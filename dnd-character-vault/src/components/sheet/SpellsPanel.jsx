@@ -28,7 +28,7 @@ export default function SpellsPanel({ character, updatePath, addItem, removeItem
         <Field label={t("panel.spells.attack")} value={spells.attackBonus} onChange={(value) => updatePath("spells.attackBonus", value)} />
         <Field label={t("panel.spells.focus")} value={spells.focus} onChange={(value) => updatePath("spells.focus", value)} />
       </div>
-      <div className="scrollbar-thin mt-3 grid grid-flow-col auto-cols-[72px] gap-2 overflow-x-auto pb-1">
+      <div className="scrollbar-thin mt-3 grid max-w-full min-w-0 grid-flow-col auto-cols-[72px] gap-2 overflow-x-auto pb-1">
         {SPELL_LEVELS.filter((level) => level > 0).map((level) => (
           <div key={level} className="rounded-md border border-umber/25 bg-white/20 p-2">
             <div className="font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">L{level}</div>

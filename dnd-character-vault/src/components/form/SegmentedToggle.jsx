@@ -7,17 +7,17 @@ export function SegmentedToggle({
   onChange,
 }) {
   return (
-    <fieldset className="space-y-2">
+    <fieldset className="min-w-0 w-full space-y-2">
       {label ? (
-        <legend className="mb-1 font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">
+        <legend className="mb-1 block w-full truncate font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">
           {label}
         </legend>
       ) : null}
-      <div className="inline-flex min-h-10 overflow-hidden rounded-md border border-umber/30 bg-white/55">
+      <div className="inline-flex min-h-10 w-full min-w-0 overflow-hidden rounded-md border border-umber/30 bg-white/55">
         {options.map((option, index) => {
           const selected = option.value === value;
           const sharedClassName = [
-            "min-h-10 px-3 py-2 font-ui text-xs font-black transition",
+            "min-h-10 min-w-0 flex-1 px-2 py-2 text-center font-ui text-[10px] font-black transition sm:text-xs",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate/30 focus-visible:ring-inset",
             index === 0 ? "rounded-l-md" : "",
             index === options.length - 1 ? "rounded-r-md" : "",
@@ -34,7 +34,7 @@ export function SegmentedToggle({
               aria-label={option.label}
               onClick={() => onChange?.(option.value)}
             >
-              {option.label}
+              <span className="block min-w-0 truncate">{option.label}</span>
             </button>
           );
         })}

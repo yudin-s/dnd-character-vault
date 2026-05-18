@@ -72,9 +72,9 @@ export default function CharacterVault() {
   }, []);
 
   return (
-    <main className="min-h-screen px-3 pb-28 pt-3 text-ink sm:px-5 sm:py-5 lg:px-7 lg:pb-6">
+    <main className="min-h-screen max-w-full overflow-x-hidden px-3 pb-28 pt-3 text-ink sm:px-5 sm:py-5 lg:px-7 lg:pb-6">
       <ServiceWorkerRegister />
-      <div className="mx-auto max-w-[1540px]">
+      <div className="mx-auto max-w-[1540px] min-w-0">
         <AppHeader
           status={t(`generic.status.${vault.statusKey || "saved"}`)}
           locale={locale}
@@ -100,39 +100,39 @@ export default function CharacterVault() {
           }}
         />
 
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
-          <section className="paper-grain rounded-md border border-umber/35 p-3 shadow-sheet sm:p-4 lg:p-5">
-            <div className="grid gap-4">
-              <section id="identity" className="scroll-mt-4">
+        <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
+          <section className="paper-grain min-w-0 overflow-hidden rounded-md border border-umber/35 p-3 shadow-sheet sm:p-4 lg:p-5">
+            <div className="grid min-w-0 gap-4">
+              <section id="identity" className="min-w-0 scroll-mt-4">
                 <IdentityPanel character={vault.character} updatePath={vault.updatePath} t={t} />
               </section>
-              <div className="grid gap-4 2xl:grid-cols-[320px_minmax(0,1fr)_380px]">
-                <section id="abilities" className="scroll-mt-4">
+              <div className="grid min-w-0 gap-4 2xl:grid-cols-[320px_minmax(0,1fr)_380px]">
+                <section id="abilities" className="min-w-0 scroll-mt-4">
                   <AbilityPanel character={vault.character} updatePath={vault.updatePath} t={t} />
                 </section>
-                <section id="skills" className="scroll-mt-4">
+                <section id="skills" className="min-w-0 scroll-mt-4">
                   <SkillsPanel character={vault.character} updatePath={vault.updatePath} t={t} />
                 </section>
-                <section id="combat" className="scroll-mt-4">
+                <section id="combat" className="min-w-0 scroll-mt-4">
                   <CombatPanel character={vault.character} updatePath={vault.updatePath} t={t} />
                 </section>
               </div>
-              <div className="grid gap-4 2xl:grid-cols-2">
+              <div className="grid min-w-0 gap-4 2xl:grid-cols-2">
                 <AttacksPanel character={vault.character} updatePath={vault.updatePath} addItem={vault.addItem} removeItem={vault.removeItem} t={t} />
                 <ResourcesPanel character={vault.character} updatePath={vault.updatePath} addItem={vault.addItem} removeItem={vault.removeItem} t={t} />
               </div>
-              <section id="dices" className="scroll-mt-4">
+              <section id="dices" className="min-w-0 scroll-mt-4">
                 <DicePanel t={t} />
               </section>
-              <div className="grid gap-4 2xl:grid-cols-2">
-                <section id="inventory" className="scroll-mt-4">
+              <div className="grid min-w-0 gap-4 2xl:grid-cols-2">
+                <section id="inventory" className="min-w-0 scroll-mt-4">
                   <InventoryPanel character={vault.character} updatePath={vault.updatePath} t={t} />
                 </section>
-                <section id="spells" className="scroll-mt-4">
+                <section id="spells" className="min-w-0 scroll-mt-4">
                   <SpellsPanel character={vault.character} updatePath={vault.updatePath} addItem={vault.addItem} removeItem={vault.removeItem} t={t} />
                 </section>
               </div>
-              <section id="notes" className="scroll-mt-4">
+              <section id="notes" className="min-w-0 scroll-mt-4">
                 <NotesPanel character={vault.character} updatePath={vault.updatePath} t={t} />
               </section>
             </div>

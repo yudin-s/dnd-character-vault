@@ -25,8 +25,8 @@ export default function DicePanel({ t }) {
         </button>
       }
     >
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px]">
-        <div className="space-y-4">
+      <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_260px]">
+        <div className="min-w-0 space-y-4">
           <div>
             <div className="mb-2 font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">{t("dice.typeLabel")}</div>
             <div className="grid grid-cols-5 gap-2">
@@ -104,7 +104,7 @@ export default function DicePanel({ t }) {
           </div>
         </div>
 
-        <div className="rounded-md border border-umber/25 bg-white/25 p-4">
+        <div className="min-w-0 rounded-md border border-umber/25 bg-white/25 p-4">
           <div className="mb-3 flex items-center justify-between gap-2">
             <div>
               <div className="font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">{t("dice.result")}</div>
@@ -143,7 +143,7 @@ export default function DicePanel({ t }) {
           </button>
         </div>
         {dice.history.length ? (
-          <div className="scrollbar-thin flex gap-2 overflow-x-auto pb-1">
+          <div className="scrollbar-thin flex max-w-full min-w-0 gap-2 overflow-x-auto pb-1">
             {dice.history.map((item) => (
               <div key={item.id} className="min-w-32 rounded-md border border-umber/20 bg-vellum/70 px-3 py-2">
                 <div className="font-ui text-sm font-black">{formatRoll(item)}</div>

@@ -12,7 +12,7 @@ export default function SkillsPanel({ character, updatePath, t }) {
     >
       <div className="grid gap-1">
         {SKILLS.map((skill) => (
-          <div key={skill.key} className="grid grid-cols-[26px_minmax(0,1fr)_116px_44px] items-center gap-2 border-b border-umber/15 py-1.5 last:border-b-0">
+          <div key={skill.key} className="grid min-w-0 grid-cols-[26px_minmax(0,1fr)_minmax(0,116px)_44px] items-center gap-2 border-b border-umber/15 py-1.5 last:border-b-0">
             <Field
               type="checkbox"
               label={t(`skill.${skill.key}`)}

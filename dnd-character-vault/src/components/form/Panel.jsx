@@ -9,11 +9,11 @@ export function Panel({
 }) {
   return (
     <section
-      className={`fantasy-frame rounded-md border border-umber/25 bg-vellum/55 text-ink shadow-insetLine ${className}`.trim()}
+      className={`fantasy-frame min-w-0 max-w-full rounded-md border border-umber/25 bg-vellum/55 text-ink shadow-insetLine ${className}`.trim()}
     >
       <div className="border-b border-umber/20 bg-white/20 px-3 py-3 sm:px-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div>
+          <div className="min-w-0">
             <h2 className="font-display text-lg font-bold leading-none text-ink">
               {title}
             </h2>

@@ -11,13 +11,18 @@
 }
 
 html {
-  min-width: 320px;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   background: #2c2219;
 }
 
 body {
+  width: 100%;
+  max-width: 100%;
   min-height: 100vh;
   margin: 0;
+  overflow-x: hidden;
   color: #251813;
   background:
     radial-gradient(circle at 18% 12%, rgba(140, 31, 36, 0.24), transparent 22rem),

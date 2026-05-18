@@ -8,10 +8,10 @@ export default function MobileQuickNav({
 
   return (
     <nav
-      className="lg:hidden fixed inset-x-0 bottom-0 z-40 border-t border-umber/35 bg-vellum/95 px-2 pb-[env(safe-area-inset-bottom)] pt-2 shadow-lg backdrop-blur"
+      className="fixed inset-x-0 bottom-0 z-40 max-w-full overflow-hidden border-t border-umber/35 bg-vellum/95 px-2 pb-[env(safe-area-inset-bottom)] pt-2 shadow-lg backdrop-blur lg:hidden"
       aria-label={label}
     >
-      <ul className="flex min-w-full gap-2 overflow-x-auto whitespace-nowrap pb-2">
+      <ul className="scrollbar-thin flex w-full min-w-0 max-w-full gap-2 overflow-x-auto overscroll-x-contain whitespace-nowrap pb-2">
         {sections.map((section) => {
           if (!section) return null;
           const isActive = section.id === activeSection;

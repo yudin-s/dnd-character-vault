@@ -3,13 +3,13 @@ import { formatTimestamp } from "@/lib/storage";
 
 export default function HistoryPanel({ history, status, restoreSnapshot, clearLocal, t }) {
   return (
-    <aside className="paper-grain rounded-md border border-umber/35 p-4 shadow-sheet xl:sticky xl:top-4 xl:max-h-[calc(100vh-2rem)] xl:overflow-hidden">
+    <aside className="paper-grain min-w-0 max-w-full overflow-hidden rounded-md border border-umber/35 p-4 shadow-sheet xl:sticky xl:top-4 xl:max-h-[calc(100vh-2rem)]">
       <div className="flex items-start justify-between gap-3 border-b border-umber/20 pb-3">
-        <div>
+        <div className="min-w-0">
           <p className="font-ui text-xs font-black uppercase tracking-[0.12em] text-umber">{t("history.localOnly")}</p>
           <h2 className="font-display text-2xl font-bold leading-none">{t("history.title")}</h2>
         </div>
-        <span className="rounded-full border border-laurel/30 bg-laurel/10 px-3 py-1 font-ui text-xs font-black text-laurel">{status}</span>
+        <span className="max-w-28 shrink-0 truncate rounded-full border border-laurel/30 bg-laurel/10 px-3 py-1 font-ui text-xs font-black text-laurel">{status}</span>
       </div>
 
       <div className="scrollbar-thin mt-3 grid gap-2 xl:max-h-[calc(100vh-10rem)] xl:overflow-y-auto xl:pr-1">

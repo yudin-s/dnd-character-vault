@@ -3,12 +3,13 @@ import Panel from "@/components/form/Panel";
 import SegmentedToggle from "@/components/form/SegmentedToggle";
 import { SKILLS, passiveScore, proficiencyBonus, signed, skillBonus } from "@/lib/dndRules";
 
-export default function SkillsPanel({ character, updatePath, t }) {
+export default function SkillsPanel({ character, updatePath, t, panelProps = {} }) {
   return (
     <Panel
       title={t("panel.skills.title")}
       kicker={t("panel.skills.kicker", { bonus: proficiencyBonus(character.identity.level) })}
       action={<span className="font-ui text-xs font-black text-slate">{t("panel.skills.passivePerception", { value: passiveScore(character, "perception") })}</span>}
+      {...panelProps}
     >
       <div className="grid gap-1">
         {SKILLS.map((skill) => (

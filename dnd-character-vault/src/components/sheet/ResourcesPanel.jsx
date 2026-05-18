@@ -2,12 +2,13 @@ import { Plus, X } from "lucide-react";
 import Field from "@/components/form/Field";
 import Panel from "@/components/form/Panel";
 
-export default function ResourcesPanel({ character, updatePath, addItem, removeItem, t }) {
+export default function ResourcesPanel({ character, updatePath, addItem, removeItem, t, panelProps = {} }) {
   return (
     <Panel
       title={t("panel.resources.title")}
       kicker={t("panel.resources.kicker")}
       action={<button type="button" onClick={() => addItem("resources")} className="inline-flex h-8 items-center gap-1 rounded-md border border-ink bg-parchment px-2 font-ui text-xs font-black hover:bg-vellum"><Plus className="h-3.5 w-3.5" />{t("panel.resources.add")}</button>}
+      {...panelProps}
     >
       <div className="grid gap-3">
         {character.resources.map((resource, index) => (

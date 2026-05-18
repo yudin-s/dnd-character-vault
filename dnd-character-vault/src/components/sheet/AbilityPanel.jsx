@@ -2,9 +2,9 @@ import Field from "@/components/form/Field";
 import Panel from "@/components/form/Panel";
 import { ABILITIES, abilityModifier, signed, savingThrowBonus } from "@/lib/dndRules";
 
-export default function AbilityPanel({ character, updatePath, t }) {
+export default function AbilityPanel({ character, updatePath, t, panelProps = {} }) {
   return (
-    <Panel title={t("panel.abilities.title")} kicker={t("panel.abilities.kicker")}>
+    <Panel title={t("panel.abilities.title")} kicker={t("panel.abilities.kicker")} {...panelProps}>
       <div className="grid gap-2 sm:grid-cols-2 2xl:grid-cols-1">
         {ABILITIES.map((ability) => {
           const score = character.abilities[ability.key].score;

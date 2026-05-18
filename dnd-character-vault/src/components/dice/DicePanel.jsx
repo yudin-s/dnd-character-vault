@@ -1,30 +1,67 @@
 "use client";
 
-import { Dices, RotateCcw, Smartphone, Trash2 } from "lucide-react";
+import { Dices, RotateCcw, Smartphone, Trash2, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import Panel from "@/components/form/Panel";
 import SegmentedToggle from "@/components/form/SegmentedToggle";
 import useDiceRoller from "@/hooks/useDiceRoller";
 import { formatRoll, MAX_DICE_COUNT } from "@/lib/dice";
 
-export default function DicePanel({ t }) {
-  const dice = useDiceRoller();
+const DICE_ANIMATION_INTERVAL = 90;
+
+function getRandomRoll(sides) {
+  return Math.floor(Math.random() * sides) + 1;
+}
+
+function DicePanelContent({
+  t,
+  dice,
+  rollingRolls,
+  isDrawer,
+  showClose,
+  onClose
+}) {
+  const displayedRolls = dice.isRolling ? rollingRolls : dice.lastRoll?.rolls || [];
+  const resultText = dice.lastRoll ? formatRoll(dice.lastRoll) : `${dice.count}d${dice.selectedSides}`;
 
   return (
     <Panel
       title={t("dice.title")}
       kicker={t("dice.kicker")}
       action={
-        <button
-          type="button"
-          onClick={dice.roll}
-          className="inline-flex h-9 items-center gap-2 rounded-md border border-ink bg-oxblood px-3 font-ui text-xs font-black uppercase tracking-[0.08em] text-vellum shadow-insetLine transition hover:bg-oxblood/90 disabled:cursor-not-allowed disabled:opacity-70"
-          disabled={dice.isRolling}
-        >
-          <RotateCcw className={`h-4 w-4 ${dice.isRolling ? "animate-spin" : ""}`} aria-hidden="true" />
-          {t("dice.roll")}
-        </button>
+        <div className="flex min-w-0 gap-2">
+          <button
+            type="button"
+            onClick={dice.roll}
+            className="inline-flex h-9 items-center gap-2 rounded-md border border-ink bg-oxblood px-3 font-ui text-xs font-black uppercase tracking-[0.08em] text-vellum shadow-insetLine transition hover:bg-oxblood/90 disabled:cursor-not-allowed disabled:opacity-70"
+            disabled={dice.isRolling}
+          >
+            <RotateCcw className={`h-4 w-4 ${dice.isRolling ? "animate-spin" : ""}`} aria-hidden="true" />
+            {t("dice.roll")}
+          </button>
+          {isDrawer && showClose ? (
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-grid h-9 w-9 place-items-center rounded-md border border-ink/40 bg-white/40 text-ink shadow-insetLine transition hover:bg-white/60"
+              aria-label={t("generic.close")}
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+            </button>
+          ) : null}
+        </div>
       }
+      className={isDrawer
+        ? "relative overflow-hidden border-oxblood/35 bg-gradient-to-b from-vellum/92 to-vellum/78 shadow-[0_0_0_1px_rgba(140,31,36,0.16),0_24px_60px_rgba(37,24,19,0.36)]"
+        : ""}
     >
+      {isDrawer ? (
+        <>
+          <span className="pointer-events-none absolute left-4 right-4 top-3 h-px bg-oxblood/25" aria-hidden="true" />
+          <span className="pointer-events-none absolute bottom-3 left-4 right-4 h-px bg-umber/25" aria-hidden="true" />
+        </>
+      ) : null}
+
       <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_260px]">
         <div className="min-w-0 space-y-4">
           <div>
@@ -81,6 +118,27 @@ export default function DicePanel({ t }) {
             </div>
           </div>
 
+          <div className="grid gap-3 sm:grid-cols-[1fr_116px]">
+            <label className="block">
+              <span className="mb-1 block font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">{t("dice.rollLabel")}</span>
+              <input
+                value={dice.rollLabel}
+                onChange={(event) => dice.setRollLabel(event.target.value)}
+                className="min-h-11 w-full rounded-md border border-umber/35 bg-white/65 px-3 py-2 text-base text-ink outline-none transition placeholder:text-umber/55 focus:border-slate focus:ring-2 focus:ring-slate/20 sm:text-sm"
+                placeholder={t("dice.rollLabelPlaceholder")}
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1 block font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">{t("dice.modifier")}</span>
+              <input
+                type="number"
+                value={dice.modifier}
+                onChange={(event) => dice.setModifier(event.target.value)}
+                className="min-h-11 w-full rounded-md border border-umber/35 bg-white/65 px-3 py-2 text-center font-ui text-base font-black text-ink outline-none transition focus:border-slate focus:ring-2 focus:ring-slate/20"
+              />
+            </label>
+          </div>
+
           <SegmentedToggle
             label={t("dice.shakeRoll")}
             value={dice.shakeEnabled ? "on" : "off"}
@@ -104,24 +162,38 @@ export default function DicePanel({ t }) {
           </div>
         </div>
 
-        <div className="min-w-0 rounded-md border border-umber/25 bg-white/25 p-4">
+        <div className="min-w-0 rounded-md border border-umber/25 bg-white/25 p-4 shadow-[inset_0_0_0_1px_rgba(140,31,36,0.08)]">
           <div className="mb-3 flex items-center justify-between gap-2">
             <div>
               <div className="font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">{t("dice.result")}</div>
-              <div className="font-display text-2xl font-bold">{dice.lastRoll ? formatRoll(dice.lastRoll) : `${dice.count}d${dice.selectedSides}`}</div>
+              <div className="font-display text-2xl font-bold">{resultText}</div>
             </div>
             <Dices className={`h-9 w-9 text-oxblood ${dice.isRolling ? "animate-bounce" : ""}`} aria-hidden="true" />
           </div>
 
           <div className="grid min-h-24 grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-4">
-            {dice.lastRoll?.rolls?.length ? dice.lastRoll.rolls.map((value, index) => (
-              <div
-                key={`${dice.lastRoll.id}-${index}`}
-                className={`grid aspect-square place-items-center rounded-md border border-ink bg-parchment font-ui text-lg font-black shadow-insetLine ${dice.isRolling ? "animate-pulse" : ""}`}
-              >
-                {value}
-              </div>
-            )) : (
+            {displayedRolls.length ? displayedRolls.map((value, index) => {
+              const delay = (index % 5) * 0.08;
+              const rotation = (index * 17) % 16;
+              return (
+                <div
+                  key={`${dice.lastRoll?.id || "preview"}-${index}`}
+                  className={`grid aspect-square place-items-center rounded-md border border-ink bg-parchment font-ui text-lg font-black shadow-insetLine ${dice.isRolling ? "relative overflow-hidden" : ""}`}
+                  style={{
+                    animation: dice.isRolling ? `dice-flicker 0.75s ease-in-out ${delay}s infinite` : "none",
+                    ["--dice-rotation"]: `${rotation}deg`
+                  }}
+                >
+                  {dice.isRolling && (
+                    <>
+                      <span className="pointer-events-none absolute left-1 top-1 h-1.5 w-1.5 rounded-full bg-oxblood/40 blur-[1px]" aria-hidden="true" />
+                      <span className="pointer-events-none absolute right-1 bottom-1 h-1.5 w-1.5 rounded-full bg-umber/50 blur-[1px]" aria-hidden="true" />
+                    </>
+                  )}
+                  <span>{value}</span>
+                </div>
+              );
+            }) : (
               <div className="col-span-full grid min-h-24 place-items-center rounded-md border border-dashed border-umber/35 text-sm text-umber">
                 {t("dice.rollHistoryEmpty")}
               </div>
@@ -157,4 +229,106 @@ export default function DicePanel({ t }) {
       </div>
     </Panel>
   );
+}
+
+export default function DicePanel({ t, isOpen, onClose, preset }) {
+  const dice = useDiceRoller();
+  const [rollingRolls, setRollingRolls] = useState([]);
+  const timerRef = useRef(null);
+  const handledPresetRef = useRef(null);
+  const isDrawer = typeof isOpen === "boolean" || typeof onClose === "function";
+  const hasCloseAction = typeof onClose === "function";
+  const isOpenState = typeof isOpen === "boolean" ? isOpen : true;
+  const { applyPreset, rollPreset } = dice;
+
+  const closingAction = onClose || (() => {});
+
+  useEffect(() => {
+    if (!preset) return;
+    if (handledPresetRef.current === preset.id) return;
+    handledPresetRef.current = preset.id;
+    if (preset.autoRoll) {
+      rollPreset(preset);
+      return;
+    }
+    applyPreset(preset);
+  }, [preset?.id, applyPreset, preset, rollPreset]);
+
+  useEffect(() => {
+    if (!dice.isRolling) {
+      setRollingRolls([]);
+      return;
+    }
+
+    const build = () => Array.from(
+      { length: Math.max(1, dice.count) },
+      () => getRandomRoll(dice.selectedSides)
+    );
+
+    setRollingRolls(build());
+
+    timerRef.current = window.setInterval(() => {
+      setRollingRolls(build());
+    }, DICE_ANIMATION_INTERVAL);
+
+    return () => {
+      window.clearInterval(timerRef.current);
+    };
+  }, [dice.count, dice.isRolling, dice.selectedSides]);
+
+  useEffect(() => {
+    if (!isDrawer || !isOpenState || !onClose || typeof window === "undefined") return undefined;
+
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isDrawer, isOpenState, onClose]);
+
+  if (isDrawer && !isOpenState) return null;
+
+  if (!isDrawer) {
+    return (
+      <DicePanelContent
+        t={t}
+        dice={dice}
+        rollingRolls={rollingRolls}
+        showClose={false}
+        onClose={closingAction}
+        isDrawer={false}
+      />
+    );
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-[70] flex items-end p-3 pb-4 sm:items-center sm:p-4 md:p-6"
+      role="dialog"
+      aria-modal="true"
+      style={{ animation: "dice-drawer-enter 220ms ease-out" }}
+      onClick={(event) => {
+        if (event.target !== event.currentTarget) return;
+        onClose?.();
+      }}
+    >
+      <div className="absolute inset-0 bg-ink/60" aria-hidden="true" />
+      <div className="relative z-10 max-h-[calc(100dvh-2rem)] w-full max-w-5xl overflow-y-auto rounded-md">
+        <DicePanelContent
+          t={t}
+          dice={dice}
+          rollingRolls={rollingRolls}
+          onClose={closingAction}
+          showClose={hasCloseAction}
+          isDrawer={true}
+        />
+      </div>
+    </div>
+  );
+}
+
+export function DiceDrawer({ t, isOpen, onClose, preset }) {
+  return <DicePanel t={t} isOpen={isOpen} onClose={onClose} preset={preset} />;
 }

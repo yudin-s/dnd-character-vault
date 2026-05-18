@@ -33,28 +33,43 @@ function clampCount(value) {
   return Math.min(MAX_DICE_COUNT, normalized);
 }
 
-export function rollDie(sides, rng = Math.random) {
+function secureRandom() {
+  if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+    const values = new Uint32Array(1);
+    crypto.getRandomValues(values);
+    return values[0] / 0xffffffff;
+  }
+  return Math.random();
+}
+
+export function rollDie(sides, rng = secureRandom) {
   const sidesValue = clampSides(sides);
   const random = typeof rng === "function" ? rng : Math.random;
   return Math.min(Math.max(1, Math.floor(random() * sidesValue) + 1), sidesValue);
 }
 
-export function rollDice({ sides, count, rng } = {}) {
+export function rollDice({ sides, count, rng, modifier: inputModifier, label: inputLabel } = {}) {
   const sidesValue = clampSides(sides);
   const countValue = clampCount(count);
+  const modifier = normalizeModifier(inputModifier);
+  const label = String(inputLabel || "");
   const rolls = Array.from(
     { length: countValue },
     () => rollDie(sidesValue, rng)
   );
-  const total = rolls.reduce((sum, value) => sum + value, 0);
+  const diceTotal = rolls.reduce((sum, value) => sum + value, 0);
+  const total = diceTotal + modifier;
 
   return {
     id: createRollId(),
     sides: sidesValue,
     count: countValue,
+    modifier,
+    label,
     rolls,
+    diceTotal,
     total,
-    notation: `${countValue}d${sidesValue}`,
+    notation: `${countValue}d${sidesValue}${formatModifier(modifier)}`,
     timestamp: Date.now()
   };
 }
@@ -63,7 +78,20 @@ export function formatRoll(result) {
   if (!result || typeof result !== "object") return "";
   const count = normalizeToPositiveInteger(result.count, 1);
   const sides = clampSides(result.sides);
+  const modifier = normalizeModifier(result.modifier);
   const total = Number(result.total);
-  if (!Number.isFinite(total)) return `${count}d${sides} = 0`;
-  return `${count}d${sides} = ${total}`;
+  const label = result.label ? `${result.label}: ` : "";
+  if (!Number.isFinite(total)) return `${label}${count}d${sides}${formatModifier(modifier)} = 0`;
+  return `${label}${count}d${sides}${formatModifier(modifier)} = ${total}`;
+}
+
+function normalizeModifier(value) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.trunc(parsed) : 0;
+}
+
+function formatModifier(value) {
+  const modifier = normalizeModifier(value);
+  if (modifier === 0) return "";
+  return modifier > 0 ? `+${modifier}` : `${modifier}`;
 }

@@ -28,6 +28,11 @@ function clampDiceCount(value) {
   return rounded;
 }
 
+function normalizeModifier(value) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.trunc(parsed) : 0;
+}
+
 function isMobileDevice() {
   if (typeof navigator === "undefined") return false;
   return (
@@ -48,6 +53,8 @@ export default function useDiceRoller() {
   const [lastRoll, setLastRoll] = useState(null);
   const [history, setHistory] = useState([]);
   const [isRolling, setIsRolling] = useState(false);
+  const [modifier, setModifierState] = useState(0);
+  const [rollLabel, setRollLabel] = useState("");
   const [shakeEnabled, setShakeEnabled] = useState(false);
   const [motionSupported, setMotionSupported] = useState(false);
   const [motionPermission, setMotionPermission] = useState("unknown");
@@ -61,23 +68,36 @@ export default function useDiceRoller() {
     setMotionSupported(Boolean(window.DeviceMotionEvent));
   }, []);
 
-  const executeRoll = useCallback((rollSides, rollCount) => {
+  const executeRoll = useCallback((rollSides, rollCount, rollModifier = modifier, label = rollLabel) => {
     setIsRolling(true);
     window.clearTimeout(animationTimerRef.current);
 
     animationTimerRef.current = window.setTimeout(() => {
-      const result = rollDice({ sides: rollSides, count: rollCount });
+      const result = rollDice({ sides: rollSides, count: rollCount, modifier: rollModifier, label });
       setLastRoll(result);
       setHistory((current) => [result, ...current]);
       setIsRolling(false);
     }, ANIMATION_DURATION_MS);
-  }, []);
+  }, [modifier, rollLabel]);
 
   const roll = useCallback(() => {
     if (isRolling) return;
 
-    executeRoll(selectedSides, count);
-  }, [executeRoll, isRolling, selectedSides, count]);
+    executeRoll(selectedSides, count, modifier, rollLabel);
+  }, [executeRoll, isRolling, selectedSides, count, modifier, rollLabel]);
+
+  const rollPreset = useCallback((preset = {}) => {
+    if (isRolling) return;
+    const presetSides = clampSides(preset.sides ?? selectedSides);
+    const presetCount = clampDiceCount(preset.count ?? count);
+    const presetModifier = normalizeModifier(preset.modifier);
+    const presetLabel = String(preset.label || "");
+    setSelectedSidesState(presetSides);
+    setCountState(presetCount);
+    setModifierState(presetModifier);
+    setRollLabel(presetLabel);
+    executeRoll(presetSides, presetCount, presetModifier, presetLabel);
+  }, [count, executeRoll, isRolling, selectedSides]);
 
   const clearHistory = useCallback(() => {
     setHistory([]);
@@ -151,16 +171,33 @@ export default function useDiceRoller() {
     setCountState(clampDiceCount(value));
   }, []);
 
+  const setModifier = useCallback((value) => {
+    setModifierState(normalizeModifier(value));
+  }, []);
+
+  const applyPreset = useCallback((preset = {}) => {
+    if ("sides" in preset) setSelectedSidesState(clampSides(preset.sides));
+    if ("count" in preset) setCountState(clampDiceCount(preset.count));
+    if ("modifier" in preset) setModifierState(normalizeModifier(preset.modifier));
+    if ("label" in preset) setRollLabel(String(preset.label || ""));
+  }, []);
+
   return {
     diceTypes: DICE_TYPES,
     selectedSides,
     setSelectedSides,
     count,
     setCount,
+    modifier,
+    setModifier,
+    rollLabel,
+    setRollLabel,
+    applyPreset,
     lastRoll,
     history,
     isRolling,
     roll,
+    rollPreset,
     clearHistory,
     shakeEnabled,
     setShakeEnabled,

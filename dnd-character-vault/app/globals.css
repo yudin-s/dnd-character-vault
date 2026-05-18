@@ -106,3 +106,26 @@ button {
   scrollbar-width: thin;
   scrollbar-color: rgba(95, 67, 47, 0.55) rgba(243, 231, 206, 0.3);
 }
+
+@keyframes dice-flicker {
+  0%,
+  100% {
+    filter: brightness(0.92);
+    transform: rotate(0deg) translateY(0);
+  }
+  50% {
+    filter: brightness(1.14);
+    transform: rotate(var(--dice-rotation, 0deg)) translateY(-2px);
+  }
+}
+
+@keyframes dice-drawer-enter {
+  from {
+    transform: translateY(14px) scale(0.98);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}

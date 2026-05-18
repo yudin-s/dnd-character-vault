@@ -2,12 +2,13 @@ import { Plus, X } from "lucide-react";
 import Field from "@/components/form/Field";
 import Panel from "@/components/form/Panel";
 
-export default function AttacksPanel({ character, updatePath, addItem, removeItem, t }) {
+export default function AttacksPanel({ character, updatePath, addItem, removeItem, t, panelProps = {} }) {
   return (
     <Panel
       title={t("panel.attacks.title")}
       kicker={t("panel.attacks.kicker")}
       action={<AddButton label={t("panel.attacks.add")} onClick={() => addItem("attacks")} />}
+      {...panelProps}
     >
       <div className="grid gap-3">
         {character.attacks.map((attack, index) => (

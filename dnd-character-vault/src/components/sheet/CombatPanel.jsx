@@ -2,13 +2,13 @@ import Field from "@/components/form/Field";
 import Panel from "@/components/form/Panel";
 import { abilityModifier, signed } from "@/lib/dndRules";
 
-export default function CombatPanel({ character, updatePath, t }) {
+export default function CombatPanel({ character, updatePath, t, panelProps = {} }) {
   const combat = character.combat;
   const dexInit = abilityModifier(character.abilities.dexterity.score);
   const initiative = combat.initiativeOverride === "" ? dexInit : Number(combat.initiativeOverride);
 
   return (
-    <Panel title={t("panel.combat.title")} kicker={t("panel.combat.kicker", { value: signed(initiative) })}>
+    <Panel title={t("panel.combat.title")} kicker={t("panel.combat.kicker", { value: signed(initiative) })} {...panelProps}>
       <div className="grid gap-3 sm:grid-cols-3">
         <Stat label={t("panel.combat.armor")} value={combat.armorClass} />
         <Stat label={t("panel.combat.speed")} value={combat.speed} />

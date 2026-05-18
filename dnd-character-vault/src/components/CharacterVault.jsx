@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Backpack, BookOpen, Download, Dices, FileClock, Plus, ScrollText, Shield, Sparkles, Swords, Upload, UserRound } from "lucide-react";
+import { Backpack, BookOpen, Download, Dices, FileClock, Gamepad2, Plus, ScrollText, Shield, Sparkles, Swords, Upload, UserRound } from "lucide-react";
 import { useCharacterVault } from "@/hooks/useCharacterVault";
 import usePwaInstall from "@/hooks/usePwaInstall";
 import useLocale from "@/hooks/useLocale";
@@ -15,18 +15,26 @@ import ResourcesPanel from "@/components/sheet/ResourcesPanel";
 import InventoryPanel from "@/components/sheet/InventoryPanel";
 import SpellsPanel from "@/components/sheet/SpellsPanel";
 import NotesPanel from "@/components/sheet/NotesPanel";
-import DicePanel from "@/components/dice/DicePanel";
+import { DiceDrawer } from "@/components/dice/DicePanel";
 import HistoryPanel from "@/components/history/HistoryPanel";
 import MobileQuickNav from "@/components/sheet/MobileQuickNav";
 import PwaInstallHint from "@/components/PwaInstallHint";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import SegmentedToggle from "@/components/form/SegmentedToggle";
+import PlayDashboard from "@/components/game/PlayDashboard";
 
-const MOBILE_SECTIONS = [
+const PLAY_SECTIONS = [
+  { id: "play", label: "Play", icon: Gamepad2 },
+  { id: "inventory", label: "Gear", icon: Backpack },
+  { id: "spells", label: "Spells", icon: BookOpen },
+  { id: "notes", label: "Notes", icon: Shield }
+];
+
+const EDIT_SECTIONS = [
   { id: "identity", label: "Hero", icon: UserRound },
   { id: "abilities", label: "Stats", icon: Sparkles },
   { id: "skills", label: "Skills", icon: ScrollText },
   { id: "combat", label: "Combat", icon: Swords },
-  { id: "dices", label: "Dices", icon: Dices },
   { id: "inventory", label: "Gear", icon: Backpack },
   { id: "spells", label: "Spells", icon: BookOpen },
   { id: "notes", label: "Notes", icon: Shield }
@@ -37,11 +45,20 @@ export default function CharacterVault() {
   const pwa = usePwaInstall();
   const { locale, setLocale, t } = useLocale();
   const fileRef = useRef(null);
-  const [activeSection, setActiveSection] = useState(MOBILE_SECTIONS[0].id);
-  const localizedSections = MOBILE_SECTIONS.map((section) => ({
+  const [mode, setMode] = useState("play");
+  const [diceOpen, setDiceOpen] = useState(false);
+  const [dicePreset, setDicePreset] = useState(null);
+  const visibleSections = mode === "play" ? PLAY_SECTIONS : EDIT_SECTIONS;
+  const [activeSection, setActiveSection] = useState(visibleSections[0].id);
+  const localizedSections = visibleSections.map((section) => ({
     ...section,
     label: t(`nav.section.${section.id}`)
   }));
+  const editPanelProps = { collapsible: true, defaultOpen: false };
+  const openDice = (preset = {}) => {
+    setDicePreset({ ...preset, id: Date.now(), autoRoll: preset.autoRoll ?? true });
+    setDiceOpen(true);
+  };
 
   useEffect(() => {
     if (!vault.notice && !vault.noticeKey) return undefined;
@@ -53,6 +70,11 @@ export default function CharacterVault() {
   }, [vault]);
 
   useEffect(() => {
+    setActiveSection(mode === "play" ? PLAY_SECTIONS[0].id : EDIT_SECTIONS[0].id);
+  }, [mode]);
+
+  useEffect(() => {
+    const sections = mode === "play" ? PLAY_SECTIONS : EDIT_SECTIONS;
     const observer = new IntersectionObserver(
       (entries) => {
         const visible = entries
@@ -63,13 +85,13 @@ export default function CharacterVault() {
       { rootMargin: "-18% 0px -68% 0px", threshold: [0.05, 0.2, 0.45] }
     );
 
-    for (const section of MOBILE_SECTIONS) {
+    for (const section of sections) {
       const node = document.getElementById(section.id);
       if (node) observer.observe(node);
     }
 
     return () => observer.disconnect();
-  }, []);
+  }, [mode]);
 
   return (
     <main className="min-h-screen max-w-full overflow-x-hidden px-3 pb-28 pt-3 text-ink sm:px-5 sm:py-5 lg:px-7 lg:pb-6">
@@ -88,6 +110,29 @@ export default function CharacterVault() {
           ]}
         />
 
+        <div className="mb-4 grid min-w-0 gap-3 rounded-md border border-umber/25 bg-vellum/55 p-3 shadow-insetLine lg:grid-cols-[260px_minmax(0,1fr)_auto] lg:items-center">
+          <SegmentedToggle
+            label={t("mode.label")}
+            value={mode}
+            options={[
+              { value: "play", label: t("mode.play") },
+              { value: "edit", label: t("mode.edit") }
+            ]}
+            onChange={setMode}
+          />
+          <p className="text-sm leading-6 text-umber">
+            {mode === "play" ? t("mode.playHint") : t("mode.editHint")}
+          </p>
+          <button
+            type="button"
+            onClick={() => openDice({ label: t("dice.title"), sides: 20, count: 1, autoRoll: false })}
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-ink bg-oxblood px-4 font-ui text-sm font-black uppercase tracking-[0.08em] text-vellum shadow-insetLine transition hover:bg-oxblood/90"
+          >
+            <Dices className="h-4 w-4" aria-hidden="true" />
+            {t("dice.title")}
+          </button>
+        </div>
+
         <input
           ref={fileRef}
           type="file"
@@ -102,40 +147,65 @@ export default function CharacterVault() {
 
         <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
           <section className="paper-grain min-w-0 overflow-hidden rounded-md border border-umber/35 p-3 shadow-sheet sm:p-4 lg:p-5">
-            <div className="grid min-w-0 gap-4">
-              <section id="identity" className="min-w-0 scroll-mt-4">
-                <IdentityPanel character={vault.character} updatePath={vault.updatePath} t={t} />
-              </section>
-              <div className="grid min-w-0 gap-4 2xl:grid-cols-[320px_minmax(0,1fr)_380px]">
-                <section id="abilities" className="min-w-0 scroll-mt-4">
-                  <AbilityPanel character={vault.character} updatePath={vault.updatePath} t={t} />
-                </section>
-                <section id="skills" className="min-w-0 scroll-mt-4">
-                  <SkillsPanel character={vault.character} updatePath={vault.updatePath} t={t} />
-                </section>
-                <section id="combat" className="min-w-0 scroll-mt-4">
-                  <CombatPanel character={vault.character} updatePath={vault.updatePath} t={t} />
-                </section>
-              </div>
-              <div className="grid min-w-0 gap-4 2xl:grid-cols-2">
-                <AttacksPanel character={vault.character} updatePath={vault.updatePath} addItem={vault.addItem} removeItem={vault.removeItem} t={t} />
-                <ResourcesPanel character={vault.character} updatePath={vault.updatePath} addItem={vault.addItem} removeItem={vault.removeItem} t={t} />
-              </div>
-              <section id="dices" className="min-w-0 scroll-mt-4">
-                <DicePanel t={t} />
-              </section>
-              <div className="grid min-w-0 gap-4 2xl:grid-cols-2">
-                <section id="inventory" className="min-w-0 scroll-mt-4">
-                  <InventoryPanel character={vault.character} updatePath={vault.updatePath} t={t} />
-                </section>
-                <section id="spells" className="min-w-0 scroll-mt-4">
-                  <SpellsPanel character={vault.character} updatePath={vault.updatePath} addItem={vault.addItem} removeItem={vault.removeItem} t={t} />
+            {mode === "play" ? (
+              <div className="grid min-w-0 gap-4">
+                <PlayDashboard
+                  character={vault.character}
+                  t={t}
+                  openDice={openDice}
+                  actions={{
+                    applyHitPointChange: vault.changeHitPoints,
+                    adjustResource: vault.changeResource,
+                    resetResources: vault.restResources,
+                    setDeathSave: vault.changeDeathSave,
+                    toggleCondition: vault.changeCondition
+                  }}
+                />
+                <div className="grid min-w-0 gap-4 2xl:grid-cols-2">
+                  <section id="inventory" className="min-w-0 scroll-mt-4">
+                    <InventoryPanel character={vault.character} updatePath={vault.updatePath} t={t} panelProps={editPanelProps} equipmentActions={{ toggleEquipped: vault.changeEquipment, useItem: vault.useEquipment }} />
+                  </section>
+                  <section id="spells" className="min-w-0 scroll-mt-4">
+                    <SpellsPanel character={vault.character} updatePath={vault.updatePath} addItem={vault.addItem} removeItem={vault.removeItem} t={t} panelProps={editPanelProps} />
+                  </section>
+                </div>
+                <section id="notes" className="min-w-0 scroll-mt-4">
+                  <NotesPanel character={vault.character} updatePath={vault.updatePath} t={t} panelProps={editPanelProps} />
                 </section>
               </div>
-              <section id="notes" className="min-w-0 scroll-mt-4">
-                <NotesPanel character={vault.character} updatePath={vault.updatePath} t={t} />
-              </section>
-            </div>
+            ) : (
+              <div className="grid min-w-0 gap-4">
+                <section id="identity" className="min-w-0 scroll-mt-4">
+                  <IdentityPanel character={vault.character} updatePath={vault.updatePath} t={t} panelProps={{ ...editPanelProps, defaultOpen: true }} />
+                </section>
+                <div className="grid min-w-0 gap-4 2xl:grid-cols-[320px_minmax(0,1fr)_380px]">
+                  <section id="abilities" className="min-w-0 scroll-mt-4">
+                    <AbilityPanel character={vault.character} updatePath={vault.updatePath} t={t} panelProps={editPanelProps} />
+                  </section>
+                  <section id="skills" className="min-w-0 scroll-mt-4">
+                    <SkillsPanel character={vault.character} updatePath={vault.updatePath} t={t} panelProps={editPanelProps} />
+                  </section>
+                  <section id="combat" className="min-w-0 scroll-mt-4">
+                    <CombatPanel character={vault.character} updatePath={vault.updatePath} t={t} panelProps={{ ...editPanelProps, defaultOpen: true }} />
+                  </section>
+                </div>
+                <div className="grid min-w-0 gap-4 2xl:grid-cols-2">
+                  <AttacksPanel character={vault.character} updatePath={vault.updatePath} addItem={vault.addItem} removeItem={vault.removeItem} t={t} panelProps={editPanelProps} />
+                  <ResourcesPanel character={vault.character} updatePath={vault.updatePath} addItem={vault.addItem} removeItem={vault.removeItem} t={t} panelProps={editPanelProps} />
+                </div>
+                <div className="grid min-w-0 gap-4 2xl:grid-cols-2">
+                  <section id="inventory" className="min-w-0 scroll-mt-4">
+                    <InventoryPanel character={vault.character} updatePath={vault.updatePath} t={t} panelProps={editPanelProps} equipmentActions={{ toggleEquipped: vault.changeEquipment, useItem: vault.useEquipment }} />
+                  </section>
+                  <section id="spells" className="min-w-0 scroll-mt-4">
+                    <SpellsPanel character={vault.character} updatePath={vault.updatePath} addItem={vault.addItem} removeItem={vault.removeItem} t={t} panelProps={editPanelProps} />
+                  </section>
+                </div>
+                <section id="notes" className="min-w-0 scroll-mt-4">
+                  <NotesPanel character={vault.character} updatePath={vault.updatePath} t={t} panelProps={editPanelProps} />
+                </section>
+              </div>
+            )}
           </section>
 
           <HistoryPanel
@@ -147,6 +217,15 @@ export default function CharacterVault() {
           />
         </div>
       </div>
+
+      <button
+        type="button"
+        onClick={() => openDice({ label: t("dice.title"), sides: 20, count: 1, autoRoll: false })}
+        className="fixed bottom-24 right-3 z-50 grid h-14 w-14 place-items-center rounded-full border border-ink bg-oxblood text-vellum shadow-[0_12px_30px_rgba(37,24,19,0.32)] transition hover:bg-oxblood/90 lg:bottom-6 lg:right-6"
+        aria-label={t("dice.title")}
+      >
+        <Dices className="h-6 w-6" aria-hidden="true" />
+      </button>
 
       <div
         className={`fixed bottom-28 right-3 z-50 max-w-sm rounded-md border border-umber/40 bg-vellum px-4 py-3 text-sm shadow-sheet transition lg:bottom-4 lg:right-4 ${vault.notice || vault.noticeKey ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0"}`}
@@ -162,6 +241,7 @@ export default function CharacterVault() {
         onSectionClick={(id) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" })}
         label={t("header.quickSectionsLabel")}
       />
+      <DiceDrawer t={t} isOpen={diceOpen} onClose={() => setDiceOpen(false)} preset={dicePreset} />
     </main>
   );
 }

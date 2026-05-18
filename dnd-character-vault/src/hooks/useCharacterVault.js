@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createDefaultCharacter, createListItem, normalizeCharacter } from "@/lib/character";
+import { adjustResourceValue, applyHitPointChange, resetResources, setDeathSave, toggleCondition, toggleEquipment, useEquipmentItem } from "@/lib/combat";
 import {
   clearAllLocalData,
   downloadTextFile,
@@ -44,6 +45,41 @@ export function useCharacterVault() {
 
   const updatePath = useCallback((path, value) => {
     setCharacter((current) => normalizeCharacter(setByPath(current, path, value)));
+  }, []);
+
+  const updateCharacter = useCallback((updater) => {
+    setCharacter((current) => {
+      const draft = typeof updater === "function" ? updater(current) : updater;
+      return normalizeCharacter(draft);
+    });
+  }, []);
+
+  const changeHitPoints = useCallback((payload) => {
+    setCharacter((current) => applyHitPointChange(current, payload));
+  }, []);
+
+  const changeResource = useCallback((index, delta) => {
+    setCharacter((current) => adjustResourceValue(current, index, delta));
+  }, []);
+
+  const restResources = useCallback((restType) => {
+    setCharacter((current) => resetResources(current, restType));
+  }, []);
+
+  const changeDeathSave = useCallback((type, index, value) => {
+    setCharacter((current) => setDeathSave(current, type, index, value));
+  }, []);
+
+  const changeCondition = useCallback((condition) => {
+    setCharacter((current) => toggleCondition(current, condition));
+  }, []);
+
+  const changeEquipment = useCallback((index) => {
+    setCharacter((current) => toggleEquipment(current, index));
+  }, []);
+
+  const useEquipment = useCallback((index) => {
+    setCharacter((current) => useEquipmentItem(current, index));
   }, []);
 
   const addItem = useCallback((listName) => {
@@ -131,6 +167,14 @@ export function useCharacterVault() {
     setNotice,
     setNoticeKey,
     updatePath,
+    updateCharacter,
+    changeHitPoints,
+    changeResource,
+    restResources,
+    changeDeathSave,
+    changeCondition,
+    changeEquipment,
+    useEquipment,
     addItem,
     removeItem,
     manualSnapshot,
@@ -146,6 +190,14 @@ export function useCharacterVault() {
     notice,
     noticeKey,
     updatePath,
+    updateCharacter,
+    changeHitPoints,
+    changeResource,
+    restResources,
+    changeDeathSave,
+    changeCondition,
+    changeEquipment,
+    useEquipment,
     addItem,
     removeItem,
     manualSnapshot,

@@ -4,13 +4,14 @@ import Panel from "@/components/form/Panel";
 import SegmentedToggle from "@/components/form/SegmentedToggle";
 import { ABILITIES, SPELL_LEVELS } from "@/lib/dndRules";
 
-export default function SpellsPanel({ character, updatePath, addItem, removeItem, t }) {
+export default function SpellsPanel({ character, updatePath, addItem, removeItem, t, panelProps = {} }) {
   const spells = character.spells;
   return (
     <Panel
       title={t("panel.spells.title")}
       kicker={t("panel.spells.kicker")}
       action={<button type="button" onClick={() => addItem("spells")} className="inline-flex h-8 items-center gap-1 rounded-md border border-ink bg-parchment px-2 font-ui text-xs font-black hover:bg-vellum"><Plus className="h-3.5 w-3.5" />{t("panel.spells.add")}</button>}
+      {...panelProps}
     >
       <div className="grid gap-3 md:grid-cols-4">
         <label className="block">

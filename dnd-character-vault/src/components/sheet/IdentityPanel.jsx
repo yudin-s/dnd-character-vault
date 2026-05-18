@@ -1,10 +1,10 @@
 import Field from "@/components/form/Field";
 import Panel from "@/components/form/Panel";
 
-export default function IdentityPanel({ character, updatePath, t }) {
+export default function IdentityPanel({ character, updatePath, t, panelProps = {} }) {
   const identity = character.identity;
   return (
-    <Panel title={t("panel.character.title")} kicker={t("panel.character.kicker")}>
+    <Panel title={t("panel.character.title")} kicker={t("panel.character.kicker")} {...panelProps}>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         <Field label={t("panel.identity.name")} value={identity.name} onChange={(value) => updatePath("identity.name", value)} />
         <Field label={t("panel.identity.player")} value={identity.player} onChange={(value) => updatePath("identity.player", value)} />

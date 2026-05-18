@@ -1,4 +1,6 @@
-export const SCHEMA_VERSION = 2;
+import { createEquipmentItem, normalizeEquipmentItem } from "./equipment";
+
+export const SCHEMA_VERSION = 3;
 
 export const ABILITY_KEYS = [
   "strength",
@@ -132,7 +134,9 @@ export function createDefaultCharacter() {
         gp: 0,
         pp: 0
       },
-      gear: ""
+      items: [],
+      notes: "",
+      legacyNotes: ""
     },
     proficiencies: "",
     features: "",
@@ -226,6 +230,21 @@ export function normalizeCharacter(input) {
     prepared: false,
     notes: ""
   }).map((spell) => ({ ...spell, prepared: Boolean(spell.prepared) }));
+  const legacyGearNotes = stringOr(merged.equipment?.legacyNotes, stringOr(merged.equipment?.gear, ""));
+  const notes = stringOr(merged.equipment?.notes, legacyGearNotes);
+  merged.equipment = {
+    coins: {
+      cp: numberOr(merged.equipment?.coins?.cp, 0),
+      sp: numberOr(merged.equipment?.coins?.sp, 0),
+      ep: numberOr(merged.equipment?.coins?.ep, 0),
+      gp: numberOr(merged.equipment?.coins?.gp, 0),
+      pp: numberOr(merged.equipment?.coins?.pp, 0)
+    },
+    items: normalizeEquipmentItems(merged.equipment?.items),
+    notes,
+    legacyNotes: legacyGearNotes,
+    gear: stringOr(merged.equipment?.gear, notes)
+  };
 
   return merged;
 }
@@ -251,9 +270,15 @@ export function createListItem(type) {
   const factories = {
     attacks: () => ({ id: createId("attack"), name: "", bonus: "", damage: "", notes: "" }),
     resources: () => ({ id: createId("resource"), name: "", current: "", max: "", reset: "" }),
-    spells: () => ({ id: createId("spell"), level: "", name: "", prepared: false, notes: "" })
+    spells: () => ({ id: createId("spell"), level: "", name: "", prepared: false, notes: "" }),
+    equipment: () => createEquipmentItem(createId("equipment"))
   };
   return factories[type]?.() || { id: createId("item") };
+}
+
+function normalizeEquipmentItems(value) {
+  const source = Array.isArray(value) ? value : [];
+  return source.map((item) => normalizeEquipmentItem(item, createId));
 }
 
 function normalizeList(value, prefix, defaults) {

@@ -1,4 +1,4 @@
-import { deepClone, normalizeCharacter, summarizeCharacter } from "./character";
+import { SCHEMA_VERSION, deepClone, normalizeCharacter, summarizeCharacter } from "./character";
 
 export const STORAGE_KEY = "dnd-character-vault:character:v2";
 export const HISTORY_KEY = "dnd-character-vault:history:v2";
@@ -61,7 +61,7 @@ export function clearAllLocalData() {
 export function exportBackup(character, history = loadHistory()) {
   return JSON.stringify({
     app: "5e-character-vault",
-    schemaVersion: 2,
+    schemaVersion: SCHEMA_VERSION,
     exportedAt: new Date().toISOString(),
     character: normalizeCharacter(character),
     history: Array.isArray(history) ? history.map(normalizeHistoryEntry).filter(Boolean) : []

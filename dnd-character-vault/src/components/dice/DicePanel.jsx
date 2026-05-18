@@ -1,19 +1,13 @@
 "use client";
 
 import { Dices, RotateCcw, Smartphone, Trash2, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import Panel from "@/components/form/Panel";
 import NumberStepper from "@/components/form/NumberStepper";
 import SegmentedToggle from "@/components/form/SegmentedToggle";
 import ThreeDiceStage from "@/components/dice/ThreeDiceStage";
 import useDiceRoller from "@/hooks/useDiceRoller";
 import { formatRoll, MAX_DICE_COUNT } from "@/lib/dice";
-
-const DICE_ANIMATION_INTERVAL = 90;
-
-function getRandomRoll(sides) {
-  return Math.floor(Math.random() * sides) + 1;
-}
 
 function getRollFaces(result) {
   if (!result) return [];
@@ -42,15 +36,17 @@ function getGroupRolls(group) {
 function DicePanelContent({
   t,
   dice,
-  rollingRolls,
   isDrawer,
   showClose,
   onClose
 }) {
-  const displayedRolls = dice.isRolling ? rollingRolls : getRollFaces(dice.lastRoll);
-  const resultText = dice.lastRoll ? formatRoll(dice.lastRoll) : `${dice.count}d${dice.selectedSides}`;
-  const resultLabel = dice.rollLabel || dice.lastRoll?.label || "";
-  const resultGroups = Array.isArray(dice.lastRoll?.groups) ? dice.lastRoll.groups : [];
+  const displayedRolls = dice.isRolling ? getRollFaces(dice.pendingRoll) : getRollFaces(dice.lastRoll);
+  const pendingNotation = dice.pendingRoll?.notation || `${dice.count}d${dice.selectedSides}`;
+  const resultText = dice.isRolling
+    ? pendingNotation
+    : dice.lastRoll ? formatRoll(dice.lastRoll) : `${dice.count}d${dice.selectedSides}`;
+  const resultLabel = dice.rollLabel || dice.pendingRoll?.label || dice.lastRoll?.label || "";
+  const resultGroups = !dice.isRolling && Array.isArray(dice.lastRoll?.groups) ? dice.lastRoll.groups : [];
 
   return (
     <Panel
@@ -260,8 +256,6 @@ function DicePanelContent({
 
 export default function DicePanel({ t, isOpen, onClose, preset }) {
   const dice = useDiceRoller();
-  const [rollingRolls, setRollingRolls] = useState([]);
-  const timerRef = useRef(null);
   const handledPresetRef = useRef(null);
   const isDrawer = typeof isOpen === "boolean" || typeof onClose === "function";
   const hasCloseAction = typeof onClose === "function";
@@ -282,43 +276,6 @@ export default function DicePanel({ t, isOpen, onClose, preset }) {
   }, [preset?.id, applyPreset, preset, rollPreset]);
 
   useEffect(() => {
-    if (!dice.isRolling) {
-      setRollingRolls([]);
-      return;
-    }
-
-    const activeGroups = Array.isArray(dice.rollGroups) && dice.rollGroups.length ? dice.rollGroups : null;
-    const build = () => activeGroups
-      ? activeGroups.flatMap((group, groupIndex) => Array.from(
-          { length: Math.max(1, Number(group.count) || 1) },
-          (_, index) => ({
-            key: `rolling-${group.key || groupIndex}-${index}`,
-            value: getRandomRoll(group.sides),
-            sides: group.sides,
-            label: group.label
-          })
-        ))
-      : Array.from(
-          { length: Math.max(1, dice.count) },
-          (_, index) => ({
-            key: `rolling-${index}`,
-            value: getRandomRoll(dice.selectedSides),
-            sides: dice.selectedSides
-          })
-        );
-
-    setRollingRolls(build());
-
-    timerRef.current = window.setInterval(() => {
-      setRollingRolls(build());
-    }, DICE_ANIMATION_INTERVAL);
-
-    return () => {
-      window.clearInterval(timerRef.current);
-    };
-  }, [dice.count, dice.isRolling, dice.rollGroups, dice.selectedSides]);
-
-  useEffect(() => {
     if (!isDrawer || !isOpenState || !onClose || typeof window === "undefined") return undefined;
 
     const onKeyDown = (event) => {
@@ -337,7 +294,6 @@ export default function DicePanel({ t, isOpen, onClose, preset }) {
       <DicePanelContent
         t={t}
         dice={dice}
-        rollingRolls={rollingRolls}
         showClose={false}
         onClose={closingAction}
         isDrawer={false}
@@ -361,7 +317,6 @@ export default function DicePanel({ t, isOpen, onClose, preset }) {
         <DicePanelContent
           t={t}
           dice={dice}
-          rollingRolls={rollingRolls}
           onClose={closingAction}
           showClose={hasCloseAction}
           isDrawer={true}

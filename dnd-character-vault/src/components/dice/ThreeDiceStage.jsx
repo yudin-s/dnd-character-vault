@@ -20,6 +20,11 @@ const DICE_PALETTES = {
   20: { base: "#d79a24", highlight: "#fff08d", shadow: "#5b2b0d", emissive: "#f3b331", edge: "#fff0b8", glow: "#ffd35b" }
 };
 
+function canvasRgba(hex, alpha) {
+  const color = new THREE.Color(hex);
+  return `rgba(${Math.round(color.r * 255)}, ${Math.round(color.g * 255)}, ${Math.round(color.b * 255)}, ${alpha})`;
+}
+
 function dieScale(total) {
   if (total <= 1) return SINGLE_DIE_SCALE;
   if (total <= 3) return 0.52;
@@ -298,22 +303,55 @@ function createGeometry(sides) {
   return createIcosahedronGeometry();
 }
 
-function numberTexture(value, emphasis = false) {
+function numberTexture(value, emphasis = false, palette = DICE_PALETTES[20]) {
   const canvas = document.createElement("canvas");
-  canvas.width = 256;
-  canvas.height = 256;
+  canvas.width = 384;
+  canvas.height = 384;
   const context = canvas.getContext("2d");
   context.clearRect(0, 0, canvas.width, canvas.height);
   context.textAlign = "center";
   context.textBaseline = "middle";
-  context.font = `900 ${emphasis ? 144 : 118}px ui-sans-serif, system-ui, sans-serif`;
-  context.lineWidth = emphasis ? 22 : 16;
-  context.strokeStyle = "rgba(24, 12, 7, 0.98)";
-  context.fillStyle = emphasis ? "#fff8e8" : "rgba(255, 248, 232, 0.92)";
-  context.shadowColor = emphasis ? "rgba(255, 238, 168, 0.6)" : "rgba(0, 0, 0, 0.2)";
-  context.shadowBlur = emphasis ? 10 : 2;
-  context.strokeText(String(value), 128, 134);
-  context.fillText(String(value), 128, 134);
+  context.lineJoin = "round";
+  context.miterLimit = 2;
+
+  const text = String(value);
+  const x = 192;
+  const y = 202;
+  const glow = palette.glow || DICE_PALETTES[20].glow;
+  const edge = palette.edge || DICE_PALETTES[20].edge;
+  const fill = context.createLinearGradient(0, 82, 0, 268);
+  fill.addColorStop(0, "#fffdf2");
+  fill.addColorStop(0.54, edge);
+  fill.addColorStop(1, glow);
+
+  context.font = `900 ${emphasis ? 204 : 160}px ui-sans-serif, system-ui, sans-serif`;
+  context.shadowColor = canvasRgba(glow, emphasis ? 0.92 : 0.7);
+  context.shadowBlur = emphasis ? 44 : 28;
+  context.lineWidth = emphasis ? 44 : 30;
+  context.strokeStyle = canvasRgba(glow, emphasis ? 0.46 : 0.34);
+  context.strokeText(text, x, y);
+  context.strokeText(text, x, y);
+
+  context.shadowBlur = 0;
+  context.lineWidth = emphasis ? 34 : 24;
+  context.strokeStyle = "rgba(13, 6, 18, 0.98)";
+  context.strokeText(text, x, y);
+
+  context.shadowColor = canvasRgba(glow, emphasis ? 0.95 : 0.78);
+  context.shadowBlur = emphasis ? 18 : 12;
+  context.lineWidth = emphasis ? 13 : 9;
+  context.strokeStyle = canvasRgba(glow, emphasis ? 0.95 : 0.72);
+  context.strokeText(text, x, y);
+
+  context.shadowColor = canvasRgba(glow, emphasis ? 0.74 : 0.48);
+  context.shadowBlur = emphasis ? 12 : 6;
+  context.fillStyle = fill;
+  context.fillText(text, x, y);
+
+  context.shadowBlur = 0;
+  context.lineWidth = emphasis ? 3 : 2;
+  context.strokeStyle = canvasRgba("#fffef7", emphasis ? 0.92 : 0.66);
+  context.strokeText(text, x, y);
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.needsUpdate = true;
@@ -401,14 +439,15 @@ function labelSize(sides, emphasis = false) {
   return emphasis ? base * 1.72 : base;
 }
 
-function createFaceLabel(value, sides, spec, emphasis = false) {
+function createFaceLabel(value, sides, spec, palette, emphasis = false) {
   const size = labelSize(sides, emphasis);
-  const texture = numberTexture(value, emphasis);
+  const texture = numberTexture(value, emphasis, palette);
   const material = new THREE.MeshBasicMaterial({
     map: texture,
     transparent: true,
-    opacity: emphasis ? 1 : 0.72,
+    opacity: emphasis ? 1 : 0.86,
     depthWrite: false,
+    toneMapped: false,
     polygonOffset: true,
     polygonOffsetFactor: -4,
     polygonOffsetUnits: -4
@@ -424,18 +463,23 @@ function createFaceLabel(value, sides, spec, emphasis = false) {
     faceIndex: value - 1,
     normal: spec.normal.clone(),
     distance: spec.distance,
+    palette: { edge: palette.edge, glow: palette.glow },
     emphasis
   };
   return label;
 }
 
-function updateFaceLabelStyle(label, emphasis) {
+function updateFaceLabel(label, value, emphasis) {
   const data = label.userData.diceLabel;
-  if (!data || data.emphasis === emphasis) return;
+  if (!data) return;
+  const nextValue = Number(value) || data.value;
+  const changed = data.emphasis !== emphasis || data.value !== nextValue;
+  if (!changed) return;
+  data.value = nextValue;
   data.emphasis = emphasis;
   label.material.map?.dispose?.();
-  label.material.map = numberTexture(data.value, emphasis);
-  label.material.opacity = emphasis ? 1 : 0.78;
+  label.material.map = numberTexture(data.value, emphasis, data.palette);
+  label.material.opacity = emphasis ? 1 : 0.86;
   label.material.needsUpdate = true;
   const size = labelSize(data.sides, emphasis);
   label.scale.set(size, size, size);
@@ -443,12 +487,35 @@ function updateFaceLabelStyle(label, emphasis) {
   label.renderOrder = emphasis ? 10 : 8;
 }
 
-function emphasizeResultLabel(body, value) {
-  const resultIndex = Math.min(Math.max(Number(value) - 1, 0), body.specs.length - 1);
+function placeResultOnFace(body, value, targetFaceIndex) {
+  const faceCount = body.specs.length;
+  const resultIndex = Math.min(Math.max(Number(value) - 1, 0), faceCount - 1);
+  const values = Array.from({ length: faceCount }, (_, index) => index + 1);
+  const targetIndex = Math.min(Math.max(Number(targetFaceIndex) || 0, 0), faceCount - 1);
+  [values[targetIndex], values[resultIndex]] = [values[resultIndex], values[targetIndex]];
+
   body.group.traverse((child) => {
-    if (!child.userData?.diceLabel) return;
-    updateFaceLabelStyle(child, child.userData.diceLabel.faceIndex === resultIndex);
+    const label = child.userData?.diceLabel;
+    if (!label) return;
+    updateFaceLabel(child, values[label.faceIndex], label.faceIndex === targetIndex);
   });
+}
+
+function resolveTopFaceIndex(specs, quaternion) {
+  let bestIndex = 0;
+  let bestDot = -Infinity;
+  const normal = new THREE.Vector3();
+
+  specs.forEach((spec, index) => {
+    const worldNormal = normal.copy(spec.normal).applyQuaternion(quaternion);
+    const elevation = worldNormal.dot(TARGET_FACE_NORMAL);
+    if (elevation > bestDot) {
+      bestDot = elevation;
+      bestIndex = index;
+    }
+  });
+
+  return bestIndex;
 }
 
 function glowTexture(hex) {
@@ -473,21 +540,31 @@ function createGlowSprite(palette, total) {
   const material = new THREE.SpriteMaterial({
     map: texture,
     transparent: true,
-    opacity: total > 3 ? 0.42 : 0.54,
+    opacity: total > 3 ? 0.5 : 0.66,
     blending: THREE.AdditiveBlending,
     depthWrite: false
   });
   const sprite = new THREE.Sprite(material);
-  const size = total > 3 ? 1.52 : 1.86;
+  const size = total > 3 ? 1.72 : 2.02;
   sprite.scale.set(size, size, size);
   sprite.renderOrder = -1;
   return sprite;
 }
 
-function landingQuaternion(specs, value) {
-  const resultIndex = Math.min(Math.max(Number(value) - 1, 0), specs.length - 1);
-  const resultNormal = specs[resultIndex]?.normal || new THREE.Vector3(0, 1, 0);
-  return new THREE.Quaternion().setFromUnitVectors(resultNormal, TARGET_FACE_NORMAL);
+function createGemAura(geometry, palette, total) {
+  const material = new THREE.MeshBasicMaterial({
+    color: new THREE.Color(palette.glow),
+    transparent: true,
+    opacity: total > 3 ? 0.08 : 0.13,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    side: THREE.BackSide,
+    toneMapped: false
+  });
+  const aura = new THREE.Mesh(geometry, material);
+  aura.scale.setScalar(1.035);
+  aura.renderOrder = -2;
+  return aura;
 }
 
 function disposeObject(object) {
@@ -535,9 +612,9 @@ function createDie(face, index, total, isRolling) {
     color: new THREE.Color(face.sides === 12 ? palette.base : "#ffffff"),
     vertexColors: Boolean(geometry.getAttribute("color")),
     emissive: new THREE.Color(palette.emissive),
-    emissiveIntensity: 0.32,
-    roughness: 0.42,
-    metalness: 0.34,
+    emissiveIntensity: 0.5,
+    roughness: 0.26,
+    metalness: 0.5,
     flatShading: true
   });
   const mesh = new THREE.Mesh(geometry, material);
@@ -546,30 +623,33 @@ function createDie(face, index, total, isRolling) {
 
   const edge = new THREE.LineSegments(
     new THREE.EdgesGeometry(geometry, 10),
-    new THREE.LineBasicMaterial({ color: palette.edge, transparent: true, opacity: 0.72 })
+    new THREE.LineBasicMaterial({
+      color: palette.edge,
+      transparent: true,
+      opacity: 0.92,
+      blending: THREE.AdditiveBlending
+    })
   );
 
-  const innerLight = new THREE.PointLight(palette.glow, total > 3 ? 0.48 : 0.72, 2.25);
-  innerLight.position.set(0, 0.08, 0.04);
+  const innerLight = new THREE.PointLight(palette.glow, total > 3 ? 0.78 : 1.12, 2.75);
+  innerLight.position.set(0, 0.16, 0.04);
 
-  group.add(createGlowSprite(palette, total), mesh, edge, innerLight);
+  group.add(createGlowSprite(palette, total), createGemAura(geometry, palette, total), mesh, edge, innerLight);
   const resultIndex = Math.min(Math.max(Number(face.value) - 1, 0), specs.length - 1);
   specs.forEach((spec, faceIndex) => {
-    group.add(createFaceLabel(faceIndex + 1, face.sides, spec, faceIndex === resultIndex));
+    group.add(createFaceLabel(faceIndex + 1, face.sides, spec, palette, faceIndex === resultIndex));
   });
   group.scale.setScalar(visualScale);
 
   const finalPosition = settledPosition(index, total, radius);
-  const finalQuaternion = landingQuaternion(specs, face.value);
   if (isRolling) {
     group.position.copy(launchPosition(index, total, radius));
     group.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
   } else {
     group.position.copy(finalPosition);
-    group.quaternion.copy(finalQuaternion);
   }
 
-  return {
+  const body = {
     face,
     group,
     velocity: launchVelocity(index, total),
@@ -580,9 +660,15 @@ function createDie(face, index, total, isRolling) {
     ),
     radius,
     finalPosition,
-    finalQuaternion,
-    specs
+    specs,
+    hasSettled: !isRolling
   };
+
+  if (!isRolling) {
+    updateLanding(body, face);
+  }
+
+  return body;
 }
 
 function sameBodyShape(body, face) {
@@ -596,11 +682,14 @@ function clearBodies(scene, bodies) {
   });
 }
 
-function updateLanding(body, face) {
-  body.face = face;
+function updateLanding(body, face = body.face) {
+  const topFaceIndex = resolveTopFaceIndex(body.specs, body.group.quaternion);
+  body.face = { ...body.face, ...face };
   body.finalPosition = body.group.position.clone();
-  body.finalQuaternion = landingQuaternion(body.specs, face.value);
-  emphasizeResultLabel(body, face.value);
+  placeResultOnFace(body, body.face.value, topFaceIndex);
+  body.spin.set(0, 0, 0);
+  body.velocity.set(0, 0, 0);
+  body.hasSettled = true;
 }
 
 function resolveCollisions(bodies) {
@@ -736,9 +825,11 @@ export default function ThreeDiceStage({ faces, fallbackSides, isRolling, emptyT
         bodies.forEach((body) => {
           body.group.position.x += body.velocity.x * dt * 0.32;
           body.group.position.z += body.velocity.z * dt * 0.32;
-          body.group.quaternion.slerp(body.finalQuaternion, 0.1);
           body.velocity.multiplyScalar(0.9);
           body.spin.multiplyScalar(0.9);
+          if (!body.hasSettled && body.spin.lengthSq() < 0.00008 && body.velocity.lengthSq() < 0.00008) {
+            updateLanding(body);
+          }
           const xLimit = ARENA_X - body.radius;
           const zLimit = ARENA_Z - body.radius;
           body.group.position.x = Math.max(-xLimit, Math.min(xLimit, body.group.position.x));
@@ -776,7 +867,10 @@ export default function ThreeDiceStage({ faces, fallbackSides, isRolling, emptyT
     } else if (!isRolling) {
       bodiesRef.current.forEach((body, index) => {
         const face = normalizedFaces[index];
-        if (face) updateLanding(body, face);
+        if (face) {
+          body.face = { ...body.face, ...face };
+          body.hasSettled = false;
+        }
       });
     }
 

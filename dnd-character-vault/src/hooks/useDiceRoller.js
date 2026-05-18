@@ -51,6 +51,7 @@ export default function useDiceRoller() {
   const [selectedSides, setSelectedSidesState] = useState(DICE_TYPES[0]);
   const [count, setCountState] = useState(1);
   const [lastRoll, setLastRoll] = useState(null);
+  const [pendingRoll, setPendingRoll] = useState(null);
   const [history, setHistory] = useState([]);
   const [isRolling, setIsRolling] = useState(false);
   const [modifier, setModifierState] = useState(0);
@@ -70,26 +71,30 @@ export default function useDiceRoller() {
   }, []);
 
   const executeRoll = useCallback((rollSides, rollCount, rollModifier = modifier, label = rollLabel) => {
+    const result = rollDice({ sides: rollSides, count: rollCount, modifier: rollModifier, label });
+    setPendingRoll(result);
     setIsRolling(true);
     window.clearTimeout(animationTimerRef.current);
 
     animationTimerRef.current = window.setTimeout(() => {
-      const result = rollDice({ sides: rollSides, count: rollCount, modifier: rollModifier, label });
       setLastRoll(result);
       setHistory((current) => [result, ...current]);
+      setPendingRoll(null);
       setIsRolling(false);
     }, ANIMATION_DURATION_MS);
   }, [modifier, rollLabel]);
 
   const executeCompositeRoll = useCallback((groups = [], label = rollLabel) => {
     if (!groups.length) return;
+    const result = rollCompositeDice({ label, groups });
+    setPendingRoll(result);
     setIsRolling(true);
     window.clearTimeout(animationTimerRef.current);
 
     animationTimerRef.current = window.setTimeout(() => {
-      const result = rollCompositeDice({ label, groups });
       setLastRoll(result);
       setHistory((current) => [result, ...current]);
+      setPendingRoll(null);
       setIsRolling(false);
     }, ANIMATION_DURATION_MS);
   }, [rollLabel]);
@@ -132,6 +137,7 @@ export default function useDiceRoller() {
   const clearHistory = useCallback(() => {
     setHistory([]);
     setLastRoll(null);
+    setPendingRoll(null);
   }, []);
 
   const requestMotionPermission = useCallback(async () => {
@@ -242,6 +248,7 @@ export default function useDiceRoller() {
     rollGroups,
     applyPreset,
     lastRoll,
+    pendingRoll,
     history,
     isRolling,
     roll,

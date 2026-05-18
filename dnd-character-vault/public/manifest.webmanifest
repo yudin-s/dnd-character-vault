@@ -1,0 +1,28 @@
+{
+  "id": "./",
+  "name": "5e Character Vault",
+  "short_name": "5e Vault",
+  "description": "Browser-only DnD 5e character sheet with local autosave, history, and backup files.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f3e7ce",
+  "theme_color": "#f3e7ce",
+  "categories": ["games", "utilities", "productivity"],
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Open character sheet",
+      "short_name": "Sheet",
+      "url": "./"
+    }
+  ]
+}

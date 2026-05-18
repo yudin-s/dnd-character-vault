@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  background: #2c2219;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  color: #251813;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(140, 31, 36, 0.24), transparent 22rem),
+    radial-gradient(circle at 78% 8%, rgba(163, 109, 36, 0.16), transparent 20rem),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08), transparent 18%, transparent 82%, rgba(255, 255, 255, 0.06)),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.055) 0 1px, transparent 1px 5px),
+    #2c2219;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+::selection {
+  color: #fff8e8;
+  background: #8c1f24;
+}
+
+.paper-grain {
+  background:
+    linear-gradient(45deg, rgba(95, 67, 47, 0.045) 25%, transparent 25% 75%, rgba(95, 67, 47, 0.045) 75%),
+    radial-gradient(circle at 18% 0%, rgba(255, 255, 255, 0.52), transparent 30%),
+    radial-gradient(circle at 92% 18%, rgba(163, 109, 36, 0.12), transparent 28%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.34), transparent 42%),
+    #f3e7ce;
+  background-size: 18px 18px, auto, auto, auto, auto;
+}
+
+.fantasy-frame {
+  position: relative;
+  overflow: hidden;
+}
+
+.fantasy-frame::before,
+.fantasy-frame::after {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  width: 36px;
+  display: grid;
+  place-items: center;
+  color: rgba(140, 31, 36, 0.34);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.15rem;
+  letter-spacing: 0;
+  pointer-events: none;
+}
+
+.fantasy-frame::before {
+  left: 6px;
+  content: "✦";
+}
+
+.fantasy-frame::after {
+  right: 6px;
+  content: "✦";
+}
+
+@media (max-width: 640px) {
+  .fantasy-frame::before,
+  .fantasy-frame::after {
+    display: none;
+  }
+}
+
+.ruled-panel {
+  background-image:
+    linear-gradient(rgba(95, 67, 47, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(95, 67, 47, 0.10) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(95, 67, 47, 0.55) rgba(243, 231, 206, 0.3);
+}

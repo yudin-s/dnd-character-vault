@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="5e Character Vault icon">
+  <rect width="512" height="512" rx="96" fill="#f3e7ce"/>
+  <path d="M256 42 426 140v232L256 470 86 372V140L256 42Z" fill="#ead7ad" stroke="#251813" stroke-width="22" stroke-linejoin="round"/>
+  <path d="M256 84 388 160v191L256 428 124 351V160L256 84Z" fill="#fff7df" stroke="#8c1f24" stroke-width="12" stroke-linejoin="round"/>
+  <path d="M256 112v288M140 168l232 136M372 168 140 304" stroke="#5f432f" stroke-width="10" stroke-linecap="round" opacity=".45"/>
+  <text x="256" y="278" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="122" font-weight="700" fill="#251813">5e</text>
+  <path d="M188 330h136" stroke="#8c1f24" stroke-width="16" stroke-linecap="round"/>
+</svg>

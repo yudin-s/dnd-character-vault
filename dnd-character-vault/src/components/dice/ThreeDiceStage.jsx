@@ -9,8 +9,18 @@ const ARENA_Z = 1.2;
 const ARENA_TOP = 1.68;
 const ORTHO_VIEW_HEIGHT = 2.92;
 const SINGLE_DIE_SCALE = 0.66;
+const GRAVITY = 14;
+const FRICTION_AIR = 0.996;
+const FRICTION_FLOOR = 0.88;
+const BOUNCE_DAMPING = 0.36;
+const SPIN_DAMPING = 0.985;
+const STOP_LINEAR_SPEED_SQ = 0.00011;
+const STOP_SPIN_SPEED_SQ = 0.00011;
+const MIN_ROLL_DURATION_MS = 620;
+const MAX_ROLL_DURATION_MS = 1800;
 const OUTWARD_Z = new THREE.Vector3(0, 0, 1);
 const TARGET_FACE_NORMAL = new THREE.Vector3(0, 1, 0);
+const BOTTOM_FACE_NORMAL = new THREE.Vector3(0, -1, 0);
 const DICE_PALETTES = {
   4: { base: "#1f8f64", highlight: "#8af7be", shadow: "#0a3b31", emissive: "#29d184", edge: "#c8ffd8", glow: "#5dffb4" },
   6: { base: "#218da0", highlight: "#89f0ff", shadow: "#08334b", emissive: "#24cde2", edge: "#d5fbff", glow: "#51e9ff" },
@@ -487,18 +497,19 @@ function updateFaceLabel(label, value, emphasis) {
   label.renderOrder = emphasis ? 10 : 8;
 }
 
-function placeResultOnFace(body, value, targetFaceIndex) {
+function setResultFaceLabel(body, resultFaceIndex) {
   const faceCount = body.specs.length;
-  const resultIndex = Math.min(Math.max(Number(value) - 1, 0), faceCount - 1);
-  const values = Array.from({ length: faceCount }, (_, index) => index + 1);
-  const targetIndex = Math.min(Math.max(Number(targetFaceIndex) || 0, 0), faceCount - 1);
-  [values[targetIndex], values[resultIndex]] = [values[resultIndex], values[targetIndex]];
-
+  const clampedFaceIndex = Math.min(Math.max(Math.trunc(resultFaceIndex) || 0, 0), Math.max(0, faceCount - 1));
+  let resolvedValue = clampedFaceIndex + 1;
   body.group.traverse((child) => {
     const label = child.userData?.diceLabel;
     if (!label) return;
-    updateFaceLabel(child, values[label.faceIndex], label.faceIndex === targetIndex);
+    const isResult = label.faceIndex === clampedFaceIndex;
+    if (isResult) resolvedValue = label.value;
+    updateFaceLabel(child, label.value, isResult);
   });
+
+  return resolvedValue;
 }
 
 function resolveTopFaceIndex(specs, quaternion) {
@@ -516,6 +527,42 @@ function resolveTopFaceIndex(specs, quaternion) {
   });
 
   return bestIndex;
+}
+
+function resolveBottomFaceIndex(specs, quaternion) {
+  let bestIndex = 0;
+  let bestDot = Infinity;
+  const normal = new THREE.Vector3();
+
+  specs.forEach((spec, index) => {
+    const worldNormal = normal.copy(spec.normal).applyQuaternion(quaternion);
+    const elevation = worldNormal.dot(TARGET_FACE_NORMAL);
+    if (elevation < bestDot) {
+      bestDot = elevation;
+      bestIndex = index;
+    }
+  });
+
+  return bestIndex;
+}
+
+function supportDistance(body) {
+  const normal = new THREE.Vector3();
+  return body.specs.reduce((distance, spec) => {
+    const worldNormal = normal.copy(spec.normal).applyQuaternion(body.group.quaternion);
+    const support = Math.max(0, -worldNormal.y * spec.distance * body.visualScale);
+    return Math.max(distance, support);
+  }, 0.02);
+}
+
+function snapBodyToResultFace(body, resultFaceIndex) {
+  const spec = body.specs[resultFaceIndex] || body.specs[0];
+  if (!spec) return;
+  const targetNormal = body.face.sides === 4 ? BOTTOM_FACE_NORMAL : TARGET_FACE_NORMAL;
+  const worldNormal = spec.normal.clone().applyQuaternion(body.group.quaternion).normalize();
+  const align = new THREE.Quaternion().setFromUnitVectors(worldNormal, targetNormal);
+  body.group.quaternion.premultiply(align);
+  body.group.position.y = FLOOR_Y + supportDistance(body);
 }
 
 function glowTexture(hex) {
@@ -586,7 +633,8 @@ function normalizeFaces(faces, fallbackSides) {
   return faces.map((face, index) => ({
     key: face.key || `${face.sides || fallbackSides}-${index}`,
     sides: Number(face.sides || fallbackSides || 20),
-    value: Number(face.value ?? face) || 1
+    value: Number(face.value ?? face) || 1,
+    groupKey: face.groupKey
   }));
 }
 
@@ -635,7 +683,7 @@ function createDie(face, index, total, isRolling) {
   innerLight.position.set(0, 0.16, 0.04);
 
   group.add(createGlowSprite(palette, total), createGemAura(geometry, palette, total), mesh, edge, innerLight);
-  const resultIndex = Math.min(Math.max(Number(face.value) - 1, 0), specs.length - 1);
+  const resultIndex = isRolling ? -1 : Math.min(Math.max(Number(face.value) - 1, 0), specs.length - 1);
   specs.forEach((spec, faceIndex) => {
     group.add(createFaceLabel(faceIndex + 1, face.sides, spec, palette, faceIndex === resultIndex));
   });
@@ -659,6 +707,7 @@ function createDie(face, index, total, isRolling) {
       (Math.random() - 0.5) * 10
     ),
     radius,
+    visualScale,
     finalPosition,
     specs,
     hasSettled: !isRolling
@@ -683,10 +732,13 @@ function clearBodies(scene, bodies) {
 }
 
 function updateLanding(body, face = body.face) {
-  const topFaceIndex = resolveTopFaceIndex(body.specs, body.group.quaternion);
-  body.face = { ...body.face, ...face };
+  const resultFaceIndex = body.face.sides === 4
+    ? resolveBottomFaceIndex(body.specs, body.group.quaternion)
+    : resolveTopFaceIndex(body.specs, body.group.quaternion);
+  snapBodyToResultFace(body, resultFaceIndex);
+  const resultValue = setResultFaceLabel(body, resultFaceIndex);
+  body.face = { ...body.face, ...face, value: resultValue };
   body.finalPosition = body.group.position.clone();
-  placeResultOnFace(body, body.face.value, topFaceIndex);
   body.spin.set(0, 0, 0);
   body.velocity.set(0, 0, 0);
   body.hasSettled = true;
@@ -725,7 +777,14 @@ function resolveCollisions(bodies) {
   }
 }
 
-export default function ThreeDiceStage({ faces, fallbackSides, isRolling, emptyText }) {
+export default function ThreeDiceStage({
+  faces,
+  fallbackSides,
+  isRolling,
+  rollId,
+  onSettledRoll,
+  emptyText
+}) {
   const containerRef = useRef(null);
   const sceneRef = useRef(null);
   const rendererRef = useRef(null);
@@ -734,7 +793,15 @@ export default function ThreeDiceStage({ faces, fallbackSides, isRolling, emptyT
   const frameRef = useRef(null);
   const lastFrameRef = useRef(0);
   const rollingRef = useRef(false);
+  const settleTokenRef = useRef(null);
+  const onSettledRollRef = useRef(null);
+  const emissionRef = useRef(false);
+  const rollStartedAtRef = useRef(0);
   const normalizedFaces = useMemo(() => normalizeFaces(faces, fallbackSides), [faces, fallbackSides]);
+
+  useEffect(() => {
+    onSettledRollRef.current = onSettledRoll;
+  }, [onSettledRoll]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -790,44 +857,62 @@ export default function ThreeDiceStage({ faces, fallbackSides, isRolling, emptyT
       lastFrameRef.current = time;
       const bodies = bodiesRef.current;
       if (rollingRef.current) {
+        const elapsed = time - rollStartedAtRef.current;
         bodies.forEach((body) => {
-          body.velocity.y -= 7.2 * dt;
+          if (body.hasSettled) return;
+          body.velocity.y -= GRAVITY * dt;
           body.group.position.addScaledVector(body.velocity, dt);
           body.group.rotation.x += body.spin.x * dt;
           body.group.rotation.y += body.spin.y * dt;
           body.group.rotation.z += body.spin.z * dt;
+          body.velocity.multiplyScalar(FRICTION_AIR);
+          body.spin.multiplyScalar(SPIN_DAMPING);
 
           if (body.group.position.y <= FLOOR_Y + body.radius) {
             body.group.position.y = FLOOR_Y + body.radius;
-            body.velocity.y = Math.abs(body.velocity.y) * 0.58;
-            body.velocity.x *= 0.84;
-            body.velocity.z *= 0.84;
-            body.spin.multiplyScalar(0.84);
+            if (Math.abs(body.velocity.y) <= 0.035) {
+              body.velocity.y = 0;
+            } else {
+              body.velocity.y = -body.velocity.y * BOUNCE_DAMPING;
+            }
+            body.velocity.x *= FRICTION_FLOOR;
+            body.velocity.z *= FRICTION_FLOOR;
+            body.spin.multiplyScalar(0.82);
           }
           if (body.group.position.y > ARENA_TOP) {
             body.group.position.y = ARENA_TOP;
-            body.velocity.y = -Math.abs(body.velocity.y) * 0.36;
-            body.spin.multiplyScalar(0.9);
+            body.velocity.y = -Math.abs(body.velocity.y) * BOUNCE_DAMPING;
           }
           const xLimit = ARENA_X - body.radius;
           const zLimit = ARENA_Z - body.radius;
           if (Math.abs(body.group.position.x) > xLimit) {
             body.group.position.x = Math.sign(body.group.position.x) * xLimit;
-            body.velocity.x *= -0.68;
+            body.velocity.x *= -0.72;
           }
           if (Math.abs(body.group.position.z) > zLimit) {
             body.group.position.z = Math.sign(body.group.position.z) * zLimit;
-            body.velocity.z *= -0.68;
+            body.velocity.z *= -0.72;
+          }
+          if (
+            body.group.position.y <= FLOOR_Y + body.radius + 0.001 &&
+            elapsed >= MIN_ROLL_DURATION_MS &&
+            (
+              elapsed >= MAX_ROLL_DURATION_MS ||
+              (
+                body.velocity.lengthSq() < STOP_LINEAR_SPEED_SQ &&
+                body.spin.lengthSq() < STOP_SPIN_SPEED_SQ
+              )
+            )
+          ) {
+            updateLanding(body);
           }
         });
         resolveCollisions(bodies);
       } else {
         bodies.forEach((body) => {
-          body.group.position.x += body.velocity.x * dt * 0.32;
-          body.group.position.z += body.velocity.z * dt * 0.32;
-          body.velocity.multiplyScalar(0.9);
-          body.spin.multiplyScalar(0.9);
-          if (!body.hasSettled && body.spin.lengthSq() < 0.00008 && body.velocity.lengthSq() < 0.00008) {
+          body.spin.multiplyScalar(SPIN_DAMPING);
+          body.velocity.multiplyScalar(0.92);
+          if (!body.hasSettled && body.spin.lengthSq() < STOP_SPIN_SPEED_SQ && body.velocity.lengthSq() < STOP_LINEAR_SPEED_SQ) {
             updateLanding(body);
           }
           const xLimit = ARENA_X - body.radius;
@@ -836,6 +921,19 @@ export default function ThreeDiceStage({ faces, fallbackSides, isRolling, emptyT
           body.group.position.z = Math.max(-zLimit, Math.min(zLimit, body.group.position.z));
         });
         resolveCollisions(bodies);
+      }
+
+      if (
+        settleTokenRef.current &&
+        !emissionRef.current &&
+        bodies.length > 0 &&
+        bodies.every((body) => body.hasSettled)
+      ) {
+        const token = settleTokenRef.current;
+        const values = bodies.map((body) => body.face.value);
+        emissionRef.current = true;
+        settleTokenRef.current = null;
+        onSettledRollRef.current?.(values, token);
       }
 
       renderer.render(scene, camera);
@@ -861,6 +959,9 @@ export default function ThreeDiceStage({ faces, fallbackSides, isRolling, emptyT
     const shouldLaunch = isRolling && !rollingRef.current;
 
     if (shapeChanged || shouldLaunch) {
+      settleTokenRef.current = rollId;
+      emissionRef.current = false;
+      rollStartedAtRef.current = performance.now();
       clearBodies(scene, bodiesRef.current);
       bodiesRef.current = normalizedFaces.map((face, index) => createDie(face, index, normalizedFaces.length, isRolling));
       bodiesRef.current.forEach((body) => scene.add(body.group));
@@ -875,7 +976,7 @@ export default function ThreeDiceStage({ faces, fallbackSides, isRolling, emptyT
     }
 
     rollingRef.current = isRolling;
-  }, [isRolling, normalizedFaces]);
+  }, [isRolling, normalizedFaces, rollId]);
 
   return (
     <div className="dice-stage">

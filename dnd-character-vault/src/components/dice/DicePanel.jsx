@@ -16,6 +16,7 @@ function getRollFaces(result) {
       group.rolls.map((value, index) => ({
         value,
         sides: group.sides,
+        groupKey: group.key || group.label || `group-${groupIndex}`,
         label: group.label,
         key: `${group.key || group.label || groupIndex}-${index}`
       }))
@@ -206,6 +207,8 @@ function DicePanelContent({
             faces={displayedRolls}
             fallbackSides={dice.selectedSides}
             isRolling={dice.isRolling}
+            rollId={dice.pendingRoll?.id}
+            onSettledRoll={dice.applySettledRoll}
             emptyText={t("dice.rollHistoryEmpty")}
           />
 

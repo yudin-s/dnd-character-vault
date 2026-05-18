@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DICE_TYPES, MAX_DICE_COUNT, rollCompositeDice, rollDice } from "@/lib/dice";
 
-const ANIMATION_DURATION_MS = 980;
+const ANIMATION_FALLBACK_MS = 2600;
 const SHAKE_THRESHOLD = 18;
 const SHAKE_COOLDOWN_MS = 900;
 
@@ -47,6 +47,65 @@ function normalizeResultStatus(status) {
   return "unknown";
 }
 
+function normalizeResolvedValue(value, sides) {
+  const parsed = Number(value);
+  const clampedSides = clampSides(sides);
+  if (!Number.isFinite(parsed)) return 1;
+  const normalized = Math.max(1, Math.min(clampedSides, Math.round(parsed)));
+  return normalized;
+}
+
+function rebuildRollFromResolved(result, resolvedValues) {
+  if (!result || !Array.isArray(resolvedValues)) return null;
+  const values = resolvedValues.map((value) => Number(value)).filter((value) => Number.isFinite(value));
+
+  if (Array.isArray(result.groups) && result.groups.length) {
+    let cursor = 0;
+    let allResolved = true;
+    const restoredGroups = result.groups.map((group) => {
+      const count = Math.max(1, Number(group.count) || 1);
+      const groupValues = [];
+      for (let index = 0; index < count; index += 1) {
+        if (cursor >= values.length) {
+          allResolved = false;
+          break;
+        }
+        groupValues.push(normalizeResolvedValue(values[cursor], group.sides));
+        cursor += 1;
+      }
+      const diceTotal = groupValues.reduce((sum, value) => sum + value, 0);
+      const modifier = normalizeModifier(group.modifier);
+      return {
+        ...group,
+        rolls: groupValues,
+        diceTotal,
+        total: diceTotal + modifier
+      };
+    });
+
+    if (!allResolved || cursor !== values.length) return null;
+
+    return {
+      ...result,
+      groups: restoredGroups,
+      rolls: restoredGroups.flatMap((group) => group.rolls),
+      diceTotal: restoredGroups.reduce((sum, group) => sum + group.diceTotal, 0),
+      total: restoredGroups.reduce((sum, group) => sum + group.total, 0)
+    };
+  }
+
+  if (values.length !== result.count) return null;
+  const rolls = values.map((value) => normalizeResolvedValue(value, result.sides));
+  const diceTotal = rolls.reduce((sum, value) => sum + value, 0);
+
+  return {
+    ...result,
+    rolls,
+    diceTotal,
+    total: diceTotal + normalizeModifier(result.modifier)
+  };
+}
+
 export default function useDiceRoller() {
   const [selectedSides, setSelectedSidesState] = useState(DICE_TYPES[0]);
   const [count, setCountState] = useState(1);
@@ -64,6 +123,8 @@ export default function useDiceRoller() {
 
   const animationTimerRef = useRef(null);
   const cooldownRef = useRef(0);
+  const pendingRollRef = useRef(null);
+  const rollTokenRef = useRef(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -73,31 +134,57 @@ export default function useDiceRoller() {
   const executeRoll = useCallback((rollSides, rollCount, rollModifier = modifier, label = rollLabel) => {
     const result = rollDice({ sides: rollSides, count: rollCount, modifier: rollModifier, label });
     setPendingRoll(result);
+    pendingRollRef.current = result;
+    rollTokenRef.current = result.id;
     setIsRolling(true);
     window.clearTimeout(animationTimerRef.current);
 
     animationTimerRef.current = window.setTimeout(() => {
-      setLastRoll(result);
-      setHistory((current) => [result, ...current]);
+      const finalRoll = pendingRollRef.current || result;
+      setLastRoll(finalRoll);
+      setHistory((current) => [finalRoll, ...current]);
       setPendingRoll(null);
+      pendingRollRef.current = null;
+      rollTokenRef.current = null;
       setIsRolling(false);
-    }, ANIMATION_DURATION_MS);
+    }, ANIMATION_FALLBACK_MS);
   }, [modifier, rollLabel]);
 
   const executeCompositeRoll = useCallback((groups = [], label = rollLabel) => {
     if (!groups.length) return;
     const result = rollCompositeDice({ label, groups });
     setPendingRoll(result);
+    pendingRollRef.current = result;
+    rollTokenRef.current = result.id;
     setIsRolling(true);
     window.clearTimeout(animationTimerRef.current);
 
     animationTimerRef.current = window.setTimeout(() => {
-      setLastRoll(result);
-      setHistory((current) => [result, ...current]);
+      const finalRoll = pendingRollRef.current || result;
+      setLastRoll(finalRoll);
+      setHistory((current) => [finalRoll, ...current]);
       setPendingRoll(null);
+      pendingRollRef.current = null;
+      rollTokenRef.current = null;
       setIsRolling(false);
-    }, ANIMATION_DURATION_MS);
+    }, ANIMATION_FALLBACK_MS);
   }, [rollLabel]);
+
+  const applySettledRoll = useCallback((resolvedValues, rollToken) => {
+    if (!Array.isArray(resolvedValues) || !resolvedValues.length) return;
+    if (rollToken && rollToken !== rollTokenRef.current) return;
+    const base = pendingRollRef.current;
+    if (!base) return;
+    const rebuilt = rebuildRollFromResolved(base, resolvedValues);
+    if (!rebuilt) return;
+    pendingRollRef.current = rebuilt;
+    rollTokenRef.current = null;
+    window.clearTimeout(animationTimerRef.current);
+    setPendingRoll(null);
+    setLastRoll(rebuilt);
+    setHistory((current) => [rebuilt, ...current]);
+    setIsRolling(false);
+  }, []);
 
   const roll = useCallback(() => {
     if (isRolling) return;
@@ -138,7 +225,13 @@ export default function useDiceRoller() {
     setHistory([]);
     setLastRoll(null);
     setPendingRoll(null);
+    pendingRollRef.current = null;
+    rollTokenRef.current = null;
   }, []);
+
+  useEffect(() => {
+    pendingRollRef.current = pendingRoll;
+  }, [pendingRoll]);
 
   const requestMotionPermission = useCallback(async () => {
     if (typeof window === "undefined") return false;
@@ -253,6 +346,7 @@ export default function useDiceRoller() {
     isRolling,
     roll,
     rollPreset,
+    applySettledRoll,
     clearHistory,
     shakeEnabled,
     setShakeEnabled,

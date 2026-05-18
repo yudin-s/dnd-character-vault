@@ -1,5 +1,5 @@
 import { deepClone, normalizeCharacter } from "./character";
-import { isArmorLike, isShieldLike, itemArmorValue, rollHealingFromText } from "./equipment";
+import { isArmorLike, itemArmorValue, rollHealingFromText } from "./equipment";
 
 export const CONDITIONS = [
   "blinded",
@@ -98,20 +98,23 @@ export function toggleEquipment(character, index) {
 
   const armorValue = itemArmorValue(item);
   const equipped = Boolean(item.equipped);
+  const itemType = String(item.type || "").toLowerCase();
+  const armorLike = isArmorLike(item);
+  const shieldLike = itemType === "shield" || itemType.includes("shield") || itemType.includes("щит");
   item.equipped = !equipped;
 
   if (armorValue > 0 && item.equipped) {
-    if (isShieldLike(item) && armorValue <= 5) {
+    if (shieldLike && armorValue <= 5) {
       next.combat.armorClass = numberOr(next.combat.armorClass, 10) + armorValue;
-    } else if (isArmorLike(item) || armorValue >= 10) {
+    } else if (armorLike) {
       next.combat.armorClass = armorValue;
     }
   }
 
   if (armorValue > 0 && !item.equipped) {
-    if (isShieldLike(item) && armorValue <= 5) {
+    if (shieldLike && armorValue <= 5) {
       next.combat.armorClass = Math.max(0, numberOr(next.combat.armorClass, 10) - armorValue);
-    } else if ((isArmorLike(item) || armorValue >= 10) && numberOr(next.combat.armorClass, 10) === armorValue) {
+    } else if (armorLike && numberOr(next.combat.armorClass, 10) === armorValue) {
       next.combat.armorClass = 10;
     }
   }

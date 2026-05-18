@@ -23,6 +23,7 @@ function DicePanelContent({
 }) {
   const displayedRolls = dice.isRolling ? rollingRolls : dice.lastRoll?.rolls || [];
   const resultText = dice.lastRoll ? formatRoll(dice.lastRoll) : `${dice.count}d${dice.selectedSides}`;
+  const resultLabel = dice.rollLabel || dice.lastRoll?.label || "";
 
   return (
     <Panel
@@ -33,7 +34,7 @@ function DicePanelContent({
           <button
             type="button"
             onClick={dice.roll}
-            className="inline-flex h-9 items-center gap-2 rounded-md border border-ink bg-oxblood px-3 font-ui text-xs font-black uppercase tracking-[0.08em] text-vellum shadow-insetLine transition hover:bg-oxblood/90 disabled:cursor-not-allowed disabled:opacity-70"
+            className="inline-flex min-h-11 items-center gap-2 rounded-md border border-ink bg-oxblood px-3 font-ui text-xs font-black uppercase tracking-[0.08em] text-vellum shadow-insetLine transition hover:bg-oxblood/90 disabled:cursor-not-allowed disabled:opacity-70"
             disabled={dice.isRolling}
           >
             <RotateCcw className={`h-4 w-4 ${dice.isRolling ? "animate-spin" : ""}`} aria-hidden="true" />
@@ -43,7 +44,7 @@ function DicePanelContent({
             <button
             type="button"
             onClick={onClose}
-              className="inline-grid h-9 w-9 place-items-center rounded-md border border-ink/70 bg-parchment text-ink shadow-insetLine transition hover:bg-vellum"
+              className="inline-grid h-11 w-11 place-items-center rounded-md border border-ink/70 bg-parchment text-ink shadow-insetLine transition hover:bg-vellum"
               aria-label={t("generic.close")}
             >
               <X className="h-4 w-4" aria-hidden="true" />
@@ -66,7 +67,7 @@ function DicePanelContent({
         <div className="min-w-0 space-y-4">
           <div>
             <div className="mb-2 font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">{t("dice.typeLabel")}</div>
-            <div className="grid grid-cols-5 gap-2">
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
               {dice.diceTypes.map((sides) => {
                 const selected = dice.selectedSides === sides;
                 return (
@@ -118,16 +119,13 @@ function DicePanelContent({
             </div>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-[1fr_116px]">
-            <label className="block">
-              <span className="mb-1 block font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">{t("dice.rollLabel")}</span>
-              <input
-                value={dice.rollLabel}
-                onChange={(event) => dice.setRollLabel(event.target.value)}
-                className="min-h-11 w-full rounded-md border border-umber/35 bg-vellum px-3 py-2 text-base text-ink outline-none transition placeholder:text-umber/55 focus:border-slate focus:ring-2 focus:ring-slate/20 sm:text-sm"
-                placeholder={t("dice.rollLabelPlaceholder")}
-              />
-            </label>
+          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_132px] sm:items-end">
+            <div className="rounded-md border border-umber/25 bg-vellum/80 px-3 py-2">
+              <div className="font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">{t("dice.result")}</div>
+              <div className="mt-1 truncate font-display text-xl font-bold text-ink">
+                {resultLabel || `${dice.count}d${dice.selectedSides}`}
+              </div>
+            </div>
             <label className="block">
               <span className="mb-1 block font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">{t("dice.modifier")}</span>
               <input
@@ -162,35 +160,34 @@ function DicePanelContent({
           </div>
         </div>
 
-        <div className="min-w-0 rounded-md border border-umber/35 bg-vellum p-4 shadow-[inset_0_0_0_1px_rgba(140,31,36,0.12)]">
+        <div className="dice-tray min-w-0 rounded-md border border-umber/35 p-4">
           <div className="mb-3 flex items-center justify-between gap-2">
             <div>
               <div className="font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">{t("dice.result")}</div>
-              <div className="font-display text-2xl font-bold">{resultText}</div>
+              <div className="font-display text-2xl font-bold text-ink">{resultText}</div>
+              {resultLabel ? (
+                <div className="mt-1 max-w-44 truncate font-ui text-[11px] font-black uppercase tracking-[0.08em] text-oxblood">
+                  {resultLabel}
+                </div>
+              ) : null}
             </div>
             <Dices className={`h-9 w-9 text-oxblood ${dice.isRolling ? "animate-bounce" : ""}`} aria-hidden="true" />
           </div>
 
-          <div className="grid min-h-24 grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-4">
+          <div className="grid min-h-28 grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-4">
             {displayedRolls.length ? displayedRolls.map((value, index) => {
               const delay = (index % 5) * 0.08;
-              const rotation = (index * 17) % 16;
+              const rotation = ((index * 29) % 34) - 17;
               return (
                 <div
                   key={`${dice.lastRoll?.id || "preview"}-${index}`}
-                  className={`grid aspect-square place-items-center rounded-md border border-ink bg-parchment font-ui text-lg font-black shadow-insetLine ${dice.isRolling ? "relative overflow-hidden" : ""}`}
+                  className={`dice-gem ${dice.isRolling ? "is-rolling" : "is-settled"}`}
                   style={{
-                    animation: dice.isRolling ? `dice-flicker 0.75s ease-in-out ${delay}s infinite` : "none",
+                    ["--dice-delay"]: `${delay}s`,
                     ["--dice-rotation"]: `${rotation}deg`
                   }}
                 >
-                  {dice.isRolling && (
-                    <>
-                      <span className="pointer-events-none absolute left-1 top-1 h-1.5 w-1.5 rounded-full bg-oxblood/40 blur-[1px]" aria-hidden="true" />
-                      <span className="pointer-events-none absolute right-1 bottom-1 h-1.5 w-1.5 rounded-full bg-umber/50 blur-[1px]" aria-hidden="true" />
-                    </>
-                  )}
-                  <span>{value}</span>
+                  <span className="dice-gem__value">{value}</span>
                 </div>
               );
             }) : (

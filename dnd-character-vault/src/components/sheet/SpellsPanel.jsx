@@ -10,7 +10,7 @@ export default function SpellsPanel({ character, updatePath, addItem, removeItem
     <Panel
       title={t("panel.spells.title")}
       kicker={t("panel.spells.kicker")}
-      action={<button type="button" onClick={() => addItem("spells")} className="inline-flex h-8 items-center gap-1 rounded-md border border-ink bg-parchment px-2 font-ui text-xs font-black hover:bg-vellum"><Plus className="h-3.5 w-3.5" />{t("panel.spells.add")}</button>}
+      action={<button type="button" onClick={() => addItem("spells")} className="inline-flex min-h-10 items-center gap-1 rounded-md border border-ink bg-parchment px-2 font-ui text-xs font-black hover:bg-vellum"><Plus className="h-3.5 w-3.5" />{t("panel.spells.add")}</button>}
       {...panelProps}
     >
       <div className="grid gap-3 md:grid-cols-4">
@@ -29,9 +29,9 @@ export default function SpellsPanel({ character, updatePath, addItem, removeItem
         <Field label={t("panel.spells.attack")} value={spells.attackBonus} onChange={(value) => updatePath("spells.attackBonus", value)} />
         <Field label={t("panel.spells.focus")} value={spells.focus} onChange={(value) => updatePath("spells.focus", value)} />
       </div>
-      <div className="scrollbar-thin mt-3 grid max-w-full min-w-0 grid-flow-col auto-cols-[72px] gap-2 overflow-x-auto pb-1">
+      <div className="mt-3 grid max-w-full min-w-0 grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-9">
         {SPELL_LEVELS.filter((level) => level > 0).map((level) => (
-          <div key={level} className="rounded-md border border-umber/25 bg-white/20 p-2">
+          <div key={level} className="min-w-0 rounded-md border border-umber/25 bg-white/20 p-2">
             <div className="font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">L{level}</div>
               <Field label={t("panel.spells.now")} value={spells.slots[String(level)].current} onChange={(value) => updatePath(`spells.slots.${level}.current`, value)} />
               <Field label={t("panel.spells.max")} value={spells.slots[String(level)].max} onChange={(value) => updatePath(`spells.slots.${level}.max`, value)} />
@@ -50,7 +50,7 @@ export default function SpellsPanel({ character, updatePath, addItem, removeItem
               onChange={(value) => updatePath(`spells.known.${index}.prepared`, value === "yes")}
             />
             <Field label={t("panel.attacks.notes")} value={spell.notes} onChange={(value) => updatePath(`spells.known.${index}.notes`, value)} />
-            <button type="button" title={t("panel.spells.remove")} aria-label={t("panel.spells.removeAria")} onClick={() => removeItem("spells.known", spell.id)} className="mt-5 grid h-9 w-full place-items-center rounded-md border border-oxblood/50 text-oxblood hover:bg-oxblood hover:text-white md:w-9">
+            <button type="button" title={t("panel.spells.remove")} aria-label={t("panel.spells.removeAria")} onClick={() => removeItem("spells.known", spell.id)} className="mt-5 grid min-h-11 w-full place-items-center rounded-md border border-oxblood/50 text-oxblood hover:bg-oxblood hover:text-white md:w-11">
               <X className="h-4 w-4" />
             </button>
           </div>

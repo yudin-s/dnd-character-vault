@@ -1,4 +1,4 @@
-export const DICE_TYPES = [4, 6, 10, 12, 20];
+export const DICE_TYPES = [4, 6, 8, 10, 12, 20];
 export const MAX_DICE_COUNT = 12;
 
 function createRollId() {

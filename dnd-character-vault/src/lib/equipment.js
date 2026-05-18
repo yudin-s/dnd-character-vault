@@ -13,6 +13,7 @@ function normalizeBoolean(value, fallback = false) {
   return value == null ? fallback : Boolean(value);
 }
 
+const DAMAGE_DICE_SIDES = [4, 6, 8, 10, 12, 20];
 const DEFAULT_ID_PREFIX = "equipment";
 
 function createId(prefix = DEFAULT_ID_PREFIX) {
@@ -30,6 +31,12 @@ export const EQUIPMENT_DEFAULT_ITEM = {
   consumable: false,
   use: 0,
   armorClass: "",
+  attackBonus: "",
+  damageDiceCount: 1,
+  damageDiceSides: 6,
+  damageDice: "",
+  damageBonus: "",
+  damageType: "",
   effects: ""
 };
 
@@ -44,6 +51,9 @@ export function createEquipmentItem(customId) {
 
 export function normalizeEquipmentItem(rawItem, getId = createId) {
   const item = typeof rawItem === "object" && rawItem !== null ? rawItem : {};
+  const legacyDamageDice = parseDamageDice(item.damageDice);
+  const damageDiceCount = normalizeDiceCount(item.damageDiceCount, legacyDamageDice.count);
+  const damageDiceSides = normalizeDiceSides(item.damageDiceSides, legacyDamageDice.sides);
   return {
     ...EQUIPMENT_DEFAULT_ITEM,
     ...item,
@@ -55,8 +65,33 @@ export function normalizeEquipmentItem(rawItem, getId = createId) {
     consumable: normalizeBoolean(item.consumable, false),
     use: normalizeNumber(item.use, 0),
     armorClass: normalizeText(item.armorClass, ""),
+    attackBonus: normalizeText(item.attackBonus, ""),
+    damageDiceCount,
+    damageDiceSides,
+    damageDice: normalizeText(item.damageDice, `${damageDiceCount}d${damageDiceSides}`),
+    damageBonus: normalizeText(item.damageBonus, ""),
+    damageType: normalizeText(item.damageType, ""),
     effects: normalizeText(item.effects, "")
   };
+}
+
+function parseDamageDice(value) {
+  const match = String(value || "").toLowerCase().match(/(\d*)d(\d+)/);
+  return {
+    count: normalizeDiceCount(match?.[1], 1),
+    sides: normalizeDiceSides(match?.[2], 6)
+  };
+}
+
+function normalizeDiceCount(value, fallback = 1) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(12, Math.max(1, Math.round(parsed)));
+}
+
+function normalizeDiceSides(value, fallback = 6) {
+  const parsed = Number(value);
+  return DAMAGE_DICE_SIDES.includes(parsed) ? parsed : fallback;
 }
 
 export function itemArmorValue(item) {

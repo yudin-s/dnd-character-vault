@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronDown, Clock3, Plus, Ruler, Sparkles, X, Zap } from "lucide-react";
+import { useState } from "react";
 import Field from "@/components/form/Field";
 import NumberStepper from "@/components/form/NumberStepper";
 import Panel from "@/components/form/Panel";
@@ -8,6 +9,7 @@ import SegmentedToggle from "@/components/form/SegmentedToggle";
 import TextArea from "@/components/form/TextArea";
 import { ABILITIES, SPELL_LEVELS } from "@/lib/dndRules";
 
+const DEFAULT_SLOT_LEVELS = [1];
 const SPELL_SCHOOLS = [
   "abjuration",
   "conjuration",
@@ -37,6 +39,30 @@ export default function SpellsPanel({ character, updatePath, addItem, removeItem
   const spells = character.spells;
   const known = spells.known || [];
   const preparedCount = known.filter((spell) => spell.prepared).length;
+  const [visibleSlotLevels, setVisibleSlotLevels] = useState(() => {
+    const active = SPELL_LEVELS.filter((level) => {
+      if (level <= 0) return false;
+      const slot = spells.slots[String(level)] || {};
+      return Number(slot.current) > 0 || Number(slot.max) > 0;
+    });
+    return active.length ? active : DEFAULT_SLOT_LEVELS;
+  });
+  const availableSlotLevels = SPELL_LEVELS.filter((level) => level > 0 && !visibleSlotLevels.includes(level));
+
+  const addSlotLevel = () => {
+    const nextLevel = availableSlotLevels[0];
+    if (!nextLevel) return;
+    setVisibleSlotLevels((levels) => [...levels, nextLevel].sort((a, b) => a - b));
+  };
+
+  const removeSlotLevel = (level) => {
+    setVisibleSlotLevels((levels) => {
+      const nextLevels = levels.filter((item) => item !== level);
+      return nextLevels.length ? nextLevels : DEFAULT_SLOT_LEVELS;
+    });
+    updatePath(`spells.slots.${level}.current`, "");
+    updatePath(`spells.slots.${level}.max`, "");
+  };
 
   return (
     <Panel
@@ -45,14 +71,14 @@ export default function SpellsPanel({ character, updatePath, addItem, removeItem
       action={<button type="button" onClick={() => addItem("spells")} className="inline-flex min-h-10 items-center gap-1 rounded-md border border-ink bg-parchment px-2 font-ui text-xs font-black hover:bg-vellum"><Plus className="h-3.5 w-3.5" aria-hidden="true" />{t("panel.spells.add")}</button>}
       {...panelProps}
     >
-      <div className="grid gap-3">
-        <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
-          <section className="rounded-md border border-umber/25 bg-white/25 p-3">
-            <div className="mb-3 flex items-center gap-2">
+      <div className="grid gap-2.5">
+        <div className="grid gap-2.5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+          <section className="rounded-md border border-umber/25 bg-white/25 p-2.5">
+            <div className="mb-2 flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-oxblood" aria-hidden="true" />
               <div className="font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">{t("panel.spells.casting")}</div>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-2.5 sm:grid-cols-2">
               <label className="block">
                 <span className="mb-1 block font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">{t("panel.spells.ability")}</span>
                 <select
@@ -70,8 +96,8 @@ export default function SpellsPanel({ character, updatePath, addItem, removeItem
             </div>
           </section>
 
-          <section className="rounded-md border border-umber/25 bg-parchment p-3">
-            <div className="mb-3 flex items-center justify-between gap-2">
+          <section className="rounded-md border border-umber/25 bg-parchment p-2.5">
+            <div className="mb-2 flex items-center justify-between gap-2">
               <span className="inline-flex items-center gap-2 font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">
                 <Zap className="h-4 w-4 text-oxblood" aria-hidden="true" />
                 {t("panel.spells.slots")}
@@ -80,32 +106,28 @@ export default function SpellsPanel({ character, updatePath, addItem, removeItem
                 {preparedCount}/{known.length} {t("panel.spells.preparedShort")}
               </span>
             </div>
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-9">
-              {SPELL_LEVELS.filter((level) => level > 0).map((level) => (
-                <div key={level} className="min-w-0 rounded-md border border-umber/25 bg-vellum/80 p-1.5 shadow-insetLine">
-                  <div className="mb-1 text-center font-ui text-[10px] font-black uppercase tracking-[0.08em] text-umber">{t("panel.spells.levelShort")} {level}</div>
-                  <NumberStepper
-                    label={`${t("panel.spells.levelShort")} ${level} ${t("panel.spells.now")}`}
-                    min={0}
-                    value={spells.slots[String(level)].current}
-                    onChange={(value) => updatePath(`spells.slots.${level}.current`, value)}
-                    className="bg-white/70"
-                    inputClassName="px-0 font-ui text-sm font-black"
-                    buttonClassName="min-h-10"
-                    buttonWidth="28px"
-                  />
-                  <NumberStepper
-                    label={`${t("panel.spells.levelShort")} ${level} ${t("panel.spells.max")}`}
-                    min={0}
-                    value={spells.slots[String(level)].max}
-                    onChange={(value) => updatePath(`spells.slots.${level}.max`, value)}
-                    className="mt-1 bg-white/70"
-                    inputClassName="px-0 font-ui text-sm font-black"
-                    buttonClassName="min-h-10"
-                    buttonWidth="28px"
-                  />
-                </div>
+            <div className="grid gap-1.5">
+              {visibleSlotLevels.map((level) => (
+                <SlotLevelRow
+                  key={level}
+                  level={level}
+                  slot={spells.slots[String(level)]}
+                  t={t}
+                  updatePath={updatePath}
+                  onRemove={() => removeSlotLevel(level)}
+                  removable={visibleSlotLevels.length > 1 || level !== DEFAULT_SLOT_LEVELS[0]}
+                />
               ))}
+              <button
+                type="button"
+                onClick={addSlotLevel}
+                disabled={!availableSlotLevels.length}
+                className="grid min-h-[52px] w-full place-items-center rounded-md border border-dashed border-umber/35 bg-vellum/70 text-oxblood shadow-insetLine transition hover:border-oxblood/55 hover:bg-vellum disabled:cursor-not-allowed disabled:opacity-45"
+                aria-label={t("panel.spells.addSlotLevel")}
+                title={t("panel.spells.addSlotLevel")}
+              >
+                <Plus className="h-5 w-5" aria-hidden="true" />
+              </button>
             </div>
           </section>
         </div>
@@ -128,6 +150,46 @@ export default function SpellsPanel({ character, updatePath, addItem, removeItem
         </div>
       </div>
     </Panel>
+  );
+}
+
+function SlotLevelRow({ level, slot, t, updatePath, onRemove, removable }) {
+  return (
+    <div className="grid grid-cols-[46px_minmax(0,1fr)_minmax(0,1fr)_36px] items-center gap-1.5 rounded-md border border-umber/25 bg-vellum/80 p-1.5 shadow-insetLine">
+      <div className="text-center font-ui text-[10px] font-black uppercase tracking-[0.08em] text-umber">
+        {t("panel.spells.levelShort")} {level}
+      </div>
+      <NumberStepper
+        label={`${t("panel.spells.levelShort")} ${level} ${t("panel.spells.now")}`}
+        min={0}
+        value={slot?.current}
+        onChange={(value) => updatePath(`spells.slots.${level}.current`, value)}
+        className="min-h-10 bg-white/70"
+        inputClassName="px-0 font-ui text-sm font-black"
+        buttonClassName="min-h-10"
+        buttonWidth="28px"
+      />
+      <NumberStepper
+        label={`${t("panel.spells.levelShort")} ${level} ${t("panel.spells.max")}`}
+        min={0}
+        value={slot?.max}
+        onChange={(value) => updatePath(`spells.slots.${level}.max`, value)}
+        className="min-h-10 bg-white/70"
+        inputClassName="px-0 font-ui text-sm font-black"
+        buttonClassName="min-h-10"
+        buttonWidth="28px"
+      />
+      <button
+        type="button"
+        onClick={onRemove}
+        disabled={!removable}
+        className="grid h-10 w-9 place-items-center rounded-md border border-oxblood/35 text-oxblood transition hover:bg-oxblood hover:text-vellum disabled:cursor-not-allowed disabled:opacity-35"
+        aria-label={t("panel.spells.removeSlotLevel")}
+        title={t("panel.spells.removeSlotLevel")}
+      >
+        <X className="h-3.5 w-3.5" aria-hidden="true" />
+      </button>
+    </div>
   );
 }
 

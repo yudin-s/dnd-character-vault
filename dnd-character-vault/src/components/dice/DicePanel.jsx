@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import Panel from "@/components/form/Panel";
 import NumberStepper from "@/components/form/NumberStepper";
 import SegmentedToggle from "@/components/form/SegmentedToggle";
+import ThreeDiceStage from "@/components/dice/ThreeDiceStage";
 import useDiceRoller from "@/hooks/useDiceRoller";
 import { formatRoll, MAX_DICE_COUNT } from "@/lib/dice";
 
@@ -205,34 +206,12 @@ function DicePanelContent({
             </div>
           ) : null}
 
-          <div className="dice-stage">
-            <span className="dice-stage__glow" aria-hidden="true" />
-            {displayedRolls.length ? displayedRolls.map((value, index) => {
-              const delay = (index % 5) * 0.08;
-              const rotation = ((index * 31) % 46) - 23;
-              const x = ((index % 4) - 1.5) * 16;
-              const y = ((Math.floor(index / 4) % 3) - 1) * 12;
-              return (
-                <div
-                  key={`${dice.lastRoll?.id || "preview"}-${value.key || index}`}
-                  className={`dice-gem dice-gem--d${value.sides || dice.selectedSides} ${dice.isRolling ? "is-rolling" : "is-settled"}`}
-                  style={{
-                    ["--dice-delay"]: `${delay}s`,
-                    ["--dice-rotation"]: `${rotation}deg`,
-                    ["--dice-x"]: `${x}px`,
-                    ["--dice-y"]: `${y}px`
-                  }}
-                >
-                  <span className="dice-gem__value">{value.value ?? value}</span>
-                  <span className="dice-gem__type">d{value.sides || dice.selectedSides}</span>
-                </div>
-              );
-            }) : (
-              <div className="relative z-10 grid min-h-24 place-items-center rounded-md border border-dashed border-umber/35 bg-vellum/40 px-4 text-center text-sm text-umber">
-                {t("dice.rollHistoryEmpty")}
-              </div>
-            )}
-          </div>
+          <ThreeDiceStage
+            faces={displayedRolls}
+            fallbackSides={dice.selectedSides}
+            isRolling={dice.isRolling}
+            emptyText={t("dice.rollHistoryEmpty")}
+          />
 
           <button
             type="button"

@@ -167,136 +167,71 @@ button {
   position: relative;
   display: grid;
   min-height: 238px;
-  grid-template-columns: repeat(auto-fit, minmax(58px, 1fr));
-  place-items: center;
-  gap: 12px;
+  height: 238px;
+  place-items: stretch;
   overflow: hidden;
   border-radius: 0.375rem;
   border: 1px solid rgba(37, 24, 19, 0.42);
-  padding: 18px;
-  perspective: 820px;
+  padding: 0;
   background:
-    radial-gradient(circle at 50% 45%, rgba(255, 248, 232, 0.12), transparent 36%),
-    radial-gradient(circle at 50% 110%, rgba(140, 31, 36, 0.36), transparent 44%),
-    linear-gradient(145deg, #251813 0%, #3a271f 48%, #120e0c 100%);
+    radial-gradient(circle at 50% 18%, rgba(255, 248, 232, 0.34), transparent 52%),
+    linear-gradient(175deg, rgba(19, 13, 10, 0.9), rgba(37, 24, 19, 1) 58%, rgba(18, 14, 11, 1)),
+    repeating-linear-gradient(90deg, rgba(255, 248, 232, 0.08) 0 1px, transparent 1px 14px);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 248, 232, 0.10),
-    inset 0 -30px 44px rgba(0, 0, 0, 0.22);
+    inset 0 0 0 1px rgba(255, 248, 232, 0.18),
+    inset 0 -36px 58px rgba(0, 0, 0, 0.34),
+    0 18px 42px rgba(12, 8, 6, 0.44);
 }
 
 .dice-stage__glow {
   position: absolute;
-  inset: 14% 10%;
+  inset: 8% 10%;
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(214, 168, 50, 0.28), transparent 66%);
-  filter: blur(10px);
+  background: radial-gradient(circle, rgba(214, 168, 50, 0.26), transparent 66%);
+  filter: blur(18px);
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.dice-stage__canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.dice-stage__canvas > canvas,
+.dice-stage__canvas canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.dice-stage__canvas canvas {
+  display: block;
   pointer-events: none;
 }
 
-.dice-gem {
-  position: relative;
+.dice-stage__empty {
+  position: absolute;
+  inset: 0;
   display: grid;
-  width: clamp(58px, 18vw, 86px);
-  aspect-ratio: 1;
-  min-width: 0;
   place-items: center;
-  clip-path: polygon(50% 0%, 90% 18%, 100% 58%, 72% 100%, 28% 100%, 0% 58%, 10% 18%);
-  border: 1px solid rgba(255, 248, 232, 0.18);
-  background:
-    linear-gradient(145deg, rgba(255, 248, 232, 0.88), rgba(214, 168, 50, 0.42) 35%, rgba(140, 31, 36, 0.48) 72%, rgba(37, 24, 19, 0.84)),
-    #d6a832;
-  color: #fff8e8;
+  padding: 1rem;
+  text-align: center;
+  color: rgba(255, 248, 232, 0.82);
   font-family: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
-  font-size: 1.05rem;
-  font-weight: 900;
-  box-shadow:
-    inset 0 0 0 2px rgba(255, 248, 232, 0.24),
-    inset 10px 10px 22px rgba(255, 248, 232, 0.20),
-    inset -12px -18px 28px rgba(37, 24, 19, 0.48),
-    0 14px 26px rgba(0, 0, 0, 0.34);
-  transform: translate3d(0, 0, 0) rotate(var(--dice-rotation, 0deg));
-  transform-style: preserve-3d;
-}
-
-.dice-gem::before {
-  content: "";
-  position: absolute;
-  inset: 13%;
-  clip-path: polygon(50% 0%, 88% 22%, 80% 74%, 50% 100%, 20% 74%, 12% 22%);
-  border: 1px solid rgba(255, 248, 232, 0.22);
-  background:
-    linear-gradient(90deg, transparent 49%, rgba(255, 248, 232, 0.2) 50%, transparent 51%),
-    linear-gradient(32deg, transparent 48%, rgba(37, 24, 19, 0.2) 49%, transparent 53%),
-    linear-gradient(-32deg, transparent 48%, rgba(255, 248, 232, 0.16) 49%, transparent 53%);
-  opacity: 0.95;
+  font-size: 0.88rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, rgba(12, 8, 6, 0.22), rgba(11, 8, 7, 0.02));
   pointer-events: none;
-}
-
-.dice-gem::after {
-  content: "";
-  position: absolute;
-  inset: 10% 16% auto auto;
-  width: 34%;
-  height: 18%;
-  transform: rotate(-24deg);
-  background: linear-gradient(90deg, rgba(255, 248, 232, 0), rgba(255, 248, 232, 0.8), rgba(255, 248, 232, 0));
-  opacity: 0.76;
-  pointer-events: none;
-}
-
-.dice-gem__value {
-  position: relative;
-  z-index: 1;
-  font-size: clamp(1.05rem, 5vw, 1.55rem);
-  line-height: 1;
-  text-shadow: 0 2px 4px rgba(37, 24, 19, 0.58);
-}
-
-.dice-gem__type {
-  position: absolute;
-  bottom: 14%;
-  z-index: 1;
-  font-size: 0.52rem;
-  letter-spacing: 0.06em;
-  opacity: 0.7;
-}
-
-.dice-gem.is-rolling {
-  animation: dice-tumble 0.82s cubic-bezier(0.2, 0.8, 0.25, 1.08) var(--dice-delay, 0s) infinite;
-}
-
-.dice-gem.is-settled {
-  animation: dice-impact 260ms ease-out;
-}
-
-@keyframes dice-tumble {
-  0% {
-    filter: brightness(0.86) saturate(0.94);
-    transform: translate3d(calc(var(--dice-x, 0px) * -0.4), 18px, -40px) rotateX(52deg) rotateY(-38deg) rotateZ(calc(var(--dice-rotation, 0deg) - 42deg)) scale(0.86);
-  }
-  36% {
-    filter: brightness(1.24) saturate(1.12);
-    transform: translate3d(var(--dice-x, 0px), calc(var(--dice-y, 0px) - 34px), 58px) rotateX(188deg) rotateY(134deg) rotateZ(calc(var(--dice-rotation, 0deg) + 136deg)) scale(1.12);
-  }
-  74% {
-    filter: brightness(0.98) saturate(1.02);
-    transform: translate3d(calc(var(--dice-x, 0px) * -0.55), 9px, 10px) rotateX(284deg) rotateY(218deg) rotateZ(calc(var(--dice-rotation, 0deg) + 252deg)) scale(0.98);
-  }
-  100% {
-    filter: brightness(1.08) saturate(1.06);
-    transform: translate3d(0, 0, 0) rotateX(360deg) rotateY(330deg) rotateZ(calc(var(--dice-rotation, 0deg) + 360deg)) scale(1);
-  }
-}
-
-@keyframes dice-impact {
-  from {
-    filter: brightness(1.22);
-    transform: translate3d(var(--dice-x, 0px), -18px, 34px) rotateX(40deg) rotateY(-32deg) rotateZ(calc(var(--dice-rotation, 0deg) - 16deg)) scale(1.12);
-  }
-  to {
-    filter: brightness(1);
-    transform: translate3d(0, 0, 0) rotateX(0) rotateY(0) rotateZ(var(--dice-rotation, 0deg)) scale(1);
-  }
+  z-index: 3;
 }
 
 @keyframes dice-drawer-enter {
@@ -313,13 +248,7 @@ button {
 @media (max-width: 640px) {
   .dice-stage {
     min-height: 190px;
-    grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
-    gap: 9px;
-    padding: 14px;
-  }
-
-  .dice-gem {
-    width: clamp(52px, 19vw, 70px);
+    height: 190px;
   }
 
   .dice-roll-button {

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DICE_TYPES, MAX_DICE_COUNT, rollCompositeDice, rollDice } from "@/lib/dice";
 
-const ANIMATION_DURATION_MS = 700;
+const ANIMATION_DURATION_MS = 980;
 const SHAKE_THRESHOLD = 18;
 const SHAKE_COOLDOWN_MS = 900;
 

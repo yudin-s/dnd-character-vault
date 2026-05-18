@@ -176,7 +176,7 @@ function QuickRolls({ character, openDice, t }) {
           <div className="font-ui text-xs font-black uppercase tracking-[0.12em] text-[#d6a832]">{t("play.quickRolls")}</div>
           <div className="font-display text-xl font-bold text-vellum">{t("play.actions")}</div>
         </div>
-        <button type="button" onClick={() => openDice({ label: t("dice.title"), sides: 20, count: 1 })} className="rpg-action grid h-11 w-11 place-items-center rounded-md border border-[#d6a832]/50 bg-parchment text-ink shadow-insetLine transition hover:bg-vellum">
+        <button type="button" onClick={() => openDice({ label: t("dice.title"), sides: 20, count: 1 })} className="rpg-action grid h-11 w-11 place-items-center rounded-md border border-[#d6a832]/50 bg-parchment text-ink shadow-insetLine transition hover:bg-vellum" aria-label={t("dice.title")}>
           <Dice5 className="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
@@ -206,12 +206,23 @@ function RollButton({ icon: Icon = Activity, label, title, bonus, openDice, comp
       type="button"
       onClick={() => openDice({ label: title || label, sides: 20, count: 1, modifier: bonus })}
       title={title || label}
-      className={`rpg-action flex items-center justify-between gap-2 rounded-md border border-[#d6a832]/30 bg-vellum/90 px-3 font-ui font-black text-ink transition hover:bg-parchment ${compact ? "min-h-12 text-[11px]" : "min-h-12 text-sm"} ${compact ? "tracking-[0.05em]" : ""}`}
+      className={`rpg-action rounded-md border border-[#d6a832]/30 bg-vellum/90 font-ui font-black text-ink transition hover:bg-parchment ${
+        compact
+          ? "grid min-h-12 grid-cols-[14px_minmax(3ch,1fr)_auto] items-center gap-1 px-2 text-[11px] tracking-[0.05em]"
+          : "flex min-h-12 items-center justify-between gap-2 px-3 text-sm"
+      }`}
     >
-      <span className="inline-flex min-w-0 items-center gap-2">
-        <Icon className="h-4 w-4 shrink-0 text-oxblood" aria-hidden="true" />
-        <span className="truncate">{label}</span>
-      </span>
+      {compact ? (
+        <>
+          <Icon className="h-3.5 w-3.5 shrink-0 text-oxblood" aria-hidden="true" />
+          <span className="min-w-[3ch] whitespace-nowrap text-center">{label}</span>
+        </>
+      ) : (
+        <span className="inline-flex min-w-0 items-center gap-2">
+          <Icon className="h-4 w-4 shrink-0 text-oxblood" aria-hidden="true" />
+          <span className="truncate">{label}</span>
+        </span>
+      )}
       <span className="shrink-0 text-oxblood">{signed(bonus)}</span>
     </button>
   );

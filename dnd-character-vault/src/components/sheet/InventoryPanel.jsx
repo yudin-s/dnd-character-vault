@@ -34,6 +34,9 @@ const COIN_TONES = {
   pp: "border-[#b7c4d2] bg-[#e7edf4] text-ink"
 };
 
+const INVENTORY_FILTERS = ["all", "weapon", "armor", "shield", "potion", "gear"];
+const GENERIC_ITEM_TYPES = ["gear", "tool", "treasure"];
+
 function normalizeQuantity(value) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return 0;
@@ -67,6 +70,13 @@ function isArmorOrShield(item) {
 
 function isPotion(item) {
   return String(item?.type || "").toLowerCase() === "potion";
+}
+
+function matchesInventoryFilter(item, filter) {
+  if (filter === "all") return true;
+  const type = String(item?.type || "gear").toLowerCase();
+  if (filter === "gear") return GENERIC_ITEM_TYPES.includes(type);
+  return type === filter;
 }
 
 function parseDiceNotation(value) {
@@ -133,6 +143,11 @@ function createTypedItem(type, t) {
 
 export default function InventoryPanel({ character, updatePath, t, panelProps = {}, equipmentActions = {}, openDice }) {
   const items = character?.equipment?.items || [];
+  const [activeFilter, setActiveFilter] = useState("all");
+  const visibleItems = items
+    .map((item, index) => ({ item, index }))
+    .filter(({ item }) => matchesInventoryFilter(item, activeFilter));
+  const addType = activeFilter === "all" ? "gear" : activeFilter;
 
   const addItem = (type = "gear") => {
     updatePath("equipment.items", [...items, createTypedItem(type, t)]);
@@ -241,25 +256,47 @@ export default function InventoryPanel({ character, updatePath, t, panelProps = 
           <div className="font-ui text-xs font-black uppercase tracking-[0.12em] text-umber">
             {t("panel.inventory.itemsCount", { count: items.length })}
           </div>
-          <div className="flex flex-wrap gap-2">
-            {["weapon", "armor", "shield", "potion", "gear"].map((type) => (
+          <button
+            type="button"
+            onClick={() => addItem(addType)}
+            className="inline-flex min-h-11 items-center gap-1 rounded-md border border-ink bg-parchment px-3 font-ui text-xs font-black hover:bg-vellum"
+          >
+            <PackagePlus className="h-3.5 w-3.5" aria-hidden="true" />
+            {t("panel.inventory.addItem")}
+          </button>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+          {INVENTORY_FILTERS.map((type) => {
+            const active = activeFilter === type;
+            const count = type === "all"
+              ? items.length
+              : items.filter((item) => matchesInventoryFilter(item, type)).length;
+            return (
               <button
                 key={type}
                 type="button"
-                onClick={() => addItem(type)}
-                className="inline-flex min-h-11 items-center gap-1 rounded-md border border-ink bg-parchment px-2 font-ui text-xs font-black hover:bg-vellum"
+                onClick={() => setActiveFilter(type)}
+                className={`inline-flex min-h-11 min-w-0 items-center justify-between gap-1 rounded-md border px-2 font-ui text-[11px] font-black transition ${
+                  active
+                    ? "border-oxblood bg-oxblood text-vellum"
+                    : "border-ink bg-parchment text-ink hover:bg-vellum"
+                }`}
+                aria-pressed={active}
               >
-                <PackagePlus className="h-3.5 w-3.5" aria-hidden="true" />
-                {t(`panel.inventory.add.${type}`)}
+                <span className="min-w-0 truncate">{t(type === "all" ? "panel.inventory.filter.all" : `panel.inventory.add.${type}`)}</span>
+                <span className={`grid h-6 min-w-6 place-items-center rounded-full px-1 text-[10px] ${active ? "bg-vellum/20 text-vellum" : "bg-umber/10 text-umber"}`}>
+                  {count}
+                </span>
               </button>
-            ))}
-          </div>
+            );
+          })}
         </div>
 
         <CoinPouch coins={character.equipment.coins} updateCoin={(coin, value) => updatePath(`equipment.coins.${coin}`, value)} t={t} />
 
         <div className="grid gap-2">
-          {items.length ? items.map((item, index) => (
+          {visibleItems.length ? visibleItems.map(({ item, index }) => (
             <ItemCard
               key={item.id}
               item={item}
@@ -282,7 +319,7 @@ export default function InventoryPanel({ character, updatePath, t, panelProps = 
             />
           )) : (
             <div className="rounded-md border border-dashed border-umber/35 bg-vellum px-3 py-5 text-sm leading-6 text-umber">
-              {t("panel.inventory.empty")}
+              {activeFilter === "all" ? t("panel.inventory.empty") : t("panel.inventory.filterEmpty")}
             </div>
           )}
         </div>
@@ -511,35 +548,60 @@ function ItemDetails({ item, index, t, updateItem, updateWeaponDice, weapon, arm
   if (weapon) {
     const damage = getWeaponDamage(item);
     return (
-      <div className="grid gap-3 border-t border-umber/15 p-3 md:grid-cols-[110px_110px_110px_110px_minmax(0,1fr)]">
-        <Field
-          label={t("panel.inventory.attackBonus")}
-          type="number"
-          signed
-          value={item.attackBonus}
-          onChange={(value) => updateItem(index, "attackBonus", value)}
-        />
-        <Field
-          label={t("panel.inventory.damageDiceCount")}
-          type="number"
-          min={1}
-          max={12}
-          value={damage.count}
-          onChange={(value) => updateWeaponDice(index, { count: value, sides: damage.sides })}
-        />
-        <SelectField
-          label={t("panel.inventory.damageDie")}
-          value={String(damage.sides)}
-          onChange={(value) => updateWeaponDice(index, { count: damage.count, sides: value })}
-          options={DICE_TYPES.map((sides) => ({ value: String(sides), label: `d${sides}` }))}
-        />
-        <Field
-          label={t("panel.inventory.damageBonus")}
-          type="number"
-          signed
-          value={item.damageBonus}
-          onChange={(value) => updateItem(index, "damageBonus", value)}
-        />
+      <div className="grid gap-3 border-t border-umber/15 p-3">
+        <div className="rounded-md border border-umber/20 bg-parchment p-2.5 shadow-insetLine">
+          <div className="mb-2 font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">
+            {t("panel.inventory.weaponRolls")}
+          </div>
+          <div className="grid gap-2">
+            <div className="grid gap-1">
+              <div className="font-ui text-[10px] font-black uppercase tracking-[0.08em] text-umber">{t("panel.inventory.attackBonus")}</div>
+              <NumberStepper
+                label={t("panel.inventory.attackBonus")}
+                signed
+                value={item.attackBonus}
+                onChange={(value) => updateItem(index, "attackBonus", value)}
+                className="h-11 bg-white/70"
+                inputClassName="font-ui text-base font-black"
+                buttonWidth="38px"
+              />
+            </div>
+
+            <div className="grid gap-1">
+              <div className="font-ui text-[10px] font-black uppercase tracking-[0.08em] text-umber">{t("panel.inventory.damageDice")}</div>
+              <div className="grid grid-cols-[minmax(82px,1fr)_74px_minmax(82px,1fr)] gap-2">
+                <NumberStepper
+                  label={t("panel.inventory.damageDiceCount")}
+                  min={1}
+                  max={12}
+                  value={damage.count}
+                  onChange={(value) => updateWeaponDice(index, { count: value, sides: damage.sides })}
+                  className="h-11 bg-white/70"
+                  inputClassName="px-0 font-ui text-base font-black"
+                  buttonWidth="30px"
+                />
+                <select
+                  aria-label={t("panel.inventory.damageDie")}
+                  value={String(damage.sides)}
+                  onChange={(event) => updateWeaponDice(index, { count: damage.count, sides: event.target.value })}
+                  className="h-11 w-full rounded-md border border-umber/35 bg-white/70 px-2 text-center font-ui text-sm font-black text-ink outline-none focus:border-slate focus:ring-2 focus:ring-slate/20"
+                >
+                  {DICE_TYPES.map((sides) => <option key={sides} value={String(sides)}>d{sides}</option>)}
+                </select>
+                <NumberStepper
+                  label={t("panel.inventory.damageBonus")}
+                  signed
+                  value={item.damageBonus}
+                  onChange={(value) => updateItem(index, "damageBonus", value)}
+                  className="h-11 bg-white/70"
+                  inputClassName="px-0 font-ui text-base font-black"
+                  buttonWidth="30px"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
         <SelectField
           label={t("panel.inventory.damageType")}
           value={item.damageType || ""}
@@ -549,7 +611,7 @@ function ItemDetails({ item, index, t, updateItem, updateWeaponDice, weapon, arm
             ...DAMAGE_TYPES.map((type) => ({ value: type, label: t(`damage.type.${type}`) }))
           ]}
         />
-        <div className="md:col-span-5">
+        <div>
           <TextArea
             label={t("panel.inventory.itemNotes")}
             rows={2}

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Activity, Castle, Dice5, Footprints, HeartPulse, Minus, Plus, RotateCcw, Shield, Skull, Sparkles, Swords } from "lucide-react";
 import { ABILITIES, SKILLS, abilityModifier, passiveScore, savingThrowBonus, signed, skillBonus } from "@/lib/dndRules";
 import { CONDITIONS, parseConditions } from "@/lib/combat";
+import NumberStepper from "@/components/form/NumberStepper";
 
 const QUICK_SKILLS = ["perception", "stealth", "investigation", "persuasion", "athletics"];
 
@@ -65,12 +66,13 @@ export default function PlayDashboard({ character, actions, openDice, t }) {
               <div className="grid min-w-0 gap-2 md:grid-cols-[132px_1fr]">
                 <label className="block">
                   <span className="mb-1 block font-ui text-[11px] font-black uppercase tracking-[0.12em] text-[#d6a832]">{t("play.amount")}</span>
-                  <input
-                    type="number"
+                  <NumberStepper
+                    label={t("play.amount")}
                     min="0"
                     value={hpAmount}
-                    onChange={(event) => setHpAmount(event.target.value)}
-                    className="h-12 w-full rounded-md border border-umber/35 bg-white/65 px-3 text-center font-ui text-lg font-black text-ink outline-none ring-0 transition focus:border-slate focus:ring-2 focus:ring-slate/20"
+                    onChange={setHpAmount}
+                    className="h-12 bg-white/65"
+                    inputClassName="font-ui text-lg font-black"
                   />
                 </label>
                 <div className="grid min-w-0 gap-2 sm:grid-cols-3">
@@ -122,7 +124,7 @@ export default function PlayDashboard({ character, actions, openDice, t }) {
                   <button
                     key={condition}
                     type="button"
-                    onClick={() => actions.toggleCondition(t(`condition.${condition}`))}
+                    onClick={() => actions.toggleCondition(condition)}
                     className={`rounded-full border px-3 py-1.5 font-ui text-[10px] font-black uppercase tracking-[0.08em] transition ${
                       active
                         ? "border-oxblood bg-oxblood text-vellum shadow-[inset_0_0_0_1px_rgba(255,255,255,0.35)]"
@@ -186,7 +188,7 @@ function QuickRolls({ character, openDice, t }) {
       </div>
       <div className="mt-3 grid grid-cols-2 gap-2">
         {QUICK_SKILLS.map((skill) => (
-          <RollButton key={skill} compact label={t(`skill.${skill}`)} bonus={skillBonus(character, skill)} openDice={openDice} />
+          <RollButton key={skill} compact label={t(`skill.short.${skill}`)} title={t(`skill.${skill}`)} bonus={skillBonus(character, skill)} openDice={openDice} />
         ))}
       </div>
       <div className="mt-3 grid grid-cols-3 gap-2">
@@ -198,11 +200,12 @@ function QuickRolls({ character, openDice, t }) {
   );
 }
 
-function RollButton({ icon: Icon = Activity, label, bonus, openDice, compact = false }) {
+function RollButton({ icon: Icon = Activity, label, title, bonus, openDice, compact = false }) {
   return (
     <button
       type="button"
-      onClick={() => openDice({ label, sides: 20, count: 1, modifier: bonus })}
+      onClick={() => openDice({ label: title || label, sides: 20, count: 1, modifier: bonus })}
+      title={title || label}
       className={`rpg-action flex items-center justify-between gap-2 rounded-md border border-[#d6a832]/30 bg-vellum/90 px-3 font-ui font-black text-ink transition hover:bg-parchment ${compact ? "min-h-12 text-[11px]" : "min-h-12 text-sm"} ${compact ? "tracking-[0.05em]" : ""}`}
     >
       <span className="inline-flex min-w-0 items-center gap-2">

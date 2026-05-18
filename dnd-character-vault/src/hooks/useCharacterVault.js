@@ -14,6 +14,8 @@ import {
   saveCharacter
 } from "@/lib/storage";
 
+const AUTOSAVE_DELAY_MS = 30000;
+
 export function useCharacterVault() {
   const [character, setCharacter] = useState(() => createDefaultCharacter());
   const [history, setHistory] = useState([]);
@@ -22,6 +24,11 @@ export function useCharacterVault() {
   const [noticeKey, setNoticeKey] = useState("");
   const loaded = useRef(false);
   const saveTimer = useRef(null);
+  const characterRef = useRef(character);
+
+  useEffect(() => {
+    characterRef.current = character;
+  }, [character]);
 
   useEffect(() => {
     const loadedCharacter = loadCharacter();
@@ -39,9 +46,30 @@ export function useCharacterVault() {
       const result = saveCharacter(character, "Autosave");
       setHistory(result.history);
       setStatusKey("saved");
-    }, 420);
+    }, AUTOSAVE_DELAY_MS);
     return () => window.clearTimeout(saveTimer.current);
   }, [character]);
+
+  useEffect(() => {
+    const flushAutosave = () => {
+      if (!loaded.current) return;
+      window.clearTimeout(saveTimer.current);
+      const result = saveCharacter(characterRef.current, "Autosave");
+      setHistory(result.history);
+      setStatusKey("saved");
+    };
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") flushAutosave();
+    };
+
+    window.addEventListener("beforeunload", flushAutosave);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      window.removeEventListener("beforeunload", flushAutosave);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, []);
 
   const updatePath = useCallback((path, value) => {
     setCharacter((current) => normalizeCharacter(setByPath(current, path, value)));
@@ -105,6 +133,7 @@ export function useCharacterVault() {
   }, []);
 
   const manualSnapshot = useCallback(() => {
+    window.clearTimeout(saveTimer.current);
     const result = saveCharacter(character, "Manual snapshot");
     setHistory(result.history);
     setStatusKey("snapshot");
@@ -115,6 +144,7 @@ export function useCharacterVault() {
   const restoreSnapshot = useCallback((id) => {
     const restored = restoreHistoryEntry(id);
     if (!restored) return;
+    window.clearTimeout(saveTimer.current);
     setCharacter(restored);
     const result = saveCharacter(restored, "Restored snapshot");
     setHistory(result.history);
@@ -133,6 +163,7 @@ export function useCharacterVault() {
   const importFile = useCallback(async (file) => {
     const text = await file.text();
     const result = importBackup(text);
+    window.clearTimeout(saveTimer.current);
     setCharacter(result.character);
     setHistory(loadHistory());
     setNotice(result.warnings.length ? result.warnings.join(" ") : "");
@@ -141,6 +172,7 @@ export function useCharacterVault() {
 
   const newCharacter = useCallback(() => {
     const blank = createDefaultCharacter();
+    window.clearTimeout(saveTimer.current);
     setCharacter(blank);
     const result = saveCharacter(blank, "New character");
     setHistory(result.history);
@@ -149,6 +181,7 @@ export function useCharacterVault() {
   }, []);
 
   const clearLocal = useCallback(() => {
+    window.clearTimeout(saveTimer.current);
     clearAllLocalData();
     const blank = createDefaultCharacter();
     setCharacter(blank);

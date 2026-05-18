@@ -1,6 +1,6 @@
 import { createEquipmentItem, normalizeEquipmentItem } from "./equipment";
 
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 export const ABILITY_KEYS = [
   "strength",
@@ -225,11 +225,30 @@ export function normalizeCharacter(input) {
   });
   merged.spells.slots = mergeDeep(createSpellSlots(), merged.spells.slots || {});
   merged.spells.known = normalizeList(merged.spells.known, "spell", {
-    level: "",
+    level: 0,
     name: "",
     prepared: false,
+    school: "",
+    castingTime: "",
+    range: "",
+    verbal: true,
+    somatic: true,
+    material: false,
+    materialText: "",
+    duration: "",
+    concentration: false,
+    ritual: false,
     notes: ""
-  }).map((spell) => ({ ...spell, prepared: Boolean(spell.prepared) }));
+  }).map((spell) => ({
+    ...spell,
+    level: clamp(Math.round(numberOr(spell.level, 0)), 0, 9),
+    prepared: Boolean(spell.prepared),
+    verbal: Boolean(spell.verbal),
+    somatic: Boolean(spell.somatic),
+    material: Boolean(spell.material),
+    concentration: Boolean(spell.concentration),
+    ritual: Boolean(spell.ritual)
+  }));
   const legacyGearNotes = stringOr(merged.equipment?.legacyNotes, stringOr(merged.equipment?.gear, ""));
   const notes = stringOr(merged.equipment?.notes, legacyGearNotes);
   merged.equipment = {
@@ -270,7 +289,23 @@ export function createListItem(type) {
   const factories = {
     attacks: () => ({ id: createId("attack"), name: "", bonus: "", damage: "", notes: "" }),
     resources: () => ({ id: createId("resource"), name: "", current: "", max: "", reset: "" }),
-    spells: () => ({ id: createId("spell"), level: "", name: "", prepared: false, notes: "" }),
+    spells: () => ({
+      id: createId("spell"),
+      level: 0,
+      name: "",
+      prepared: false,
+      school: "",
+      castingTime: "",
+      range: "",
+      verbal: true,
+      somatic: true,
+      material: false,
+      materialText: "",
+      duration: "",
+      concentration: false,
+      ritual: false,
+      notes: ""
+    }),
     equipment: () => createEquipmentItem(createId("equipment"))
   };
   return factories[type]?.() || { id: createId("item") };

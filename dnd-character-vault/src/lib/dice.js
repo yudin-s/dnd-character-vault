@@ -74,8 +74,54 @@ export function rollDice({ sides, count, rng, modifier: inputModifier, label: in
   };
 }
 
+export function rollCompositeDice({ label: inputLabel, groups = [], rng } = {}) {
+  const label = String(inputLabel || "");
+  const normalizedGroups = groups
+    .map((group) => {
+      const sides = clampSides(group.sides);
+      const count = clampCount(group.count);
+      const modifier = normalizeModifier(group.modifier);
+      const rolls = Array.from({ length: count }, () => rollDie(sides, rng));
+      const diceTotal = rolls.reduce((sum, value) => sum + value, 0);
+      const total = diceTotal + modifier;
+
+      return {
+        key: String(group.key || group.label || `${count}d${sides}`),
+        label: String(group.label || ""),
+        sides,
+        count,
+        modifier,
+        rolls,
+        diceTotal,
+        total,
+        notation: `${count}d${sides}${formatModifier(modifier)}`
+      };
+    })
+    .filter((group) => group.count > 0);
+
+  const total = normalizedGroups.reduce((sum, group) => sum + group.total, 0);
+
+  return {
+    id: createRollId(),
+    label,
+    groups: normalizedGroups,
+    rolls: normalizedGroups.flatMap((group) => group.rolls),
+    diceTotal: normalizedGroups.reduce((sum, group) => sum + group.diceTotal, 0),
+    total,
+    notation: normalizedGroups.map((group) => group.notation).join(" / "),
+    timestamp: Date.now()
+  };
+}
+
 export function formatRoll(result) {
   if (!result || typeof result !== "object") return "";
+  if (Array.isArray(result.groups) && result.groups.length) {
+    const label = result.label ? `${result.label}: ` : "";
+    return `${label}${result.groups.map((group) => {
+      const groupLabel = group.label ? `${group.label} ` : "";
+      return `${groupLabel}${group.notation} = ${group.total}`;
+    }).join(" / ")}`;
+  }
   const count = normalizeToPositiveInteger(result.count, 1);
   const sides = clampSides(result.sides);
   const modifier = normalizeModifier(result.modifier);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useId } from "react";
+import NumberStepper from "@/components/form/NumberStepper";
 
 export function Field({
   label,
@@ -14,11 +15,13 @@ export function Field({
   hideLabel = false,
   id,
   className = "",
+  signed = false,
   ...inputProps
 }) {
   const uid = useId();
   const fieldId = id || `field-${uid}`;
   const isCheckbox = type === "checkbox";
+  const { inputMode, pattern, ...restInputProps } = inputProps;
   const commonInputClassName = [
     "min-h-11 w-full rounded-md border border-umber/35 bg-white/65 px-3 py-2 text-base text-ink outline-none transition placeholder:text-umber/55 focus:border-slate focus:ring-2 focus:ring-slate/20 sm:text-sm",
     inputClassName,
@@ -41,10 +44,34 @@ export function Field({
           checked={Boolean(value)}
           onChange={(event) => onChange?.(event.target.checked)}
           className={checkboxClassName}
-          {...inputProps}
+          {...restInputProps}
         />
         <span className={hideLabel ? "sr-only" : "text-ink"}>{label}</span>
       </label>
+    );
+  }
+
+  if (type === "number") {
+    return (
+      <div className={`block text-sm ${className}`.trim()}>
+        <label htmlFor={fieldId} className="mb-1 block font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">
+          {label}
+        </label>
+        <NumberStepper
+          id={fieldId}
+          label={label}
+          value={value}
+          onChange={onChange}
+          min={min}
+          max={max}
+          signed={signed}
+          inputMode={inputMode}
+          pattern={pattern}
+          placeholder={placeholder}
+          inputClassName={inputClassName}
+          {...restInputProps}
+        />
+      </div>
     );
   }
 
@@ -53,22 +80,17 @@ export function Field({
       <span className="mb-1 block font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">
         {label}
       </span>
-      <input
-        id={fieldId}
-        value={value ?? ""}
-        onChange={(event) => {
-          const nextValue = type === "number" && event.target.value !== ""
-            ? Number(event.target.value)
-            : event.target.value;
-          onChange?.(nextValue);
-        }}
-        type={type}
-        min={type === "number" ? min : undefined}
-        max={type === "number" ? max : undefined}
-        placeholder={placeholder}
-        className={commonInputClassName}
-        {...inputProps}
-      />
+        <input
+          id={fieldId}
+          value={value ?? ""}
+          onChange={(event) => onChange?.(event.target.value)}
+          type={type}
+          placeholder={placeholder}
+          className={commonInputClassName}
+          inputMode={inputMode}
+          pattern={pattern}
+          {...restInputProps}
+        />
     </label>
   );
 }

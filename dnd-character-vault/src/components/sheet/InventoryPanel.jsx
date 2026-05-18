@@ -1,9 +1,13 @@
-import { ChevronDown, Coins, Dices, Minus, PackagePlus, Plus, Shield, ShieldCheck, Swords, Trash2, Wand2 } from "lucide-react";
+"use client";
+
+import { ChevronDown, Coins, Minus, PackagePlus, Plus, Shield, ShieldCheck, Swords, Trash2, Wand2 } from "lucide-react";
+import { useState } from "react";
 import TextArea from "@/components/form/TextArea";
 import { DICE_TYPES } from "@/lib/dice";
 import { COINS } from "@/lib/dndRules";
 import { EQUIPMENT_TYPES, createEquipmentItem } from "@/lib/equipment";
 import Field from "@/components/form/Field";
+import NumberStepper from "@/components/form/NumberStepper";
 import Panel from "@/components/form/Panel";
 
 const DAMAGE_TYPES = [
@@ -82,6 +86,12 @@ function getWeaponDamage(item) {
 
 function formatDiceNotation({ count, sides }) {
   return `${normalizeDiceCount(count)}d${normalizeDiceSides(sides)}`;
+}
+
+function formatModifier(value) {
+  const modifier = normalizeModifier(value);
+  if (!modifier) return "";
+  return modifier > 0 ? `+${modifier}` : `${modifier}`;
 }
 
 function createTypedItem(type, t) {
@@ -293,6 +303,9 @@ export default function InventoryPanel({ character, updatePath, t, panelProps = 
 }
 
 function CoinPouch({ coins, updateCoin, t }) {
+  const [activeCoin, setActiveCoin] = useState("gp");
+  const activeValue = coins?.[activeCoin] ?? 0;
+
   return (
     <details className="group rounded-md border border-umber/25 bg-parchment" open>
       <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-3 py-2 marker:hidden">
@@ -302,25 +315,51 @@ function CoinPouch({ coins, updateCoin, t }) {
         </span>
         <ChevronDown className="h-4 w-4 shrink-0 text-umber transition group-open:rotate-180" aria-hidden="true" />
       </summary>
-      <div className="grid grid-cols-5 gap-1.5 border-t border-umber/15 p-2 sm:gap-2 sm:p-3">
-        {COINS.map((coin) => (
-          <label key={coin} className="min-w-0 rounded-md border border-umber/20 bg-vellum/85 p-1.5 text-center shadow-insetLine">
-            <span className={`mx-auto grid h-8 w-8 place-items-center rounded-full border text-[10px] font-black uppercase shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_2px_4px_rgba(37,24,19,0.18)] sm:h-10 sm:w-10 sm:text-xs ${COIN_TONES[coin]}`}>
-              {t(`panel.inventory.coin.${coin}`)}
+      <div className="grid gap-3 border-t border-umber/15 p-2 sm:p-3">
+        <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+          {COINS.map((coin) => {
+            const amount = Number(coins?.[coin]) || 0;
+            const active = activeCoin === coin;
+            return (
+              <button
+                key={coin}
+                type="button"
+                onClick={() => setActiveCoin(coin)}
+                className={`min-w-0 rounded-md border p-1.5 text-center shadow-insetLine transition ${
+                  active ? "border-oxblood bg-vellum" : "border-umber/20 bg-vellum/70 hover:bg-vellum"
+                }`}
+                aria-label={t(`panel.inventory.coinName.${coin}`)}
+              >
+                <span className={`mx-auto grid h-8 w-8 place-items-center rounded-full border text-[10px] font-black uppercase shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_2px_4px_rgba(37,24,19,0.18)] sm:h-10 sm:w-10 sm:text-xs ${COIN_TONES[coin]}`}>
+                  {t(`panel.inventory.coin.${coin}`)}
+                </span>
+                <span className="mt-1 block truncate font-ui text-[9px] font-black uppercase tracking-[0.05em] text-umber sm:text-[10px]">
+                  {amount > 0 ? amount : t(`panel.inventory.coin.${coin}`)}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="grid gap-1 rounded-md border border-umber/20 bg-vellum/80 p-2 shadow-insetLine">
+          <div className="flex items-center justify-between gap-2">
+            <span className="truncate font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">
+              {t(`panel.inventory.coinName.${activeCoin}`)}
             </span>
-            <span className="mt-1 block truncate font-ui text-[9px] font-black uppercase tracking-[0.05em] text-umber sm:text-[10px]">
-              {t(`panel.inventory.coinName.${coin}`)}
+            <span className={`grid h-8 w-8 place-items-center rounded-full border text-[10px] font-black uppercase ${COIN_TONES[activeCoin]}`}>
+              {t(`panel.inventory.coin.${activeCoin}`)}
             </span>
-            <input
-              type="number"
-              min="0"
-              value={coins?.[coin] ?? 0}
-              onChange={(event) => updateCoin(coin, event.target.value === "" ? "" : Number(event.target.value))}
-              className="mt-1 h-11 w-full rounded-md border border-umber/25 bg-white/70 px-1 text-center font-ui text-sm font-black text-ink outline-none focus:border-slate focus:ring-2 focus:ring-slate/20"
-              aria-label={t(`panel.inventory.coinName.${coin}`)}
-            />
-          </label>
-        ))}
+          </div>
+          <NumberStepper
+            min="0"
+            label={t(`panel.inventory.coinName.${activeCoin}`)}
+            value={activeValue}
+            onChange={(value) => updateCoin(activeCoin, value)}
+            className="h-12 bg-white/70"
+            inputClassName="font-ui text-lg font-black"
+            buttonWidth="38px"
+            aria-label={t(`panel.inventory.coinName.${activeCoin}`)}
+          />
+        </div>
       </div>
     </details>
   );
@@ -337,22 +376,28 @@ function ItemCard({ item, index, t, updateItem, updateWeaponDice, updateItemType
     : EQUIPMENT_TYPES;
   const weaponDamage = getWeaponDamage(item);
   const damageDice = formatDiceNotation(weaponDamage);
+  const attackFormula = `1d20${formatModifier(item.attackBonus)}`;
+  const damageFormula = `${damageDice}${formatModifier(item.damageBonus)}`;
 
-  const rollAttack = () => {
+  const rollWeaponStrike = () => {
     openDice?.({
       label: item.name || t("panel.inventory.template.weapon"),
-      sides: 20,
-      count: 1,
-      modifier: normalizeModifier(item.attackBonus)
-    });
-  };
-
-  const rollDamage = () => {
-    openDice?.({
-      label: `${item.name || t("panel.inventory.template.weapon")} ${t("panel.inventory.damage")}`,
-      sides: weaponDamage.sides,
-      count: weaponDamage.count,
-      modifier: normalizeModifier(item.damageBonus)
+      groups: [
+        {
+          key: "attack",
+          label: t("panel.inventory.rollAttack"),
+          sides: 20,
+          count: 1,
+          modifier: normalizeModifier(item.attackBonus)
+        },
+        {
+          key: "damage",
+          label: t("panel.inventory.rollDamage"),
+          sides: weaponDamage.sides,
+          count: weaponDamage.count,
+          modifier: normalizeModifier(item.damageBonus)
+        }
+      ]
     });
   };
 
@@ -407,14 +452,15 @@ function ItemCard({ item, index, t, updateItem, updateWeaponDice, updateItemType
 
         <div className="grid grid-cols-2 gap-2 lg:w-[270px]">
           {weapon ? (
-            <>
-              <ActionButton disabled={!openDice} label={t("panel.inventory.rollAttack")} onClick={rollAttack}>
-                <Swords className="h-4 w-4" aria-hidden="true" />
-              </ActionButton>
-              <ActionButton disabled={!openDice} label={t("panel.inventory.rollDamage")} onClick={rollDamage}>
-                <Dices className="h-4 w-4" aria-hidden="true" />
-              </ActionButton>
-            </>
+            <ActionButton
+              disabled={!openDice}
+              label={t("panel.inventory.strike")}
+              hint={`${attackFormula} / ${damageFormula}`}
+              onClick={rollWeaponStrike}
+              wide
+            >
+              <Swords className="h-4 w-4" aria-hidden="true" />
+            </ActionButton>
           ) : null}
           {armorOrShield || weapon ? (
             <ActionButton
@@ -469,6 +515,7 @@ function ItemDetails({ item, index, t, updateItem, updateWeaponDice, weapon, arm
         <Field
           label={t("panel.inventory.attackBonus")}
           type="number"
+          signed
           value={item.attackBonus}
           onChange={(value) => updateItem(index, "attackBonus", value)}
         />
@@ -489,6 +536,7 @@ function ItemDetails({ item, index, t, updateItem, updateWeaponDice, weapon, arm
         <Field
           label={t("panel.inventory.damageBonus")}
           type="number"
+          signed
           value={item.damageBonus}
           onChange={(value) => updateItem(index, "damageBonus", value)}
         />
@@ -598,7 +646,7 @@ function IconButton({ label, onClick, children }) {
   );
 }
 
-function ActionButton({ label, onClick, children, active = false, disabled = false, danger = false }) {
+function ActionButton({ label, hint, onClick, children, active = false, disabled = false, danger = false, wide = false }) {
   const className = danger
     ? "border-oxblood/50 text-oxblood hover:bg-oxblood hover:text-vellum"
     : active
@@ -610,12 +658,15 @@ function ActionButton({ label, onClick, children, active = false, disabled = fal
       type="button"
       onClick={onClick}
       disabled={disabled}
-      title={label}
+      title={hint ? `${label}: ${hint}` : label}
       aria-label={label}
-      className={`inline-flex min-h-11 items-center justify-center gap-1 rounded-md border px-2 py-2 font-ui text-[11px] font-black uppercase tracking-[0.04em] transition disabled:cursor-not-allowed disabled:opacity-40 ${className}`}
+      className={`inline-flex min-h-11 items-center justify-center gap-1 rounded-md border px-2 py-2 font-ui text-[11px] font-black uppercase tracking-[0.04em] transition disabled:cursor-not-allowed disabled:opacity-40 ${wide ? "col-span-2" : ""} ${className}`}
     >
       {children}
-      <span className="min-w-0 truncate">{label}</span>
+      <span className="grid min-w-0 text-left leading-tight">
+        <span className="truncate">{label}</span>
+        {hint ? <span className="truncate text-[10px] opacity-75">{hint}</span> : null}
+      </span>
     </button>
   );
 }

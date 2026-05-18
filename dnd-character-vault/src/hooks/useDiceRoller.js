@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { DICE_TYPES, MAX_DICE_COUNT, rollDice } from "@/lib/dice";
+import { DICE_TYPES, MAX_DICE_COUNT, rollCompositeDice, rollDice } from "@/lib/dice";
 
 const ANIMATION_DURATION_MS = 700;
 const SHAKE_THRESHOLD = 18;
@@ -55,6 +55,7 @@ export default function useDiceRoller() {
   const [isRolling, setIsRolling] = useState(false);
   const [modifier, setModifierState] = useState(0);
   const [rollLabel, setRollLabel] = useState("");
+  const [rollGroups, setRollGroups] = useState(null);
   const [shakeEnabled, setShakeEnabled] = useState(false);
   const [motionSupported, setMotionSupported] = useState(false);
   const [motionPermission, setMotionPermission] = useState("unknown");
@@ -80,14 +81,42 @@ export default function useDiceRoller() {
     }, ANIMATION_DURATION_MS);
   }, [modifier, rollLabel]);
 
+  const executeCompositeRoll = useCallback((groups = [], label = rollLabel) => {
+    if (!groups.length) return;
+    setIsRolling(true);
+    window.clearTimeout(animationTimerRef.current);
+
+    animationTimerRef.current = window.setTimeout(() => {
+      const result = rollCompositeDice({ label, groups });
+      setLastRoll(result);
+      setHistory((current) => [result, ...current]);
+      setIsRolling(false);
+    }, ANIMATION_DURATION_MS);
+  }, [rollLabel]);
+
   const roll = useCallback(() => {
     if (isRolling) return;
+    if (Array.isArray(rollGroups) && rollGroups.length) {
+      executeCompositeRoll(rollGroups, rollLabel);
+      return;
+    }
 
     executeRoll(selectedSides, count, modifier, rollLabel);
-  }, [executeRoll, isRolling, selectedSides, count, modifier, rollLabel]);
+  }, [count, executeCompositeRoll, executeRoll, isRolling, modifier, rollGroups, rollLabel, selectedSides]);
 
   const rollPreset = useCallback((preset = {}) => {
     if (isRolling) return;
+    if (Array.isArray(preset.groups) && preset.groups.length) {
+      const firstGroup = preset.groups[0];
+      const presetLabel = String(preset.label || "");
+      setSelectedSidesState(clampSides(firstGroup.sides ?? selectedSides));
+      setCountState(clampDiceCount(firstGroup.count ?? count));
+      setModifierState(normalizeModifier(firstGroup.modifier));
+      setRollLabel(presetLabel);
+      setRollGroups(preset.groups);
+      executeCompositeRoll(preset.groups, presetLabel);
+      return;
+    }
     const presetSides = clampSides(preset.sides ?? selectedSides);
     const presetCount = clampDiceCount(preset.count ?? count);
     const presetModifier = normalizeModifier(preset.modifier);
@@ -96,8 +125,9 @@ export default function useDiceRoller() {
     setCountState(presetCount);
     setModifierState(presetModifier);
     setRollLabel(presetLabel);
+    setRollGroups(null);
     executeRoll(presetSides, presetCount, presetModifier, presetLabel);
-  }, [count, executeRoll, isRolling, selectedSides]);
+  }, [count, executeCompositeRoll, executeRoll, isRolling, selectedSides]);
 
   const clearHistory = useCallback(() => {
     setHistory([]);
@@ -131,8 +161,12 @@ export default function useDiceRoller() {
     if (isRolling) return;
 
     cooldownRef.current = now;
+    if (Array.isArray(rollGroups) && rollGroups.length) {
+      executeCompositeRoll(rollGroups, rollLabel);
+      return;
+    }
     executeRoll(selectedSides, count);
-  }, [count, executeRoll, isRolling, selectedSides]);
+  }, [count, executeCompositeRoll, executeRoll, isRolling, rollGroups, rollLabel, selectedSides]);
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -164,23 +198,36 @@ export default function useDiceRoller() {
   }, []);
 
   const setSelectedSides = useCallback((value) => {
+    setRollGroups(null);
     setSelectedSidesState(clampSides(value));
   }, []);
 
   const setCount = useCallback((value) => {
+    setRollGroups(null);
     setCountState(clampDiceCount(value));
   }, []);
 
   const setModifier = useCallback((value) => {
+    setRollGroups(null);
     setModifierState(normalizeModifier(value));
   }, []);
 
   const applyPreset = useCallback((preset = {}) => {
+    if (Array.isArray(preset.groups) && preset.groups.length) {
+      const firstGroup = preset.groups[0];
+      setSelectedSidesState(clampSides(firstGroup.sides ?? selectedSides));
+      setCountState(clampDiceCount(firstGroup.count ?? count));
+      setModifierState(normalizeModifier(firstGroup.modifier));
+      setRollLabel(String(preset.label || ""));
+      setRollGroups(preset.groups);
+      return;
+    }
     if ("sides" in preset) setSelectedSidesState(clampSides(preset.sides));
     if ("count" in preset) setCountState(clampDiceCount(preset.count));
     if ("modifier" in preset) setModifierState(normalizeModifier(preset.modifier));
     if ("label" in preset) setRollLabel(String(preset.label || ""));
-  }, []);
+    setRollGroups(null);
+  }, [count, selectedSides]);
 
   return {
     diceTypes: DICE_TYPES,
@@ -192,6 +239,7 @@ export default function useDiceRoller() {
     setModifier,
     rollLabel,
     setRollLabel,
+    rollGroups,
     applyPreset,
     lastRoll,
     history,

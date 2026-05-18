@@ -17,6 +17,52 @@ export const CONDITIONS = [
   "unconscious"
 ];
 
+const CONDITION_ALIASES = {
+  blinded: "blinded",
+  blind: "blinded",
+  "ослеплен": "blinded",
+  "ослеплён": "blinded",
+  charmed: "charmed",
+  charm: "charmed",
+  "очарован": "charmed",
+  deafened: "deafened",
+  deaf: "deafened",
+  "оглох": "deafened",
+  frightened: "frightened",
+  fear: "frightened",
+  "испуган": "frightened",
+  grappled: "grappled",
+  grabbed: "grappled",
+  "схвачен": "grappled",
+  incapacitated: "incapacitated",
+  "недееспособен": "incapacitated",
+  invisible: "invisible",
+  "невидим": "invisible",
+  paralyzed: "paralyzed",
+  paralysed: "paralyzed",
+  "парализован": "paralyzed",
+  poisoned: "poisoned",
+  poison: "poisoned",
+  "отравлен": "poisoned",
+  prone: "prone",
+  "лежит": "prone",
+  restrained: "restrained",
+  "опутан": "restrained",
+  stunned: "stunned",
+  stun: "stunned",
+  "ошеломлен": "stunned",
+  "ошеломлён": "stunned",
+  unconscious: "unconscious",
+  "без сознания": "unconscious"
+};
+
+export function normalizeConditionKey(condition) {
+  const normalized = String(condition || "").trim();
+  if (!normalized) return "";
+  const lookup = normalized.toLowerCase();
+  return CONDITION_ALIASES[lookup] || normalized;
+}
+
 export function applyHitPointChange(character, { type, amount }) {
   const next = deepClone(character);
   const hitPoints = next.combat.hitPoints;
@@ -79,7 +125,7 @@ export function setDeathSave(character, type, index, value) {
 export function toggleCondition(character, condition) {
   const next = deepClone(character);
   const current = parseConditions(next.combat.conditions);
-  const normalized = String(condition || "").trim();
+  const normalized = normalizeConditionKey(condition);
   if (!normalized) return normalizeCharacter(next);
 
   const exists = current.some((item) => item.toLowerCase() === normalized.toLowerCase());
@@ -147,7 +193,7 @@ export function useEquipmentItem(character, index) {
 export function parseConditions(value) {
   return String(value || "")
     .split(/[,;|\n]/)
-    .map((item) => item.trim())
+    .map(normalizeConditionKey)
     .filter(Boolean);
 }
 

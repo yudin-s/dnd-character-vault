@@ -18,8 +18,14 @@ export function saveCharacter(character, reason = "Autosave") {
   const changed = previousRaw !== serialized;
   const history = loadHistory();
   const now = Date.now();
+  const lastEntry = history[0];
+  const shouldAddHistory = changed && (
+    reason !== "Autosave"
+    || !lastEntry
+    || lastEntry.reason !== "Autosave"
+  );
 
-  if (changed) {
+  if (shouldAddHistory) {
     history.unshift({
       id: createHistoryId(),
       timestamp: now,

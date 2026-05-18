@@ -1,8 +1,40 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="5e Character Vault icon">
-  <rect width="512" height="512" rx="96" fill="#f3e7ce"/>
-  <path d="M256 42 426 140v232L256 470 86 372V140L256 42Z" fill="#ead7ad" stroke="#251813" stroke-width="22" stroke-linejoin="round"/>
-  <path d="M256 84 388 160v191L256 428 124 351V160L256 84Z" fill="#fff7df" stroke="#8c1f24" stroke-width="12" stroke-linejoin="round"/>
-  <path d="M256 112v288M140 168l232 136M372 168 140 304" stroke="#5f432f" stroke-width="10" stroke-linecap="round" opacity=".45"/>
-  <text x="256" y="278" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="122" font-weight="700" fill="#251813">5e</text>
-  <path d="M188 330h136" stroke="#8c1f24" stroke-width="16" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f7efdc"/>
+      <stop offset="45%" stop-color="#eadfbe"/>
+      <stop offset="100%" stop-color="#d1b07d"/>
+    </linearGradient>
+    <linearGradient id="crest" x1="0" y1="0" x2="0.25" y2="1">
+      <stop offset="0%" stop-color="#efe3c5"/>
+      <stop offset="100%" stop-color="#b8893a"/>
+    </linearGradient>
+    <linearGradient id="gem" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f4d7a0"/>
+      <stop offset="55%" stop-color="#d18f4a"/>
+      <stop offset="100%" stop-color="#8c3f1f"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <rect x="28" y="28" width="456" height="456" rx="94" fill="none" stroke="#d0a65a" stroke-width="9" opacity="0.35"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M128 92h256c11 0 20 9 20 20v176c0 113-128 192-128 192S108 381 108 288V112c0-11 9-20 20-20Z" fill="#fff8e4" stroke="#6d3f17" stroke-width="16"/>
+    <path d="M164 128h184c9 0 16 7 16 16v130c0 94-96 139-96 139s-96-44-96-139V144c0-9 7-16 16-16Z" fill="url(#crest)" stroke="#8a5a22" stroke-width="12"/>
+    <path d="M220 188h72m-72 0 24 18m48-18-24 18M220 248h72m-72 0 24 18m48-18-24 18" stroke="#8a5a22" stroke-width="10" opacity="0.45"/>
+  </g>
+  <path d="M178 338h156" stroke="#8a5a22" stroke-width="16" stroke-linecap="round"/>
+  <path d="M256 44 392 121v134c0 92-136 180-136 180S120 347 120 255V121L256 44Z" fill="url(#gem)" stroke="#4a250f" stroke-width="14" stroke-linejoin="round"/>
+  <path d="M256 81 349 136v108s-93 104-93 104-93-106-93-104V136L256 81Z" fill="#f8f0d7" opacity="0.92"/>
+  <path d="M256 98 330 150v94l-74 82-74-82V150l74-52Z" fill="#fffaf0" opacity="0.42"/>
+  <g transform="translate(256 274)">
+    <path d="M0-50 36 0 0 50-36 0Z" fill="#f3e0a8" opacity="0.95"/>
+    <path d="M0-37 14-10 0-20l-14 10Z" fill="#7e3d11"/>
+    <path d="M0 20v20" stroke="#7e3d11" stroke-width="10" stroke-linecap="round"/>
+  </g>
+  <g fill="none" stroke="#3e1208" stroke-linejoin="round">
+    <path d="M178 188c-25 18-43 46-43 79 0 60 43 87 43 87" stroke-width="7" opacity="0.25"/>
+    <path d="M334 188c25 18 43 46 43 79 0 60-43 87-43 87" stroke-width="7" opacity="0.25"/>
+  </g>
+  <circle cx="256" cy="256" r="20" fill="#f6d18d" stroke="#5b2a16" stroke-width="8"/>
 </svg>

@@ -4,13 +4,13 @@ import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 
 const FLOOR_Y = -0.62;
-const ARENA_X = 2.35;
-const ARENA_Z = 1.24;
+const ARENA_X = 2.28;
+const ARENA_Z = 1.2;
 const ARENA_TOP = 1.68;
-const ORTHO_VIEW_HEIGHT = 3.25;
-const SINGLE_DIE_SCALE = 0.78;
+const ORTHO_VIEW_HEIGHT = 2.92;
+const SINGLE_DIE_SCALE = 0.66;
 const OUTWARD_Z = new THREE.Vector3(0, 0, 1);
-const TARGET_FACE_NORMAL = new THREE.Vector3(0, 0.74, 0.68).normalize();
+const TARGET_FACE_NORMAL = new THREE.Vector3(0, 1, 0);
 const DICE_PALETTES = {
   4: { base: "#1f8f64", highlight: "#8af7be", shadow: "#0a3b31", emissive: "#29d184", edge: "#c8ffd8", glow: "#5dffb4" },
   6: { base: "#218da0", highlight: "#89f0ff", shadow: "#08334b", emissive: "#24cde2", edge: "#d5fbff", glow: "#51e9ff" },
@@ -22,23 +22,38 @@ const DICE_PALETTES = {
 
 function dieScale(total) {
   if (total <= 1) return SINGLE_DIE_SCALE;
-  if (total <= 3) return 0.6;
-  return 0.42;
+  if (total <= 3) return 0.52;
+  return 0.36;
 }
 
 function dieRadius(total) {
   return Math.max(0.34, dieScale(total) * 0.76);
 }
 
-function launchVelocity(total) {
-  const horizontal = total <= 3 ? 4.8 : 3.4;
-  const depth = total <= 3 ? 3.2 : 2.3;
+function launchLane(index, total) {
+  if (total <= 1) return 0;
+  return (index - (total - 1) / 2) / ((total - 1) / 2);
+}
+
+function launchPosition(index, total, radius) {
+  const lane = launchLane(index, total);
+  const spread = total <= 3 ? 0.82 : 1.38;
+  return new THREE.Vector3(
+    lane * spread + (Math.random() - 0.5) * 0.42,
+    1.08 + Math.random() * 0.48,
+    -ARENA_Z + radius + 0.12 + Math.random() * 0.52
+  );
+}
+
+function launchVelocity(index, total) {
+  const lane = launchLane(index, total);
+  const horizontal = total <= 3 ? 2.8 : 2.1;
   const lift = total <= 1 ? 3.25 : total <= 3 ? 2.85 : 2.05;
   const liftRange = total <= 3 ? 1.25 : 0.9;
   return new THREE.Vector3(
-    (Math.random() - 0.5) * horizontal,
+    -lane * 0.28 + (Math.random() - 0.5) * horizontal,
     lift + Math.random() * liftRange,
-    (Math.random() - 0.5) * depth
+    1.15 + Math.random() * (total <= 3 ? 2.45 : 2.15)
   );
 }
 
@@ -80,6 +95,12 @@ function colorizeFacets(geometry, palette) {
   working.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
   working.computeVertexNormals();
   return working;
+}
+
+function prepareGeometry(sides, palette) {
+  const geometry = createGeometry(sides);
+  if (sides === 12) return geometry;
+  return colorizeFacets(geometry, palette);
 }
 
 function createFeltTexture() {
@@ -130,34 +151,79 @@ function createFeltTexture() {
   return texture;
 }
 
-function createArcaneRing() {
+function createTrayGuide() {
   const ring = new THREE.Group();
-  const outer = new THREE.Mesh(
-    new THREE.RingGeometry(1.52, 1.56, 96),
-    new THREE.MeshBasicMaterial({
-      color: "#d6a832",
-      transparent: true,
-      opacity: 0.18,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    })
-  );
-  const inner = new THREE.Mesh(
-    new THREE.RingGeometry(0.78, 0.8, 72),
-    new THREE.MeshBasicMaterial({
-      color: "#9d5cff",
-      transparent: true,
-      opacity: 0.13,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    })
-  );
-  [outer, inner].forEach((mesh) => {
-    mesh.rotation.x = -Math.PI / 2;
-    mesh.position.y = FLOOR_Y + 0.012;
-    ring.add(mesh);
+  const material = new THREE.LineBasicMaterial({
+    color: "#d6a832",
+    transparent: true,
+    opacity: 0.18,
+    blending: THREE.AdditiveBlending
   });
+  const makeLoop = (x, z) => {
+    const points = [
+      new THREE.Vector3(-x, FLOOR_Y + 0.018, -z),
+      new THREE.Vector3(x, FLOOR_Y + 0.018, -z),
+      new THREE.Vector3(x, FLOOR_Y + 0.018, z),
+      new THREE.Vector3(-x, FLOOR_Y + 0.018, z),
+      new THREE.Vector3(-x, FLOOR_Y + 0.018, -z)
+    ];
+    return new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), material.clone());
+  };
+  ring.add(makeLoop(1.62, 0.72));
+  const inner = makeLoop(0.82, 0.36);
+  inner.material.color = new THREE.Color("#9d5cff");
+  inner.material.opacity = 0.12;
+  ring.add(inner);
   return ring;
+}
+
+function createDiceTray() {
+  const group = new THREE.Group();
+  const felt = new THREE.Mesh(
+    new THREE.PlaneGeometry(ARENA_X * 2 + 0.38, ARENA_Z * 2 + 0.34),
+    new THREE.MeshStandardMaterial({
+      color: "#ffffff",
+      map: createFeltTexture(),
+      roughness: 0.97,
+      metalness: 0.02,
+      emissive: new THREE.Color("#123122"),
+      emissiveIntensity: 0.14
+    })
+  );
+  felt.rotation.x = -Math.PI / 2;
+  felt.position.y = FLOOR_Y;
+  felt.receiveShadow = true;
+
+  const railMaterial = new THREE.MeshStandardMaterial({
+    color: "#241711",
+    roughness: 0.88,
+    metalness: 0.08,
+    emissive: new THREE.Color("#150b08"),
+    emissiveIntensity: 0.18
+  });
+  const railHeight = 0.34;
+  const railWidth = 0.16;
+  const railY = FLOOR_Y + railHeight / 2;
+  const horizontalRail = new THREE.BoxGeometry(ARENA_X * 2 + railWidth * 2, railHeight, railWidth);
+  const verticalRail = new THREE.BoxGeometry(railWidth, railHeight, ARENA_Z * 2);
+  const rails = [
+    new THREE.Mesh(horizontalRail, railMaterial),
+    new THREE.Mesh(horizontalRail.clone(), railMaterial.clone()),
+    new THREE.Mesh(verticalRail, railMaterial.clone()),
+    new THREE.Mesh(verticalRail.clone(), railMaterial.clone())
+  ];
+  rails[0].position.set(0, railY, -ARENA_Z - railWidth / 2);
+  rails[1].position.set(0, railY, ARENA_Z + railWidth / 2);
+  rails[2].position.set(-ARENA_X - railWidth / 2, railY, 0);
+  rails[3].position.set(ARENA_X + railWidth / 2, railY, 0);
+  rails.forEach((rail) => {
+    rail.castShadow = true;
+    rail.receiveShadow = true;
+    group.add(rail);
+  });
+
+  group.add(felt, createTrayGuide());
+  return group;
 }
 
 function createD10Geometry() {
@@ -234,18 +300,20 @@ function createGeometry(sides) {
 
 function numberTexture(value, emphasis = false) {
   const canvas = document.createElement("canvas");
-  canvas.width = 128;
-  canvas.height = 128;
+  canvas.width = 256;
+  canvas.height = 256;
   const context = canvas.getContext("2d");
   context.clearRect(0, 0, canvas.width, canvas.height);
   context.textAlign = "center";
   context.textBaseline = "middle";
-  context.font = `900 ${emphasis ? 72 : 58}px ui-sans-serif, system-ui, sans-serif`;
-  context.lineWidth = emphasis ? 10 : 7;
-  context.strokeStyle = "rgba(42, 21, 10, 0.96)";
+  context.font = `900 ${emphasis ? 144 : 118}px ui-sans-serif, system-ui, sans-serif`;
+  context.lineWidth = emphasis ? 22 : 16;
+  context.strokeStyle = "rgba(24, 12, 7, 0.98)";
   context.fillStyle = emphasis ? "#fff8e8" : "rgba(255, 248, 232, 0.92)";
-  context.strokeText(String(value), 64, 66);
-  context.fillText(String(value), 64, 66);
+  context.shadowColor = emphasis ? "rgba(255, 238, 168, 0.6)" : "rgba(0, 0, 0, 0.2)";
+  context.shadowBlur = emphasis ? 10 : 2;
+  context.strokeText(String(value), 128, 134);
+  context.fillText(String(value), 128, 134);
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.needsUpdate = true;
@@ -275,13 +343,25 @@ function faceSpecsFromTriangles(geometry) {
     center.copy(pointA).add(pointB).add(pointC).multiplyScalar(1 / 3);
     normal.copy(pointB).sub(pointA).cross(pointC.clone().sub(pointA)).normalize();
     if (normal.dot(center) < 0) normal.negate();
-    specs.push({
-      normal: normal.clone(),
-      distance: Math.max(0.01, center.dot(normal))
-    });
+    const distance = Math.max(0.01, center.dot(normal));
+    const existing = specs.find((spec) => spec.normal.dot(normal) > 0.995 && Math.abs(spec.distance - distance) < 0.04);
+    if (existing) {
+      existing.center.add(center);
+      existing.count += 1;
+    } else {
+      specs.push({
+        normal: normal.clone(),
+        distance,
+        center: center.clone(),
+        count: 1
+      });
+    }
   }
 
-  return specs.sort((left, right) => {
+  return specs.map((spec) => ({
+    normal: spec.normal,
+    distance: spec.center.multiplyScalar(1 / spec.count).dot(spec.normal)
+  })).sort((left, right) => {
     if (Math.abs(right.normal.y - left.normal.y) > 0.01) return right.normal.y - left.normal.y;
     return Math.atan2(left.normal.z, left.normal.x) - Math.atan2(right.normal.z, right.normal.x);
   });
@@ -303,23 +383,9 @@ function d10FaceSpecs() {
   });
 }
 
-function d12FaceSpecs() {
-  const phi = (1 + Math.sqrt(5)) / 2;
-  return [
-    [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
-    [0, -1, phi], [0, 1, phi], [0, -1, -phi], [0, 1, -phi],
-    [phi, 0, -1], [phi, 0, 1], [-phi, 0, -1], [-phi, 0, 1]
-  ].map(([x, y, z]) => ({ normal: new THREE.Vector3(x, y, z).normalize(), distance: 0.82 }))
-    .sort((left, right) => {
-      if (Math.abs(right.normal.y - left.normal.y) > 0.01) return right.normal.y - left.normal.y;
-      return Math.atan2(left.normal.z, left.normal.x) - Math.atan2(right.normal.z, right.normal.x);
-    });
-}
-
 function faceSpecs(sides, geometry) {
   if (sides === 6) return cubeFaceSpecs();
   if (sides === 10) return d10FaceSpecs();
-  if (sides === 12) return d12FaceSpecs();
   return faceSpecsFromTriangles(geometry);
 }
 
@@ -329,10 +395,10 @@ function labelSize(sides, emphasis = false) {
     if (sides === 6) return 0.46;
     if (sides === 8) return 0.4;
     if (sides === 10) return 0.32;
-    if (sides === 12) return 0.28;
-    return 0.26;
+    if (sides === 12) return 0.36;
+    return 0.34;
   })();
-  return emphasis ? base * 1.56 : base;
+  return emphasis ? base * 1.72 : base;
 }
 
 function createFaceLabel(value, sides, spec, emphasis = false) {
@@ -463,11 +529,11 @@ function createDie(face, index, total, isRolling) {
   const visualScale = dieScale(total);
   const radius = dieRadius(total);
   const palette = paletteForSides(face.sides);
-  const geometry = colorizeFacets(createGeometry(face.sides), palette);
+  const geometry = prepareGeometry(face.sides, palette);
   const specs = faceSpecs(face.sides, geometry);
   const material = new THREE.MeshStandardMaterial({
-    color: new THREE.Color("#ffffff"),
-    vertexColors: true,
+    color: new THREE.Color(face.sides === 12 ? palette.base : "#ffffff"),
+    vertexColors: Boolean(geometry.getAttribute("color")),
     emissive: new THREE.Color(palette.emissive),
     emissiveIntensity: 0.32,
     roughness: 0.42,
@@ -496,13 +562,7 @@ function createDie(face, index, total, isRolling) {
   const finalPosition = settledPosition(index, total, radius);
   const finalQuaternion = landingQuaternion(specs, face.value);
   if (isRolling) {
-    const launchWidth = total <= 3 ? 1.2 : 1.9;
-    const launchDepth = total <= 3 ? 1.05 : 1.32;
-    group.position.set(
-      (Math.random() - 0.5) * launchWidth,
-      1.08 + Math.random() * 0.48,
-      -0.58 + Math.random() * launchDepth
-    );
+    group.position.copy(launchPosition(index, total, radius));
     group.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
   } else {
     group.position.copy(finalPosition);
@@ -512,7 +572,7 @@ function createDie(face, index, total, isRolling) {
   return {
     face,
     group,
-    velocity: launchVelocity(total),
+    velocity: launchVelocity(index, total),
     spin: new THREE.Vector3(
       (Math.random() - 0.5) * 10,
       (Math.random() - 0.5) * 10,
@@ -536,9 +596,9 @@ function clearBodies(scene, bodies) {
   });
 }
 
-function updateLanding(body, face, index, total) {
+function updateLanding(body, face) {
   body.face = face;
-  body.finalPosition = settledPosition(index, total, body.radius);
+  body.finalPosition = body.group.position.clone();
   body.finalQuaternion = landingQuaternion(body.specs, face.value);
   emphasizeResultLabel(body, face.value);
 }
@@ -553,11 +613,16 @@ function resolveCollisions(bodies) {
         0,
         right.group.position.z - left.group.position.z
       );
+      const rawDistance = delta.length();
+      if (rawDistance < 0.001) {
+        const angle = (leftIndex / Math.max(1, bodies.length)) * Math.PI * 2;
+        delta.set(Math.cos(angle), 0, Math.sin(angle));
+      }
       const distance = Math.max(delta.length(), 0.001);
       const minDistance = left.radius + right.radius;
       if (distance >= minDistance) continue;
       const normal = delta.multiplyScalar(1 / distance);
-      const overlap = (minDistance - distance) * 0.52;
+      const overlap = (minDistance - distance) * 0.36;
       left.group.position.addScaledVector(normal, -overlap);
       right.group.position.addScaledVector(normal, overlap);
       const relativeVelocity = right.velocity.clone().sub(left.velocity);
@@ -590,7 +655,8 @@ export default function ThreeDiceStage({ faces, fallbackSides, isRolling, emptyT
     scene.background = new THREE.Color("#211611");
 
     const camera = new THREE.OrthographicCamera(-2.6, 2.6, 1.6, -1.6, 0.1, 100);
-    camera.position.set(0, 5.2, 4.8);
+    camera.position.set(0, 7.2, 0);
+    camera.up.set(0, 0, -1);
     camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -605,26 +671,11 @@ export default function ThreeDiceStage({ faces, fallbackSides, isRolling, emptyT
     key.castShadow = true;
     key.shadow.mapSize.set(1024, 1024);
     const rim = new THREE.PointLight("#a464ff", 1.35, 8);
-    rim.position.set(2.6, 1.8, 2.4);
+    rim.position.set(2.6, 1.8, 1.8);
     const ember = new THREE.PointLight("#ffd35b", 0.95, 6);
-    ember.position.set(-1.8, 0.62, -1.2);
+    ember.position.set(-1.8, 0.62, -0.9);
 
-    const floor = new THREE.Mesh(
-      new THREE.CircleGeometry(2.86, 96),
-      new THREE.MeshStandardMaterial({
-        color: "#ffffff",
-        map: createFeltTexture(),
-        roughness: 0.96,
-        metalness: 0.02,
-        emissive: new THREE.Color("#123122"),
-        emissiveIntensity: 0.16
-      })
-    );
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.y = FLOOR_Y;
-    floor.receiveShadow = true;
-
-    scene.add(ambient, key, rim, ember, floor, createArcaneRing());
+    scene.add(ambient, key, rim, ember, createDiceTray());
     sceneRef.current = scene;
     rendererRef.current = renderer;
     cameraRef.current = camera;
@@ -683,11 +734,17 @@ export default function ThreeDiceStage({ faces, fallbackSides, isRolling, emptyT
         resolveCollisions(bodies);
       } else {
         bodies.forEach((body) => {
-          body.group.position.lerp(body.finalPosition, 0.12);
+          body.group.position.x += body.velocity.x * dt * 0.32;
+          body.group.position.z += body.velocity.z * dt * 0.32;
           body.group.quaternion.slerp(body.finalQuaternion, 0.1);
           body.velocity.multiplyScalar(0.9);
           body.spin.multiplyScalar(0.9);
+          const xLimit = ARENA_X - body.radius;
+          const zLimit = ARENA_Z - body.radius;
+          body.group.position.x = Math.max(-xLimit, Math.min(xLimit, body.group.position.x));
+          body.group.position.z = Math.max(-zLimit, Math.min(zLimit, body.group.position.z));
         });
+        resolveCollisions(bodies);
       }
 
       renderer.render(scene, camera);
@@ -719,7 +776,7 @@ export default function ThreeDiceStage({ faces, fallbackSides, isRolling, emptyT
     } else if (!isRolling) {
       bodiesRef.current.forEach((body, index) => {
         const face = normalizedFaces[index];
-        if (face) updateLanding(body, face, index, normalizedFaces.length);
+        if (face) updateLanding(body, face);
       });
     }
 

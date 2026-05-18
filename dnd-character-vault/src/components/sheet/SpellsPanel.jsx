@@ -103,7 +103,7 @@ export default function SpellsPanel({ character, updatePath, addItem, removeItem
                 {t("panel.spells.slots")}
               </span>
               <span className="rounded-full border border-umber/20 bg-vellum px-2 py-1 font-ui text-[10px] font-black uppercase tracking-[0.08em] text-umber">
-                {preparedCount}/{known.length} {t("panel.spells.preparedShort")}
+                {t("panel.spells.summaryPrepared", { prepared: preparedCount, total: known.length })}
               </span>
             </div>
             <div className="grid gap-1.5">
@@ -155,40 +155,54 @@ export default function SpellsPanel({ character, updatePath, addItem, removeItem
 
 function SlotLevelRow({ level, slot, t, updatePath, onRemove, removable }) {
   return (
-    <div className="grid grid-cols-[46px_minmax(0,1fr)_minmax(0,1fr)_36px] items-center gap-1.5 rounded-md border border-umber/25 bg-vellum/80 p-1.5 shadow-insetLine">
-      <div className="text-center font-ui text-[10px] font-black uppercase tracking-[0.08em] text-umber">
-        {t("panel.spells.levelShort")} {level}
+    <div className="rounded-md border border-umber/25 bg-vellum/80 p-2 shadow-insetLine">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <div className="font-ui text-[11px] font-black uppercase tracking-[0.08em] text-umber">
+          {t("panel.spells.levelShort")} {level}
+        </div>
+        <button
+          type="button"
+          onClick={onRemove}
+          disabled={!removable}
+          className="grid h-8 w-8 place-items-center rounded-md border border-oxblood/35 text-oxblood transition hover:bg-oxblood hover:text-vellum disabled:cursor-not-allowed disabled:opacity-35"
+          aria-label={t("panel.spells.removeSlotLevel")}
+          title={t("panel.spells.removeSlotLevel")}
+        >
+          <X className="h-3.5 w-3.5" aria-hidden="true" />
+        </button>
       </div>
-      <NumberStepper
-        label={`${t("panel.spells.levelShort")} ${level} ${t("panel.spells.now")}`}
-        min={0}
-        value={slot?.current}
-        onChange={(value) => updatePath(`spells.slots.${level}.current`, value)}
-        className="min-h-10 bg-white/70"
-        inputClassName="px-0 font-ui text-sm font-black"
-        buttonClassName="min-h-10"
-        buttonWidth="28px"
-      />
-      <NumberStepper
-        label={`${t("panel.spells.levelShort")} ${level} ${t("panel.spells.max")}`}
-        min={0}
-        value={slot?.max}
-        onChange={(value) => updatePath(`spells.slots.${level}.max`, value)}
-        className="min-h-10 bg-white/70"
-        inputClassName="px-0 font-ui text-sm font-black"
-        buttonClassName="min-h-10"
-        buttonWidth="28px"
-      />
-      <button
-        type="button"
-        onClick={onRemove}
-        disabled={!removable}
-        className="grid h-10 w-9 place-items-center rounded-md border border-oxblood/35 text-oxblood transition hover:bg-oxblood hover:text-vellum disabled:cursor-not-allowed disabled:opacity-35"
-        aria-label={t("panel.spells.removeSlotLevel")}
-        title={t("panel.spells.removeSlotLevel")}
-      >
-        <X className="h-3.5 w-3.5" aria-hidden="true" />
-      </button>
+      <div className="grid grid-cols-2 gap-2">
+        <label className="block min-w-0">
+          <span className="mb-1 block font-ui text-[10px] font-black uppercase tracking-[0.08em] text-umber">
+            {t("panel.spells.current")}
+          </span>
+          <NumberStepper
+            label={`${t("panel.spells.levelShort")} ${level} ${t("panel.spells.current")}`}
+            min={0}
+            value={slot?.current}
+            onChange={(value) => updatePath(`spells.slots.${level}.current`, value)}
+            className="min-h-10 bg-white/70"
+            inputClassName="px-0 font-ui text-sm font-black"
+            buttonClassName="min-h-10"
+            buttonWidth="30px"
+          />
+        </label>
+        <label className="block min-w-0">
+          <span className="mb-1 block font-ui text-[10px] font-black uppercase tracking-[0.08em] text-umber">
+            {t("panel.spells.total")}
+          </span>
+          <NumberStepper
+            label={`${t("panel.spells.levelShort")} ${level} ${t("panel.spells.total")}`}
+            min={0}
+            value={slot?.max}
+            onChange={(value) => updatePath(`spells.slots.${level}.max`, value)}
+            className="min-h-10 bg-white/70"
+            inputClassName="px-0 font-ui text-sm font-black"
+            buttonClassName="min-h-10"
+            buttonWidth="30px"
+          />
+        </label>
+      </div>
     </div>
   );
 }

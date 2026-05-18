@@ -41,9 +41,9 @@ function DicePanelContent({
           </button>
           {isDrawer && showClose ? (
             <button
-              type="button"
-              onClick={onClose}
-              className="inline-grid h-9 w-9 place-items-center rounded-md border border-ink/40 bg-white/40 text-ink shadow-insetLine transition hover:bg-white/60"
+            type="button"
+            onClick={onClose}
+              className="inline-grid h-9 w-9 place-items-center rounded-md border border-ink/70 bg-parchment text-ink shadow-insetLine transition hover:bg-vellum"
               aria-label={t("generic.close")}
             >
               <X className="h-4 w-4" aria-hidden="true" />
@@ -52,7 +52,7 @@ function DicePanelContent({
         </div>
       }
       className={isDrawer
-        ? "relative overflow-hidden border-oxblood/35 bg-gradient-to-b from-vellum/92 to-vellum/78 shadow-[0_0_0_1px_rgba(140,31,36,0.16),0_24px_60px_rgba(37,24,19,0.36)]"
+        ? "relative overflow-hidden !border-ink !bg-parchment shadow-[0_0_0_1px_rgba(140,31,36,0.28),0_26px_72px_rgba(37,24,19,0.48)]"
         : ""}
     >
       {isDrawer ? (
@@ -74,7 +74,7 @@ function DicePanelContent({
                     key={sides}
                     type="button"
                     onClick={() => dice.setSelectedSides(sides)}
-                    className={`min-h-14 rounded-md border font-ui text-sm font-black transition ${selected ? "border-oxblood bg-oxblood text-vellum" : "border-umber/30 bg-white/45 text-ink hover:bg-vellum"}`}
+                    className={`min-h-14 rounded-md border font-ui text-sm font-black transition ${selected ? "border-oxblood bg-oxblood text-vellum" : "border-umber/40 bg-vellum text-ink hover:bg-parchment"}`}
                   >
                     d{sides}
                   </button>
@@ -99,7 +99,7 @@ function DicePanelContent({
               <button
                 type="button"
                 onClick={() => dice.setCount(Math.max(1, dice.count - 1))}
-                className="grid h-11 place-items-center rounded-md border border-umber/30 bg-white/45 font-ui text-lg font-black"
+                className="grid h-11 place-items-center rounded-md border border-umber/35 bg-vellum font-ui text-lg font-black"
                 aria-label={t("dice.decreaseCount")}
               >
                 -
@@ -110,7 +110,7 @@ function DicePanelContent({
               <button
                 type="button"
                 onClick={() => dice.setCount(Math.min(MAX_DICE_COUNT, dice.count + 1))}
-                className="grid h-11 place-items-center rounded-md border border-umber/30 bg-white/45 font-ui text-lg font-black"
+                className="grid h-11 place-items-center rounded-md border border-umber/35 bg-vellum font-ui text-lg font-black"
                 aria-label={t("dice.increaseCount")}
               >
                 +
@@ -124,7 +124,7 @@ function DicePanelContent({
               <input
                 value={dice.rollLabel}
                 onChange={(event) => dice.setRollLabel(event.target.value)}
-                className="min-h-11 w-full rounded-md border border-umber/35 bg-white/65 px-3 py-2 text-base text-ink outline-none transition placeholder:text-umber/55 focus:border-slate focus:ring-2 focus:ring-slate/20 sm:text-sm"
+                className="min-h-11 w-full rounded-md border border-umber/35 bg-vellum px-3 py-2 text-base text-ink outline-none transition placeholder:text-umber/55 focus:border-slate focus:ring-2 focus:ring-slate/20 sm:text-sm"
                 placeholder={t("dice.rollLabelPlaceholder")}
               />
             </label>
@@ -134,7 +134,7 @@ function DicePanelContent({
                 type="number"
                 value={dice.modifier}
                 onChange={(event) => dice.setModifier(event.target.value)}
-                className="min-h-11 w-full rounded-md border border-umber/35 bg-white/65 px-3 py-2 text-center font-ui text-base font-black text-ink outline-none transition focus:border-slate focus:ring-2 focus:ring-slate/20"
+                className="min-h-11 w-full rounded-md border border-umber/35 bg-vellum px-3 py-2 text-center font-ui text-base font-black text-ink outline-none transition focus:border-slate focus:ring-2 focus:ring-slate/20"
               />
             </label>
           </div>
@@ -156,13 +156,13 @@ function DicePanelContent({
             }}
           />
 
-          <div className="rounded-md border border-umber/25 bg-white/25 p-3 font-ui text-xs leading-5 text-umber">
+          <div className="rounded-md border border-umber/30 bg-parchment p-3 font-ui text-xs leading-5 text-umber">
             <Smartphone className="mr-2 inline h-4 w-4 align-[-3px]" aria-hidden="true" />
             {t("dice.shakeRollHelp")}
           </div>
         </div>
 
-        <div className="min-w-0 rounded-md border border-umber/25 bg-white/25 p-4 shadow-[inset_0_0_0_1px_rgba(140,31,36,0.08)]">
+        <div className="min-w-0 rounded-md border border-umber/35 bg-vellum p-4 shadow-[inset_0_0_0_1px_rgba(140,31,36,0.12)]">
           <div className="mb-3 flex items-center justify-between gap-2">
             <div>
               <div className="font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">{t("dice.result")}</div>
@@ -202,7 +202,7 @@ function DicePanelContent({
         </div>
       </div>
 
-      <div className="mt-4 rounded-md border border-umber/20 bg-white/20 p-3">
+      <div className="mt-4 rounded-md border border-umber/25 bg-parchment p-3">
         <div className="mb-2 flex items-center justify-between gap-2">
           <div className="font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">{t("dice.rollHistory")}</div>
           <button
@@ -217,7 +217,7 @@ function DicePanelContent({
         {dice.history.length ? (
           <div className="scrollbar-thin flex max-w-full min-w-0 gap-2 overflow-x-auto pb-1">
             {dice.history.map((item) => (
-              <div key={item.id} className="min-w-32 rounded-md border border-umber/20 bg-vellum/70 px-3 py-2">
+              <div key={item.id} className="min-w-32 rounded-md border border-umber/25 bg-vellum px-3 py-2">
                 <div className="font-ui text-sm font-black">{formatRoll(item)}</div>
                 <div className="mt-1 truncate font-ui text-[11px] text-umber">{item.rolls.join(", ")}</div>
               </div>
@@ -314,7 +314,7 @@ export default function DicePanel({ t, isOpen, onClose, preset }) {
         onClose?.();
       }}
     >
-      <div className="absolute inset-0 bg-ink/60" aria-hidden="true" />
+      <div className="absolute inset-0 bg-ink/85 backdrop-blur-[2px]" aria-hidden="true" />
       <div className="relative z-10 max-h-[calc(100dvh-2rem)] w-full max-w-5xl overflow-y-auto rounded-md">
         <DicePanelContent
           t={t}

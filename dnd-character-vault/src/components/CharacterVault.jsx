@@ -163,7 +163,7 @@ export default function CharacterVault() {
                 />
                 <div className="grid min-w-0 gap-4 2xl:grid-cols-2">
                   <section id="inventory" className="min-w-0 scroll-mt-4">
-                    <InventoryPanel character={vault.character} updatePath={vault.updatePath} t={t} panelProps={editPanelProps} equipmentActions={{ toggleEquipped: vault.changeEquipment, useItem: vault.useEquipment }} />
+                    <InventoryPanel character={vault.character} updatePath={vault.updatePath} t={t} panelProps={{ ...editPanelProps, defaultOpen: true }} equipmentActions={{ toggleEquipped: vault.changeEquipment, useItem: vault.useEquipment }} />
                   </section>
                   <section id="spells" className="min-w-0 scroll-mt-4">
                     <SpellsPanel character={vault.character} updatePath={vault.updatePath} addItem={vault.addItem} removeItem={vault.removeItem} t={t} panelProps={editPanelProps} />

@@ -19,6 +19,7 @@ const STOP_SPIN_SPEED_SQ = 0.00018;
 const MIN_ROLL_DURATION_MS = 540;
 const MAX_ROLL_DURATION_MS = 2200;
 const LANDING_BLEND_MS = 160;
+const RESULT_FACE_CONFIDENCE = 0.82;
 const OUTWARD_Z = new THREE.Vector3(0, 0, 1);
 const TARGET_FACE_NORMAL = new THREE.Vector3(0, 1, 0);
 const BOTTOM_FACE_NORMAL = new THREE.Vector3(0, -1, 0);
@@ -572,6 +573,13 @@ function resolveResultFaceIndex(body) {
     : resolveTopFaceIndex(body.specs, body.group.quaternion);
 }
 
+function resultFaceConfidence(body, resultFaceIndex) {
+  const spec = body.specs[resultFaceIndex] || body.specs[0];
+  if (!spec) return 1;
+  const targetNormal = body.face.sides === 4 ? BOTTOM_FACE_NORMAL : TARGET_FACE_NORMAL;
+  return spec.normal.clone().applyQuaternion(body.group.quaternion).normalize().dot(targetNormal);
+}
+
 function landingTarget(body, resultFaceIndex) {
   const spec = body.specs[resultFaceIndex] || body.specs[0];
   const targetNormal = body.face.sides === 4 ? BOTTOM_FACE_NORMAL : TARGET_FACE_NORMAL;
@@ -966,7 +974,8 @@ export default function ThreeDiceStage({
               elapsed >= MAX_ROLL_DURATION_MS ||
               (
                 body.velocity.lengthSq() < STOP_LINEAR_SPEED_SQ &&
-                body.spin.lengthSq() < STOP_SPIN_SPEED_SQ
+                body.spin.lengthSq() < STOP_SPIN_SPEED_SQ &&
+                resultFaceConfidence(body, resolveResultFaceIndex(body)) >= RESULT_FACE_CONFIDENCE
               )
             )
           ) {

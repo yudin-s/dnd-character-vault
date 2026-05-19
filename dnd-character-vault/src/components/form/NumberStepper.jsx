@@ -29,7 +29,7 @@ export default function NumberStepper({
   className = "",
   inputClassName = "",
   buttonClassName = "",
-  buttonWidth = "42px",
+  buttonWidth = "36px",
   disabled = false,
   style,
   ...inputProps
@@ -51,7 +51,7 @@ export default function NumberStepper({
 
   return (
     <div
-      className={`grid min-h-11 grid-cols-[var(--stepper-button-width)_minmax(0,1fr)_var(--stepper-button-width)] overflow-hidden rounded-md border border-umber/35 bg-white/65 text-ink transition focus-within:border-slate focus-within:ring-2 focus-within:ring-slate/20 ${className}`.trim()}
+      className={`grid min-h-11 grid-cols-[var(--stepper-button-width)_minmax(4.25rem,1fr)_var(--stepper-button-width)] overflow-hidden rounded-md border border-umber/35 bg-white/65 text-ink transition focus-within:border-slate focus-within:ring-2 focus-within:ring-slate/20 ${className}`.trim()}
       style={{ "--stepper-button-width": buttonWidth, ...style }}
     >
       <button
@@ -61,7 +61,7 @@ export default function NumberStepper({
         className={`grid min-h-11 place-items-center border-r border-umber/20 bg-parchment text-ink transition hover:bg-vellum disabled:cursor-not-allowed disabled:opacity-35 ${buttonClassName}`.trim()}
         aria-label={controlLabel ? `${controlLabel} -` : "-"}
       >
-        <Minus className="h-4 w-4" aria-hidden="true" />
+        <Minus className="h-3.5 w-3.5" aria-hidden="true" />
       </button>
       <input
         id={id}
@@ -86,7 +86,7 @@ export default function NumberStepper({
         className={`grid min-h-11 place-items-center border-l border-umber/20 bg-parchment text-ink transition hover:bg-vellum disabled:cursor-not-allowed disabled:opacity-35 ${buttonClassName}`.trim()}
         aria-label={controlLabel ? `${controlLabel} +` : "+"}
       >
-        <Plus className="h-4 w-4" aria-hidden="true" />
+        <Plus className="h-3.5 w-3.5" aria-hidden="true" />
       </button>
     </div>
   );

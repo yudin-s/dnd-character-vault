@@ -71,14 +71,14 @@ export default function SpellsPanel({ character, updatePath, addItem, removeItem
       action={<button type="button" onClick={() => addItem("spells")} className="inline-flex min-h-10 items-center gap-1 rounded-md border border-ink bg-parchment px-2 font-ui text-xs font-black hover:bg-vellum"><Plus className="h-3.5 w-3.5" aria-hidden="true" />{t("panel.spells.add")}</button>}
       {...panelProps}
     >
-      <div className="grid gap-2.5">
-        <div className="grid gap-2.5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
-          <section className="rounded-md border border-umber/25 bg-white/25 p-2.5">
+      <div className="grid gap-3">
+        <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(460px,1.2fr)]">
+          <section className="rounded-md border border-umber/25 bg-white/25 p-3">
             <div className="mb-2 flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-oxblood" aria-hidden="true" />
               <div className="font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">{t("panel.spells.casting")}</div>
             </div>
-            <div className="grid gap-2.5 sm:grid-cols-2">
+            <div className="grid gap-3 lg:grid-cols-[minmax(180px,0.72fr)_minmax(180px,1fr)_minmax(150px,0.56fr)_minmax(150px,0.56fr)] xl:grid-cols-2">
               <label className="block">
                 <span className="mb-1 block font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">{t("panel.spells.ability")}</span>
                 <select
@@ -91,12 +91,12 @@ export default function SpellsPanel({ character, updatePath, addItem, removeItem
                 </select>
               </label>
               <Field label={t("panel.spells.focus")} value={spells.focus} onChange={(value) => updatePath("spells.focus", value)} />
-              <Field label={t("panel.spells.saveDc")} type="number" min={0} value={spells.saveDc} onChange={(value) => updatePath("spells.saveDc", value)} />
-              <Field label={t("panel.spells.attack")} type="number" signed value={spells.attackBonus} onChange={(value) => updatePath("spells.attackBonus", value)} />
+              <Field label={t("panel.spells.saveDc")} type="number" min={0} value={spells.saveDc} onChange={(value) => updatePath("spells.saveDc", value)} buttonWidth="34px" inputClassName="font-ui text-base font-black" />
+              <Field label={t("panel.spells.attack")} type="number" signed value={spells.attackBonus} onChange={(value) => updatePath("spells.attackBonus", value)} buttonWidth="34px" inputClassName="font-ui text-base font-black" />
             </div>
           </section>
 
-          <section className="rounded-md border border-umber/25 bg-parchment p-2.5">
+          <section className="rounded-md border border-umber/25 bg-parchment p-3">
             <div className="mb-2 flex items-center justify-between gap-2">
               <span className="inline-flex items-center gap-2 font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">
                 <Zap className="h-4 w-4 text-oxblood" aria-hidden="true" />
@@ -106,7 +106,7 @@ export default function SpellsPanel({ character, updatePath, addItem, removeItem
                 {t("panel.spells.summaryPrepared", { prepared: preparedCount, total: known.length })}
               </span>
             </div>
-            <div className="grid gap-1.5">
+            <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
               {visibleSlotLevels.map((level) => (
                 <SlotLevelRow
                   key={level}
@@ -122,7 +122,7 @@ export default function SpellsPanel({ character, updatePath, addItem, removeItem
                 type="button"
                 onClick={addSlotLevel}
                 disabled={!availableSlotLevels.length}
-                className="grid min-h-[52px] w-full place-items-center rounded-md border border-dashed border-umber/35 bg-vellum/70 text-oxblood shadow-insetLine transition hover:border-oxblood/55 hover:bg-vellum disabled:cursor-not-allowed disabled:opacity-45"
+                className="grid min-h-[74px] w-full place-items-center rounded-md border border-dashed border-umber/35 bg-vellum/70 text-oxblood shadow-insetLine transition hover:border-oxblood/55 hover:bg-vellum disabled:cursor-not-allowed disabled:opacity-45"
                 aria-label={t("panel.spells.addSlotLevel")}
                 title={t("panel.spells.addSlotLevel")}
               >
@@ -155,7 +155,7 @@ export default function SpellsPanel({ character, updatePath, addItem, removeItem
 
 function SlotLevelRow({ level, slot, t, updatePath, onRemove, removable }) {
   return (
-    <div className="rounded-md border border-umber/25 bg-vellum/80 p-2 shadow-insetLine">
+    <div className="rounded-md border border-umber/25 bg-vellum/80 p-2.5 shadow-insetLine">
       <div className="mb-2 flex items-center justify-between gap-2">
         <div className="font-ui text-[11px] font-black uppercase tracking-[0.08em] text-umber">
           {t("panel.spells.levelShort")} {level}
@@ -184,7 +184,7 @@ function SlotLevelRow({ level, slot, t, updatePath, onRemove, removable }) {
             className="min-h-10 bg-white/70"
             inputClassName="px-0 font-ui text-sm font-black"
             buttonClassName="min-h-10"
-            buttonWidth="30px"
+            buttonWidth="28px"
           />
         </label>
         <label className="block min-w-0">
@@ -199,7 +199,7 @@ function SlotLevelRow({ level, slot, t, updatePath, onRemove, removable }) {
             className="min-h-10 bg-white/70"
             inputClassName="px-0 font-ui text-sm font-black"
             buttonClassName="min-h-10"
-            buttonWidth="30px"
+            buttonWidth="28px"
           />
         </label>
       </div>
@@ -212,7 +212,7 @@ function SpellCard({ spell, index, updatePath, removeItem, t }) {
 
   return (
     <article className="rounded-md border border-umber/25 bg-vellum shadow-insetLine">
-      <div className="grid gap-2 p-3 md:grid-cols-[108px_minmax(0,1fr)_132px_44px] md:items-end">
+      <div className="grid gap-3 p-3 lg:grid-cols-[116px_minmax(220px,1fr)_150px_44px] lg:items-end">
         <SelectField
           label={t("panel.spells.level")}
           value={String(spell.level ?? 0)}

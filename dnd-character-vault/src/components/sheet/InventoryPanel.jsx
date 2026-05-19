@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Coins, Minus, PackagePlus, Plus, Shield, ShieldCheck, Swords, Trash2, Wand2 } from "lucide-react";
+import { Backpack, ChevronDown, Coins, FlaskConical, Minus, PackagePlus, Plus, Shield, ShieldCheck, Shirt, Swords, Trash2, Wand2 } from "lucide-react";
 import { useState } from "react";
 import TextArea from "@/components/form/TextArea";
 import { DICE_TYPES } from "@/lib/dice";
@@ -36,6 +36,14 @@ const COIN_TONES = {
 
 const INVENTORY_FILTERS = ["all", "weapon", "armor", "shield", "potion", "gear"];
 const GENERIC_ITEM_TYPES = ["gear", "tool", "treasure"];
+const INVENTORY_FILTER_ICONS = {
+  all: Backpack,
+  weapon: Swords,
+  armor: Shirt,
+  shield: Shield,
+  potion: FlaskConical,
+  gear: PackagePlus
+};
 
 function normalizeQuantity(value) {
   const parsed = Number(value);
@@ -266,26 +274,31 @@ export default function InventoryPanel({ character, updatePath, t, panelProps = 
           </button>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+        <div className="grid grid-cols-6 gap-2">
           {INVENTORY_FILTERS.map((type) => {
             const active = activeFilter === type;
+            const Icon = INVENTORY_FILTER_ICONS[type] || PackagePlus;
             const count = type === "all"
               ? items.length
               : items.filter((item) => matchesInventoryFilter(item, type)).length;
+            const label = t(type === "all" ? "panel.inventory.filter.all" : `panel.inventory.add.${type}`);
             return (
               <button
                 key={type}
                 type="button"
                 onClick={() => setActiveFilter(type)}
-                className={`inline-flex min-h-11 min-w-0 items-center justify-between gap-1 rounded-md border px-2 font-ui text-[11px] font-black transition ${
+                title={label}
+                className={`inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-md border px-2 font-ui text-[11px] font-black transition sm:justify-between ${
                   active
                     ? "border-oxblood bg-oxblood text-vellum"
                     : "border-ink bg-parchment text-ink hover:bg-vellum"
                 }`}
                 aria-pressed={active}
+                aria-label={label}
               >
-                <span className="min-w-0 truncate">{t(type === "all" ? "panel.inventory.filter.all" : `panel.inventory.add.${type}`)}</span>
-                <span className={`grid h-6 min-w-6 place-items-center rounded-full px-1 text-[10px] ${active ? "bg-vellum/20 text-vellum" : "bg-umber/10 text-umber"}`}>
+                <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <span className="hidden min-w-0 truncate md:block">{label}</span>
+                <span className={`grid h-6 min-w-6 shrink-0 place-items-center rounded-full px-1 text-[10px] ${active ? "bg-vellum/20 text-vellum" : "bg-umber/10 text-umber"}`}>
                   {count}
                 </span>
               </button>
@@ -367,8 +380,8 @@ function CoinPouch({ coins, updateCoin, t }) {
                 }`}
                 aria-label={t(`panel.inventory.coinName.${coin}`)}
               >
-                <span className={`mx-auto grid h-8 w-8 place-items-center rounded-full border text-[10px] font-black uppercase shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_2px_4px_rgba(37,24,19,0.18)] sm:h-10 sm:w-10 sm:text-xs ${COIN_TONES[coin]}`}>
-                  {t(`panel.inventory.coin.${coin}`)}
+                <span className={`mx-auto grid h-8 w-8 place-items-center rounded-full border shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_2px_4px_rgba(37,24,19,0.18)] sm:h-10 sm:w-10 ${COIN_TONES[coin]}`}>
+                  <Coins className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
                 </span>
                 <span className="mt-1 block truncate font-ui text-[9px] font-black uppercase tracking-[0.05em] text-umber sm:text-[10px]">
                   {amount > 0 ? amount : t(`panel.inventory.coin.${coin}`)}
@@ -393,7 +406,7 @@ function CoinPouch({ coins, updateCoin, t }) {
             onChange={(value) => updateCoin(activeCoin, value)}
             className="h-12 bg-white/70"
             inputClassName="font-ui text-lg font-black"
-            buttonWidth="38px"
+            buttonWidth="34px"
             aria-label={t(`panel.inventory.coinName.${activeCoin}`)}
           />
         </div>

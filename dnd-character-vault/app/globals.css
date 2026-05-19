@@ -62,38 +62,6 @@ button {
   overflow: hidden;
 }
 
-.fantasy-frame::before,
-.fantasy-frame::after {
-  position: absolute;
-  top: 8px;
-  bottom: 8px;
-  width: 36px;
-  display: grid;
-  place-items: center;
-  color: rgba(140, 31, 36, 0.34);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.15rem;
-  letter-spacing: 0;
-  pointer-events: none;
-}
-
-.fantasy-frame::before {
-  left: 6px;
-  content: "✦";
-}
-
-.fantasy-frame::after {
-  right: 6px;
-  content: "✦";
-}
-
-@media (max-width: 640px) {
-  .fantasy-frame::before,
-  .fantasy-frame::after {
-    display: none;
-  }
-}
-
 .ruled-panel {
   background-image:
     linear-gradient(rgba(95, 67, 47, 0.12) 1px, transparent 1px),

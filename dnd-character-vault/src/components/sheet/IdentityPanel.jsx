@@ -1,8 +1,13 @@
 import Field from "@/components/form/Field";
 import Panel from "@/components/form/Panel";
 
+const ALIGNMENTS = ["", "lg", "ng", "cg", "ln", "n", "cn", "le", "ne", "ce"];
+
 export default function IdentityPanel({ character, updatePath, t, panelProps = {} }) {
   const identity = character.identity;
+  const alignmentOptions = identity.alignment && !ALIGNMENTS.includes(identity.alignment)
+    ? ["", identity.alignment, ...ALIGNMENTS.filter(Boolean)]
+    : ALIGNMENTS;
   return (
     <Panel title={t("panel.character.title")} kicker={t("panel.character.kicker")} {...panelProps}>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -13,7 +18,22 @@ export default function IdentityPanel({ character, updatePath, t, panelProps = {
         <Field label={t("panel.identity.subclass")} value={identity.subclass} onChange={(value) => updatePath("identity.subclass", value)} />
         <Field label={t("panel.identity.species")} value={identity.species} onChange={(value) => updatePath("identity.species", value)} />
         <Field label={t("panel.identity.background")} value={identity.background} onChange={(value) => updatePath("identity.background", value)} />
-        <Field label={t("panel.identity.alignment")} value={identity.alignment} onChange={(value) => updatePath("identity.alignment", value)} />
+        <label className="block text-sm">
+          <span className="mb-1 block font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">
+            {t("panel.identity.alignment")}
+          </span>
+          <select
+            value={identity.alignment || ""}
+            onChange={(event) => updatePath("identity.alignment", event.target.value)}
+            className="min-h-11 w-full rounded-md border border-umber/35 bg-white/65 px-3 py-2 text-base text-ink outline-none transition focus:border-slate focus:ring-2 focus:ring-slate/20 sm:text-sm"
+          >
+            {alignmentOptions.map((alignment) => (
+              <option key={alignment || "none"} value={alignment}>
+                {alignment ? (ALIGNMENTS.includes(alignment) ? t(`alignment.${alignment}`) : alignment) : t("generic.none")}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
     </Panel>
   );

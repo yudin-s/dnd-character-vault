@@ -1,9 +1,18 @@
 {
-  "name": "dnd-character-vault",
+  "name": "quest-ledger",
   "version": "0.1.0",
   "private": true,
+  "description": "Local-first DnD 5e-compatible character sheet with offline PWA support.",
   "license": "MIT",
   "author": "Sergey Yudin",
+  "homepage": "https://yudin-s.github.io/dnd-character-vault/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yudin-s/dnd-character-vault.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yudin-s/dnd-character-vault/issues"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

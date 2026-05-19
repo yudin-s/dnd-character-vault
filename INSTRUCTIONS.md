@@ -1,16 +1,18 @@
-# Quest Ledger
+# Quest Ledger Developer Notes
 
-Local-first DnD 5e-compatible character sheet with local autosave, local revision history, backup import/export, dice rolling, and installable PWA support for offline play.
+Quest Ledger is a local-first DnD 5e-compatible character sheet with local autosave, revision history, backup import/export, 3D dice rolling, and installable PWA support for offline play.
 
 ## Project Layout
 
 - `dnd-character-vault/` - all application code.
 - `dnd-character-vault/app/` - Next.js app router entry points.
 - `dnd-character-vault/src/components/` - React UI components.
-- `dnd-character-vault/src/hooks/` - browser hooks for local state and PWA install.
-- `dnd-character-vault/src/lib/` - character schema, DnD 5e math, and local backup storage.
-- `dnd-character-vault/public/` - PWA manifest, service worker, and app icon.
+- `dnd-character-vault/src/hooks/` - browser hooks for local state, dice rolling, locale, and PWA install.
+- `dnd-character-vault/src/lib/` - character schema, DnD 5e math, dice helpers, and local backup storage.
+- `dnd-character-vault/public/` - PWA manifest, service worker, app icons, and dice texture assets.
 - `dnd-character-vault/src/lib/i18n.js` - English/Russian UI dictionaries.
+- `docs/product-hunt/` - Product Hunt launch copy and gallery assets.
+- `scripts/capture-product-hunt-gallery.mjs` - headless Chrome capture script for launch screenshots.
 
 ## Run Locally
 
@@ -29,7 +31,7 @@ npm run dev
 
 Then open the URL printed by Next.js, usually `http://localhost:3000`.
 
-## Deploy To GitHub Pages
+## Build
 
 The app is configured with `output: "export"` and can be published as static files.
 
@@ -38,15 +40,21 @@ cd dnd-character-vault
 npm run build
 ```
 
-Publish `dnd-character-vault/out/`.
+Static files are exported to `dnd-character-vault/out/`.
 
 For a repository subpath on GitHub Pages, build with a base path:
 
 ```bash
-NEXT_PUBLIC_BASE_PATH=/repository-name npm run build
+NEXT_PUBLIC_BASE_PATH=/dnd-character-vault npm run build
 ```
 
-The app uses only browser APIs and stores data in the user's browser through `localStorage`.
+## Deploy To GitHub Pages
+
+The repository includes `.github/workflows/pages.yml`. It installs dependencies with `npm ci`, builds the static app with `NEXT_PUBLIC_BASE_PATH=/dnd-character-vault`, and deploys `dnd-character-vault/out`.
+
+## Dice Assets
+
+`@3d-dice/dice-box-threejs` requires its texture assets to be available as static files. The required `.webp` textures are checked into `dnd-character-vault/public/textures/` so the dice renderer works in static builds and on GitHub Pages.
 
 ## Install As App
 
@@ -66,4 +74,4 @@ No data is sent to a server.
 
 ## Legal Note
 
-This is an unofficial 5e-compatible character sheet. It does not include copyrighted rule text, third-party art, or official Dungeons & Dragons branding assets.
+This is an unofficial 5e-compatible character sheet. It does not include official Dungeons & Dragons branding assets, third-party art, or copyrighted rulebook text.

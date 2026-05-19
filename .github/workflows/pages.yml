@@ -1,4 +1,4 @@
-name: Deploy DnD Character Vault
+name: Deploy Quest Ledger
 
 on:
   push:

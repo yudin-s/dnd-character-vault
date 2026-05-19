@@ -10,14 +10,15 @@ const ARENA_TOP = 1.68;
 const ORTHO_VIEW_HEIGHT = 2.92;
 const SINGLE_DIE_SCALE = 0.66;
 const GRAVITY = 14;
-const FRICTION_AIR = 0.996;
-const FRICTION_FLOOR = 0.88;
+const FRICTION_AIR = 0.994;
+const FRICTION_FLOOR = 0.82;
 const BOUNCE_DAMPING = 0.36;
-const SPIN_DAMPING = 0.985;
-const STOP_LINEAR_SPEED_SQ = 0.00011;
-const STOP_SPIN_SPEED_SQ = 0.00011;
-const MIN_ROLL_DURATION_MS = 620;
-const MAX_ROLL_DURATION_MS = 1800;
+const SPIN_DAMPING = 0.972;
+const STOP_LINEAR_SPEED_SQ = 0.00018;
+const STOP_SPIN_SPEED_SQ = 0.00018;
+const MIN_ROLL_DURATION_MS = 540;
+const MAX_ROLL_DURATION_MS = 2200;
+const LANDING_BLEND_MS = 160;
 const OUTWARD_Z = new THREE.Vector3(0, 0, 1);
 const TARGET_FACE_NORMAL = new THREE.Vector3(0, 1, 0);
 const BOTTOM_FACE_NORMAL = new THREE.Vector3(0, -1, 0);
@@ -334,33 +335,33 @@ function numberTexture(value, emphasis = false, palette = DICE_PALETTES[20]) {
   fill.addColorStop(0.54, edge);
   fill.addColorStop(1, glow);
 
-  context.font = `900 ${emphasis ? 204 : 160}px ui-sans-serif, system-ui, sans-serif`;
-  context.shadowColor = canvasRgba(glow, emphasis ? 0.92 : 0.7);
-  context.shadowBlur = emphasis ? 44 : 28;
-  context.lineWidth = emphasis ? 44 : 30;
-  context.strokeStyle = canvasRgba(glow, emphasis ? 0.46 : 0.34);
+  context.font = `900 ${emphasis ? 204 : 178}px ui-sans-serif, system-ui, sans-serif`;
+  context.shadowColor = canvasRgba(glow, emphasis ? 0.92 : 0.86);
+  context.shadowBlur = emphasis ? 44 : 34;
+  context.lineWidth = emphasis ? 44 : 34;
+  context.strokeStyle = canvasRgba(glow, emphasis ? 0.46 : 0.5);
   context.strokeText(text, x, y);
   context.strokeText(text, x, y);
 
   context.shadowBlur = 0;
-  context.lineWidth = emphasis ? 34 : 24;
+  context.lineWidth = emphasis ? 34 : 28;
   context.strokeStyle = "rgba(13, 6, 18, 0.98)";
   context.strokeText(text, x, y);
 
-  context.shadowColor = canvasRgba(glow, emphasis ? 0.95 : 0.78);
-  context.shadowBlur = emphasis ? 18 : 12;
-  context.lineWidth = emphasis ? 13 : 9;
-  context.strokeStyle = canvasRgba(glow, emphasis ? 0.95 : 0.72);
+  context.shadowColor = canvasRgba(glow, emphasis ? 0.95 : 0.9);
+  context.shadowBlur = emphasis ? 18 : 14;
+  context.lineWidth = emphasis ? 13 : 11;
+  context.strokeStyle = canvasRgba(glow, emphasis ? 0.95 : 0.84);
   context.strokeText(text, x, y);
 
-  context.shadowColor = canvasRgba(glow, emphasis ? 0.74 : 0.48);
-  context.shadowBlur = emphasis ? 12 : 6;
+  context.shadowColor = canvasRgba(glow, emphasis ? 0.74 : 0.62);
+  context.shadowBlur = emphasis ? 12 : 8;
   context.fillStyle = fill;
   context.fillText(text, x, y);
 
   context.shadowBlur = 0;
-  context.lineWidth = emphasis ? 3 : 2;
-  context.strokeStyle = canvasRgba("#fffef7", emphasis ? 0.92 : 0.66);
+  context.lineWidth = emphasis ? 3 : 2.4;
+  context.strokeStyle = canvasRgba("#fffef7", emphasis ? 0.92 : 0.8);
   context.strokeText(text, x, y);
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
@@ -455,7 +456,7 @@ function createFaceLabel(value, sides, spec, palette, emphasis = false) {
   const material = new THREE.MeshBasicMaterial({
     map: texture,
     transparent: true,
-    opacity: emphasis ? 1 : 0.86,
+    opacity: emphasis ? 1 : 0.98,
     depthWrite: false,
     toneMapped: false,
     polygonOffset: true,
@@ -464,7 +465,7 @@ function createFaceLabel(value, sides, spec, palette, emphasis = false) {
   });
   const label = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), material);
   label.scale.set(size, size, size);
-  label.position.copy(spec.normal).multiplyScalar(spec.distance + (emphasis ? 0.026 : 0.018));
+  label.position.copy(spec.normal).multiplyScalar(spec.distance + (emphasis ? 0.026 : 0.022));
   label.quaternion.setFromUnitVectors(OUTWARD_Z, spec.normal);
   label.renderOrder = emphasis ? 10 : 8;
   label.userData.diceLabel = {
@@ -489,11 +490,11 @@ function updateFaceLabel(label, value, emphasis) {
   data.emphasis = emphasis;
   label.material.map?.dispose?.();
   label.material.map = numberTexture(data.value, emphasis, data.palette);
-  label.material.opacity = emphasis ? 1 : 0.86;
+  label.material.opacity = emphasis ? 1 : 0.98;
   label.material.needsUpdate = true;
   const size = labelSize(data.sides, emphasis);
   label.scale.set(size, size, size);
-  label.position.copy(data.normal).multiplyScalar(data.distance + (emphasis ? 0.026 : 0.018));
+  label.position.copy(data.normal).multiplyScalar(data.distance + (emphasis ? 0.026 : 0.022));
   label.renderOrder = emphasis ? 10 : 8;
 }
 
@@ -563,6 +564,64 @@ function snapBodyToResultFace(body, resultFaceIndex) {
   const align = new THREE.Quaternion().setFromUnitVectors(worldNormal, targetNormal);
   body.group.quaternion.premultiply(align);
   body.group.position.y = FLOOR_Y + supportDistance(body);
+}
+
+function resolveResultFaceIndex(body) {
+  return body.face.sides === 4
+    ? resolveBottomFaceIndex(body.specs, body.group.quaternion)
+    : resolveTopFaceIndex(body.specs, body.group.quaternion);
+}
+
+function landingTarget(body, resultFaceIndex) {
+  const spec = body.specs[resultFaceIndex] || body.specs[0];
+  const targetNormal = body.face.sides === 4 ? BOTTOM_FACE_NORMAL : TARGET_FACE_NORMAL;
+  const worldNormal = spec.normal.clone().applyQuaternion(body.group.quaternion).normalize();
+  const align = new THREE.Quaternion().setFromUnitVectors(worldNormal, targetNormal);
+  const quaternion = body.group.quaternion.clone().premultiply(align);
+  const probe = { ...body, group: { quaternion } };
+  return {
+    quaternion,
+    y: FLOOR_Y + supportDistance(probe)
+  };
+}
+
+function easeOutCubic(value) {
+  return 1 - Math.pow(1 - value, 3);
+}
+
+function startLandingBlend(body, time, face = body.face) {
+  if (body.landingBlend || body.hasSettled) return;
+  const resultFaceIndex = resolveResultFaceIndex(body);
+  const target = landingTarget(body, resultFaceIndex);
+  body.face = { ...body.face, ...face };
+  body.velocity.set(0, 0, 0);
+  body.spin.set(0, 0, 0);
+  body.landingBlend = {
+    startedAt: time,
+    startY: body.group.position.y,
+    startQuaternion: body.group.quaternion.clone(),
+    resultFaceIndex,
+    targetQuaternion: target.quaternion,
+    targetY: target.y
+  };
+}
+
+function updateLandingBlend(body, time) {
+  if (!body.landingBlend) return;
+  const blend = body.landingBlend;
+  const progress = Math.min(1, Math.max(0, (time - blend.startedAt) / LANDING_BLEND_MS));
+  const eased = easeOutCubic(progress);
+  body.group.quaternion.slerpQuaternions(blend.startQuaternion, blend.targetQuaternion, eased);
+  body.group.position.y = THREE.MathUtils.lerp(blend.startY, blend.targetY, eased);
+  if (progress < 1) return;
+
+  body.group.quaternion.copy(blend.targetQuaternion);
+  body.group.position.y = blend.targetY;
+  const resultValue = setResultFaceLabel(body, blend.resultFaceIndex);
+  body.face = { ...body.face, value: resultValue };
+  body.finalPosition = body.group.position.clone();
+  body.landingBlend = null;
+  body.hasSettled = true;
 }
 
 function glowTexture(hex) {
@@ -710,7 +769,8 @@ function createDie(face, index, total, isRolling) {
     visualScale,
     finalPosition,
     specs,
-    hasSettled: !isRolling
+    hasSettled: !isRolling,
+    landingBlend: null
   };
 
   if (!isRolling) {
@@ -732,46 +792,50 @@ function clearBodies(scene, bodies) {
 }
 
 function updateLanding(body, face = body.face) {
-  const resultFaceIndex = body.face.sides === 4
-    ? resolveBottomFaceIndex(body.specs, body.group.quaternion)
-    : resolveTopFaceIndex(body.specs, body.group.quaternion);
+  const resultFaceIndex = resolveResultFaceIndex(body);
   snapBodyToResultFace(body, resultFaceIndex);
   const resultValue = setResultFaceLabel(body, resultFaceIndex);
   body.face = { ...body.face, ...face, value: resultValue };
   body.finalPosition = body.group.position.clone();
   body.spin.set(0, 0, 0);
   body.velocity.set(0, 0, 0);
+  body.landingBlend = null;
   body.hasSettled = true;
 }
 
-function resolveCollisions(bodies) {
-  for (let leftIndex = 0; leftIndex < bodies.length; leftIndex += 1) {
-    for (let rightIndex = leftIndex + 1; rightIndex < bodies.length; rightIndex += 1) {
-      const left = bodies[leftIndex];
-      const right = bodies[rightIndex];
-      const delta = new THREE.Vector3(
-        right.group.position.x - left.group.position.x,
-        0,
-        right.group.position.z - left.group.position.z
-      );
-      const rawDistance = delta.length();
-      if (rawDistance < 0.001) {
-        const angle = (leftIndex / Math.max(1, bodies.length)) * Math.PI * 2;
-        delta.set(Math.cos(angle), 0, Math.sin(angle));
-      }
-      const distance = Math.max(delta.length(), 0.001);
-      const minDistance = left.radius + right.radius;
-      if (distance >= minDistance) continue;
-      const normal = delta.multiplyScalar(1 / distance);
-      const overlap = (minDistance - distance) * 0.36;
-      left.group.position.addScaledVector(normal, -overlap);
-      right.group.position.addScaledVector(normal, overlap);
-      const relativeVelocity = right.velocity.clone().sub(left.velocity);
-      const impact = relativeVelocity.dot(normal);
-      if (impact < 0) {
-        const impulse = normal.multiplyScalar(-impact * 0.64);
-        left.velocity.addScaledVector(impulse, -0.5);
-        right.velocity.addScaledVector(impulse, 0.5);
+function resolveCollisions(bodies, iterations = 3) {
+  for (let pass = 0; pass < iterations; pass += 1) {
+    for (let leftIndex = 0; leftIndex < bodies.length; leftIndex += 1) {
+      for (let rightIndex = leftIndex + 1; rightIndex < bodies.length; rightIndex += 1) {
+        const left = bodies[leftIndex];
+        const right = bodies[rightIndex];
+        if (left.hasSettled && right.hasSettled) continue;
+        const verticalDistance = Math.abs(right.group.position.y - left.group.position.y);
+        if (verticalDistance > (left.radius + right.radius) * 0.75) continue;
+        const delta = new THREE.Vector3(
+          right.group.position.x - left.group.position.x,
+          0,
+          right.group.position.z - left.group.position.z
+        );
+        const rawDistance = delta.length();
+        if (rawDistance < 0.001) {
+          const angle = ((leftIndex + pass * 0.37) / Math.max(1, bodies.length)) * Math.PI * 2;
+          delta.set(Math.cos(angle), 0, Math.sin(angle));
+        }
+        const distance = Math.max(delta.length(), 0.001);
+        const minDistance = (left.radius + right.radius) * 0.94;
+        if (distance >= minDistance) continue;
+        const normal = delta.multiplyScalar(1 / distance);
+        const overlap = (minDistance - distance) * 0.5;
+        if (!left.hasSettled) left.group.position.addScaledVector(normal, -overlap);
+        if (!right.hasSettled) right.group.position.addScaledVector(normal, overlap);
+        const relativeVelocity = right.velocity.clone().sub(left.velocity);
+        const impact = relativeVelocity.dot(normal);
+        if (impact < 0) {
+          const impulse = normal.multiplyScalar(-impact * 0.48);
+          if (!left.hasSettled) left.velocity.addScaledVector(impulse, -0.5);
+          if (!right.hasSettled) right.velocity.addScaledVector(impulse, 0.5);
+        }
       }
     }
   }
@@ -859,7 +923,9 @@ export default function ThreeDiceStage({
       if (rollingRef.current) {
         const elapsed = time - rollStartedAtRef.current;
         bodies.forEach((body) => {
+          updateLandingBlend(body, time);
           if (body.hasSettled) return;
+          if (body.landingBlend) return;
           body.velocity.y -= GRAVITY * dt;
           body.group.position.addScaledVector(body.velocity, dt);
           body.group.rotation.x += body.spin.x * dt;
@@ -904,16 +970,18 @@ export default function ThreeDiceStage({
               )
             )
           ) {
-            updateLanding(body);
+            startLandingBlend(body, time);
           }
         });
         resolveCollisions(bodies);
       } else {
         bodies.forEach((body) => {
+          updateLandingBlend(body, time);
+          if (body.hasSettled || body.landingBlend) return;
           body.spin.multiplyScalar(SPIN_DAMPING);
           body.velocity.multiplyScalar(0.92);
           if (!body.hasSettled && body.spin.lengthSq() < STOP_SPIN_SPEED_SQ && body.velocity.lengthSq() < STOP_LINEAR_SPEED_SQ) {
-            updateLanding(body);
+            startLandingBlend(body, time);
           }
           const xLimit = ARENA_X - body.radius;
           const zLimit = ARENA_Z - body.radius;
@@ -969,8 +1037,12 @@ export default function ThreeDiceStage({
       bodiesRef.current.forEach((body, index) => {
         const face = normalizedFaces[index];
         if (face) {
-          body.face = { ...body.face, ...face };
-          body.hasSettled = false;
+          if (body.hasSettled) {
+            body.face = { ...body.face, ...face };
+            setResultFaceLabel(body, Math.max(0, Math.min(body.specs.length - 1, Number(face.value) - 1)));
+          } else {
+            body.face = { ...body.face, ...face };
+          }
         }
       });
     }

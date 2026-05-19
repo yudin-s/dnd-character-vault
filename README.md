@@ -1,20 +1,12 @@
 # Quest Ledger
 
-Quest Ledger is a local-first DnD 5e-compatible character sheet for live tabletop sessions. It keeps the parts you touch during play close at hand: HP, resources, spells, inventory, dice, history snapshots, and portable backups.
+Quest Ledger is a DnD 5e character sheet built around live tabletop moments. It keeps the parts you touch during play in one place: HP, resources, spells, inventory, dice, history snapshots, and portable backups.
 
-The app runs entirely in the browser. Characters are saved locally, can be exported as JSON, and the site can be installed as a PWA on a phone for offline play after the first load.
+The app runs in your browser. Save the character on the current device, export it as JSON, and install it on a phone for quick access at the table after the first load.
 
 ## Live App
 
 https://yudin-s.github.io/dnd-character-vault/
-
-## Screenshots
-
-![Quest Ledger session dashboard](docs/product-hunt/assets/gallery-01-hero.png)
-
-| Dice roller | Spellbook |
-| --- | --- |
-| ![Quest Ledger dice roller](docs/product-hunt/assets/gallery-03-dice.png) | ![Quest Ledger spellbook](docs/product-hunt/assets/gallery-04-spellbook.png) |
 
 ## Features
 
@@ -23,34 +15,36 @@ https://yudin-s.github.io/dnd-character-vault/
 - Built-in 3D dice roller powered by `@3d-dice/dice-box-threejs`.
 - Spellbook with slots, prepared spells, filters, components, casting details, and notes.
 - Inventory with equipped gear, weapons, armor, shields, coins, item counters, and weapon rolls.
-- Local autosave history with restore points.
-- JSON export/import for portable backups.
-- Installable PWA/SPA for phone use and offline sessions.
+- Automatic checkpoints after key moments and a restore point list for recovery.
+- JSON export/import for session handoffs and portable backups.
+- Installable app shell for phone use during a game night.
 - No account, backend, or cloud sync required.
 - English and Russian UI dictionaries.
 
-## Local-First Data
+## Storage and Privacy
 
-Quest Ledger stores data in the user's browser through `localStorage`.
+Quest Ledger stores data in the user's browser through `localStorage` and keeps app data available for repeat sessions.
 
-Saved locally:
+What stays on the device:
 
 - Current character sheet.
 - Local history snapshots.
 - Selected UI language.
 - App shell cache through the service worker.
 
-Not sent anywhere:
+What is not sent:
 
 - Character data.
 - Dice history.
 - Backups.
 
-Browser storage can still be cleared by the user or browser. Export JSON backups before switching devices or clearing site data.
+Browser storage can be cleared by the user or browser settings. Export a JSON backup before switching devices or ending a session.
 
 ## Install As App
 
 Open the live site over HTTPS, then install it from the browser menu or the in-app install prompt. After the first successful load, the service worker caches the app shell so it can reopen offline.
+
+For practical prep, export your character before a session and re-import after setup if you want a clean handoff.
 
 ## Tech Stack
 
@@ -94,14 +88,6 @@ NEXT_PUBLIC_BASE_PATH=/dnd-character-vault npm run build
 - `dnd-character-vault/src/hooks/` - local state, dice, locale, and PWA hooks.
 - `dnd-character-vault/src/lib/` - character schema, 5e math, dice helpers, and storage.
 - `dnd-character-vault/public/` - PWA manifest, service worker, icons, and dice textures.
-- `docs/product-hunt/` - launch copy, gallery screenshots, and Product Hunt assets.
-- `scripts/` - screenshot capture tooling for launch assets.
-
-## Product Hunt
-
-Launch copy and asset checklist live in [docs/product-hunt/launch-kit.md](docs/product-hunt/launch-kit.md).
-
-Gallery assets are documented in [docs/product-hunt/assets/README.md](docs/product-hunt/assets/README.md).
 
 ## Legal
 

@@ -11,8 +11,6 @@ Quest Ledger is a local-first DnD 5e-compatible character sheet with local autos
 - `dnd-character-vault/src/lib/` - character schema, DnD 5e math, dice helpers, and local backup storage.
 - `dnd-character-vault/public/` - PWA manifest, service worker, app icons, and dice texture assets.
 - `dnd-character-vault/src/lib/i18n.js` - English/Russian UI dictionaries.
-- `docs/product-hunt/` - Product Hunt launch copy and gallery assets.
-- `scripts/capture-product-hunt-gallery.mjs` - headless Chrome capture script for launch screenshots.
 
 ## Run Locally
 

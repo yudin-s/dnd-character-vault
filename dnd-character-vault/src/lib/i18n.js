@@ -6,6 +6,7 @@ export const dictionaries = {
   en: {
     "header.tagline": "Browser-only 5e sheet",
     "header.title": "5e Character Vault",
+    "header.level": "Level {level}",
     "header.actions.snapshot": "Snapshot",
     "header.actions.export": "Export",
     "header.actions.import": "Import",
@@ -370,6 +371,7 @@ export const dictionaries = {
   ru: {
     "header.tagline": "Лист персонажа 5e для браузера",
     "header.title": "Хранилище персонажа 5e",
+    "header.level": "Уровень {level}",
     "header.actions.snapshot": "Снимок",
     "header.actions.export": "Экспорт",
     "header.actions.import": "Импорт",

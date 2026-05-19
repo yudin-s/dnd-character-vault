@@ -1,6 +1,6 @@
 import { createEquipmentItem, normalizeEquipmentItem } from "./equipment";
 
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 
 export const ABILITY_KEYS = [
   "strength",
@@ -33,6 +33,7 @@ export const SKILL_DEFINITIONS = {
 };
 
 const DEFAULT_ABILITY_SCORE = 10;
+const EXPERIENCE_RESOURCE_NAME = "Experience";
 
 function createId(prefix = "char") {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
@@ -75,6 +76,13 @@ function createSpellSlots() {
   );
 }
 
+function createDefaultResources() {
+  return [
+    { id: createId("resource"), name: "Hit Dice", current: "", max: "", reset: "Long rest" },
+    { id: createId("resource"), name: EXPERIENCE_RESOURCE_NAME, current: "", max: "", reset: "" }
+  ];
+}
+
 export function createDefaultCharacter() {
   return {
     schemaVersion: SCHEMA_VERSION,
@@ -112,9 +120,7 @@ export function createDefaultCharacter() {
       successes: [false, false, false],
       failures: [false, false, false]
     },
-    resources: [
-      { id: createId("resource"), name: "Hit Dice", current: "", max: "", reset: "Long rest" }
-    ],
+    resources: createDefaultResources(),
     attacks: [
       { id: createId("attack"), name: "", bonus: "", damage: "", notes: "" }
     ],
@@ -169,6 +175,7 @@ export function proficiencyBonus(level) {
 }
 
 export function normalizeCharacter(input) {
+  const inputSchemaVersion = numberOr(input?.schemaVersion, 0);
   const merged = mergeDeep(createDefaultCharacter(), isObject(input) ? input : {});
 
   merged.schemaVersion = SCHEMA_VERSION;
@@ -217,6 +224,9 @@ export function normalizeCharacter(input) {
     max: "",
     reset: ""
   });
+  if (inputSchemaVersion < 5 && !hasExperienceResource(merged.resources)) {
+    merged.resources.push({ id: createId("resource"), name: EXPERIENCE_RESOURCE_NAME, current: "", max: "", reset: "" });
+  }
   merged.attacks = normalizeList(merged.attacks, "attack", {
     name: "",
     bonus: "",
@@ -266,6 +276,13 @@ export function normalizeCharacter(input) {
   };
 
   return merged;
+}
+
+function hasExperienceResource(resources) {
+  return resources.some((resource) => {
+    const name = String(resource?.name || "").trim().toLowerCase();
+    return name === "experience" || name === "xp" || name === "опыт";
+  });
 }
 
 export function summarizeCharacter(character) {

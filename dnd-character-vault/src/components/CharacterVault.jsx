@@ -98,6 +98,7 @@ export default function CharacterVault() {
       <ServiceWorkerRegister />
       <div className="mx-auto max-w-[1540px] min-w-0">
         <AppHeader
+          character={vault.character}
           status={t(`generic.status.${vault.statusKey || "saved"}`)}
           locale={locale}
           setLocale={setLocale}

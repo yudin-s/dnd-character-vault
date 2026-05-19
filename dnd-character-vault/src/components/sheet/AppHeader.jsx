@@ -1,7 +1,11 @@
 import { Shield, Sparkles } from "lucide-react";
 import LocaleToggle from "@/components/LocaleToggle";
 
-export default function AppHeader({ actions, status, locale, setLocale, t }) {
+export default function AppHeader({ actions, character, status, locale, setLocale, t }) {
+  const name = String(character?.identity?.name || "").trim() || t("play.unnamed");
+  const level = Number(character?.identity?.level) || 1;
+  const title = `${name} · ${t("header.level", { level })}`;
+
   return (
     <header className="paper-grain fantasy-frame mb-4 flex max-w-full min-w-0 flex-col gap-4 rounded-md border border-umber/35 p-4 shadow-sheet lg:flex-row lg:items-center lg:justify-between">
       <div className="flex min-w-0 items-center gap-3">
@@ -10,7 +14,7 @@ export default function AppHeader({ actions, status, locale, setLocale, t }) {
         </div>
         <div className="min-w-0">
           <p className="font-ui text-xs font-black uppercase tracking-[0.12em] text-umber">{t("header.tagline")}</p>
-          <h1 className="truncate font-display text-3xl font-bold leading-none text-ink sm:text-4xl">{t("header.title")}</h1>
+          <h1 className="truncate font-display text-3xl font-bold leading-none text-ink sm:text-4xl">{title}</h1>
         </div>
       </div>
 

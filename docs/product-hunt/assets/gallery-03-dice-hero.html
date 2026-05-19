@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=1270, initial-scale=1">
+    <style>
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        width: 1270px;
+        height: 760px;
+        overflow: hidden;
+      }
+      body {
+        display: grid;
+        grid-template-columns: 470px 1fr;
+        align-items: center;
+        gap: 52px;
+        padding: 64px 76px;
+        background:
+          radial-gradient(circle at 68% 40%, rgba(214,168,50,.28), transparent 30%),
+          linear-gradient(135deg, #f5ebd5, #d9c28c);
+        color: #251813;
+        font-family: Georgia, "Times New Roman", serif;
+      }
+      .eyebrow {
+        display: inline-flex;
+        margin-bottom: 22px;
+        border: 2px solid #8c1f24;
+        border-radius: 999px;
+        padding: 10px 16px;
+        color: #8c1f24;
+        font: 900 17px/1 system-ui, sans-serif;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+      }
+      h1 {
+        margin: 0;
+        font-size: 70px;
+        line-height: .94;
+        letter-spacing: 0;
+      }
+      p {
+        margin: 24px 0 0;
+        color: #604636;
+        font: 750 24px/1.36 system-ui, sans-serif;
+      }
+      .stage {
+        position: relative;
+        height: 560px;
+        border: 3px solid rgba(37,24,19,.82);
+        border-radius: 18px;
+        overflow: hidden;
+        background:
+          linear-gradient(transparent 31px, rgba(240,213,140,.12) 32px),
+          linear-gradient(90deg, transparent 31px, rgba(240,213,140,.12) 32px),
+          radial-gradient(circle at 55% 35%, rgba(240,213,140,.34), transparent 28%),
+          linear-gradient(145deg, #183421, #251813 72%);
+        background-size: auto, 32px 32px, auto, auto;
+        box-shadow: 0 28px 80px rgba(37,24,19,.34);
+      }
+      .result {
+        position: absolute;
+        left: 28px;
+        top: 26px;
+        border-radius: 14px;
+        border: 1px solid rgba(240,213,140,.44);
+        background: rgba(37,24,19,.58);
+        padding: 18px 20px;
+        color: #fff7dc;
+      }
+      .result small {
+        display: block;
+        color: #f0d58c;
+        font: 900 13px/1 system-ui, sans-serif;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+      }
+      .result strong {
+        display: block;
+        margin-top: 5px;
+        font: 900 50px/1 system-ui, sans-serif;
+      }
+      .die {
+        position: absolute;
+        display: grid;
+        place-items: center;
+        color: #fff8e6;
+        font: 900 42px/1 system-ui, sans-serif;
+        text-shadow: 0 3px 10px rgba(37,24,19,.45);
+        box-shadow: 0 24px 70px rgba(0,0,0,.38);
+      }
+      .d20 {
+        left: 252px;
+        top: 142px;
+        width: 190px;
+        height: 190px;
+        transform: rotate(-12deg);
+        clip-path: polygon(50% 0, 95% 28%, 78% 92%, 22% 92%, 5% 28%);
+        border: 4px solid rgba(255,248,230,.56);
+        background: linear-gradient(145deg, #d6a832, #f0d58c 42%, #8c1f24);
+      }
+      .d8 {
+        right: 118px;
+        bottom: 86px;
+        width: 118px;
+        height: 118px;
+        transform: rotate(16deg);
+        clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+        border: 3px solid rgba(255,248,230,.5);
+        background: linear-gradient(145deg, #8c1f24, #d6a832);
+        font-size: 30px;
+      }
+      .trail {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(circle at 46% 45%, rgba(255,248,230,.20), transparent 8%),
+          radial-gradient(circle at 58% 36%, rgba(255,248,230,.14), transparent 7%),
+          radial-gradient(circle at 67% 57%, rgba(255,248,230,.12), transparent 9%);
+      }
+      .caption {
+        position: absolute;
+        right: 28px;
+        top: 28px;
+        color: rgba(255,248,230,.74);
+        font: 800 15px/1.4 system-ui, sans-serif;
+        text-align: right;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="eyebrow">Dice roller</div>
+      <h1>Built-in physics dice for live rolls.</h1>
+      <p>Roll d4-d20 from the character sheet and keep the result next to the session controls.</p>
+    </main>
+    <section class="stage">
+      <div class="trail"></div>
+      <div class="caption">d4 · d6 · d8 · d10 · d12 · d20</div>
+      <div class="result"><small>Result</small><strong>17</strong></div>
+      <div class="die d20">17</div>
+      <div class="die d8">6</div>
+    </section>
+  </body>
+</html>

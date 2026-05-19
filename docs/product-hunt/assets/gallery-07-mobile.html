@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=1270, initial-scale=1">
+    <style>
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        width: 1270px;
+        height: 760px;
+        overflow: hidden;
+      }
+      body {
+        display: grid;
+        grid-template-columns: 1fr 390px;
+        align-items: center;
+        gap: 54px;
+        padding: 58px 82px;
+        background:
+          linear-gradient(120deg, rgba(245,235,213,.96), rgba(218,196,148,.84)),
+          repeating-linear-gradient(0deg, rgba(40,24,18,.09) 0 1px, transparent 1px 9px);
+        color: #251813;
+        font-family: Georgia, "Times New Roman", serif;
+      }
+      h1 {
+        max-width: 680px;
+        margin: 0;
+        font-size: 66px;
+        line-height: .95;
+        letter-spacing: 0;
+      }
+      p {
+        max-width: 570px;
+        margin: 28px 0 0;
+        color: #604636;
+        font: 700 24px/1.35 system-ui, sans-serif;
+      }
+      .badge {
+        display: inline-block;
+        margin-bottom: 24px;
+        border: 2px solid #8c1f24;
+        border-radius: 999px;
+        padding: 10px 16px;
+        color: #8c1f24;
+        font: 900 18px/1 system-ui, sans-serif;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+      }
+      .phone {
+        justify-self: end;
+        width: 330px;
+        height: 640px;
+        padding: 14px;
+        border-radius: 38px;
+        background: #251813;
+        box-shadow: 0 26px 70px rgba(37,24,19,.35);
+      }
+      .screen {
+        height: 100%;
+        overflow: hidden;
+        border-radius: 26px;
+        background:
+          repeating-linear-gradient(45deg, rgba(214,168,50,.08) 0 12px, transparent 12px 24px),
+          #f5ebd5;
+      }
+      .top {
+        padding: 18px;
+        border-bottom: 1px solid rgba(96,70,54,.2);
+      }
+      .tag {
+        color: #604636;
+        font: 900 10px/1 system-ui, sans-serif;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+      }
+      .name {
+        margin-top: 4px;
+        font: 900 27px/1 Georgia, serif;
+        white-space: nowrap;
+      }
+      .mode {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+        margin: 14px 18px;
+        overflow: hidden;
+        border: 1px solid rgba(37,24,19,.55);
+        border-radius: 8px;
+        font: 900 11px/1 system-ui, sans-serif;
+        text-align: center;
+      }
+      .mode span {
+        padding: 12px 0;
+      }
+      .mode span:first-child {
+        background: #251813;
+        color: #fff8e6;
+      }
+      .dice {
+        margin: 0 18px 14px;
+        border-radius: 8px;
+        background: #9f1f28;
+        padding: 14px;
+        color: #fff8e6;
+        font: 900 13px/1 system-ui, sans-serif;
+        text-align: center;
+        letter-spacing: .08em;
+      }
+      .panel {
+        margin: 0 18px 14px;
+        border: 1px solid rgba(214,168,50,.48);
+        border-radius: 9px;
+        background:
+          linear-gradient(transparent 27px, rgba(214,168,50,.12) 28px),
+          linear-gradient(90deg, transparent 27px, rgba(214,168,50,.12) 28px),
+          #251813;
+        background-size: 28px 28px;
+        padding: 14px;
+        color: #fff8e6;
+      }
+      .panel-title {
+        color: #d6a832;
+        font: 900 11px/1 system-ui, sans-serif;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+      }
+      .profile-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      .cell {
+        border: 1px solid rgba(214,168,50,.22);
+        border-radius: 7px;
+        padding: 9px;
+      }
+      .cell small {
+        display: block;
+        color: rgba(255,248,230,.55);
+        font: 900 8px/1 system-ui, sans-serif;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+      }
+      .cell strong {
+        display: block;
+        margin-top: 4px;
+        font: 900 12px/1.1 system-ui, sans-serif;
+      }
+      .hp {
+        display: flex;
+        align-items: end;
+        gap: 7px;
+        margin-top: 13px;
+      }
+      .hp strong {
+        color: #f0d58c;
+        font: 900 40px/1 system-ui, sans-serif;
+      }
+      .bar {
+        height: 9px;
+        margin-top: 9px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: rgba(0,0,0,.32);
+      }
+      .bar span {
+        display: block;
+        width: 81%;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #9f1f28, #2f654f);
+      }
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      .actions span {
+        border-radius: 7px;
+        background: #f0d58c;
+        padding: 10px;
+        color: #251813;
+        font: 900 10px/1 system-ui, sans-serif;
+        text-align: center;
+      }
+      .actions span:first-child {
+        background: #9f1f28;
+        color: #fff8e6;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="badge">Mobile ready</div>
+      <h1>Designed for the table, not the desk.</h1>
+      <p>Track HP, resources, dice, spells, and backups from a phone during a live session.</p>
+    </main>
+    <div class="phone">
+      <div class="screen">
+        <div class="top">
+          <div class="tag">Browser-only 5e sheet</div>
+          <div class="name">Aelar Stormwatch</div>
+        </div>
+        <div class="mode"><span>Play</span><span>Edit</span></div>
+        <div class="dice">Dice</div>
+        <section class="panel">
+          <div class="panel-title">Profile</div>
+          <div class="profile-grid">
+            <div class="cell"><small>Class</small><strong>Ranger</strong></div>
+            <div class="cell"><small>Subclass</small><strong>Gloom Stalker</strong></div>
+            <div class="cell"><small>Race</small><strong>Wood Elf</strong></div>
+            <div class="cell"><small>XP</small><strong>11,400 / 14,000</strong></div>
+          </div>
+        </section>
+        <section class="panel">
+          <div class="panel-title">Hit points</div>
+          <div class="hp"><strong>42</strong><span>/ 52</span></div>
+          <div class="bar"><span></span></div>
+          <div class="actions"><span>Damage</span><span>Heal</span></div>
+        </section>
+      </div>
+    </div>
+  </body>
+</html>

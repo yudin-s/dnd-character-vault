@@ -66,12 +66,14 @@ Asset checklist:
 | Asset | Size / format | Status | File / action |
 | --- | --- | --- | --- |
 | Product logo / thumbnail | 240x240 PNG or GIF under 3 MB | Ready | `docs/product-hunt/assets/product-hunt-logo-240.png` |
-| Gallery image 1: hero | 1270x760 PNG/JPG | Needed | Screenshot + headline |
-| Gallery image 2: live session controls | 1270x760 PNG/JPG | Needed | HP/resources/dice area |
-| Gallery image 3: spellbook | 1270x760 PNG/JPG | Needed | Spellbook desktop view |
-| Gallery image 4: inventory + coins | 1270x760 PNG/JPG | Needed | Inventory edit/play view |
-| Gallery image 5: local backups/history | 1270x760 PNG/JPG | Needed | Floating history drawer + export/import |
-| Gallery image 6: mobile layout | 1270x760 PNG/JPG | Needed | Mobile screenshot in device frame |
+| Gallery image 1: hero | 1270x760 PNG | Ready | `docs/product-hunt/assets/gallery-01-hero.png` |
+| Gallery image 2: live session controls | 1270x760 PNG | Ready | `docs/product-hunt/assets/gallery-02-session-controls.png` |
+| Gallery image 3: dice hero | 1270x760 PNG | Ready | `docs/product-hunt/assets/gallery-03-dice-hero.png` |
+| Gallery image 4: dice modal | 1270x760 PNG | Ready, optional | `docs/product-hunt/assets/gallery-03-dice.png` |
+| Gallery image 5: spellbook | 1270x760 PNG | Ready | `docs/product-hunt/assets/gallery-04-spellbook.png` |
+| Gallery image 6: inventory + coins | 1270x760 PNG | Ready | `docs/product-hunt/assets/gallery-05-inventory.png` |
+| Gallery image 7: local backups/history | 1270x760 PNG | Ready | `docs/product-hunt/assets/gallery-06-history-backups.png` |
+| Gallery image 8: mobile layout | 1270x760 PNG | Ready | `docs/product-hunt/assets/gallery-07-mobile.png` |
 | Optional gallery video | YouTube full URL, 16:9 | Recommended | 45-60 second walkthrough |
 | Interactive demo | Product Hunt-supported demo link | Optional | Arcade, Supademo, Storylane, etc. |
 | Social OG image | 1200x630 PNG/JPG | Needed | Use hero gallery visual adapted to 1.91:1 |
@@ -89,19 +91,27 @@ Gallery copy:
    `Everything needed during play`
    `HP, resources, death saves, conditions, quick rolls, and XP stay close.`
 
-3. Dice:
+3. Dice hero:
    `Physics dice, built in`
    `Roll d4-d20 directly from the sheet.`
 
-4. Spells:
+4. Dice modal:
+   `Roll without leaving the sheet`
+   `Pick a die, add a modifier, and keep roll history nearby.`
+
+5. Spells:
    `A spellbook that works at the table`
    `Slots, prepared spells, filters, casting details, and notes.`
 
-5. Local-first safety:
+6. Inventory:
+   `Inventory, coins, and equipped gear`
+   `Track items, armor, weapons, and currency without editing long text.`
+
+7. Local-first safety:
    `Your character stays with you`
    `Autosave history, restore points, JSON export, and import.`
 
-6. Mobile:
+8. Mobile:
    `Designed for desktop and mobile sessions`
    `Use it beside your map, notes, or VTT.`
 

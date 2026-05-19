@@ -18,8 +18,7 @@ export default function PlayDashboard({ character, actions, openDice, t }) {
   const hpPercent = Math.max(0, Math.min(100, ((Number(hp.current) || 0) / hpMax) * 100));
   const activeConditions = useMemo(() => parseConditions(combat.conditions), [combat.conditions]);
   const initiative = combat.initiativeOverride === "" ? abilityModifier(character.abilities.dexterity.score) : Number(combat.initiativeOverride);
-  const experienceIndex = character.resources.findIndex(isExperienceResource);
-  const experience = experienceIndex >= 0 ? character.resources[experienceIndex] : null;
+  const experience = character.identity.experience || {};
 
   return (
     <section id="play" className="grid min-w-0 gap-4">
@@ -155,18 +154,13 @@ export default function PlayDashboard({ character, actions, openDice, t }) {
           t={t}
           onClose={() => setXpModalOpen(false)}
           onSubmit={() => {
-            if (experienceIndex >= 0) actions.adjustResource(experienceIndex, Math.max(0, Number(xpAmount) || 0));
+            actions.addExperience(Math.max(0, Number(xpAmount) || 0));
             setXpModalOpen(false);
           }}
         />
       ) : null}
     </section>
   );
-}
-
-function isExperienceResource(resource) {
-  const name = String(resource?.name || "").trim().toLowerCase();
-  return name === "experience" || name === "xp" || name === "опыт";
 }
 
 function ExperienceProgress({ experience, t, onClick }) {
@@ -327,7 +321,6 @@ function RollButton({ icon: Icon = Activity, label, title, bonus, openDice, comp
 function Resources({ character, actions, t }) {
   const visibleResources = character.resources
     .map((resource, index) => ({ resource, index }))
-    .filter(({ resource }) => !isExperienceResource(resource))
     .slice(0, 5);
 
   return (
@@ -346,7 +339,7 @@ function Resources({ character, actions, t }) {
           <div key={resource.id} className="grid grid-cols-[minmax(0,1fr)_44px_52px_44px] items-center gap-1.5 rounded-md border border-[#d6a832]/20 bg-vellum/90 p-2 sm:grid-cols-[minmax(0,1fr)_44px_58px_44px] sm:gap-2">
             <div className="min-w-0">
               <div className="truncate font-bold text-ink">{resource.name || t("play.resource")}</div>
-              <div className="font-ui text-[11px] uppercase text-umber">{resource.reset || t("play.manual")}</div>
+              <div className="font-ui text-[11px] uppercase text-umber">{resource.resetOnRest ? t("play.resetOnRest") : t("play.manual")}</div>
             </div>
             <CounterButton icon={Minus} label="-" onClick={() => actions.adjustResource(index, -1)} />
             <div className="text-center font-ui text-sm font-black text-ink">{resource.current || 0}/{resource.max || "-"}</div>

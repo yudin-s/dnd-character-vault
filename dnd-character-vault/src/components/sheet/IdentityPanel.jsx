@@ -15,7 +15,13 @@ export default function IdentityPanel({ character, updatePath, t, panelProps = {
         <Field label={t("panel.identity.name")} value={identity.name} onChange={(value) => updatePath("identity.name", value)} />
         <Field label={t("panel.identity.player")} value={identity.player} onChange={(value) => updatePath("identity.player", value)} />
         <Field label={t("panel.identity.class")} value={identity.className} onChange={(value) => updatePath("identity.className", value)} />
-        <Field label={t("panel.identity.level")} type="number" min={1} max={20} value={identity.level} onChange={(value) => updatePath("identity.level", value)} />
+        <div className="grid gap-2">
+          <Field label={t("panel.identity.level")} type="number" min={1} max={20} value={identity.level} onChange={(value) => updatePath("identity.level", value)} />
+          <div className="grid grid-cols-2 gap-2">
+            <Field label={t("panel.identity.experienceCurrent")} type="number" min={0} value={identity.experience?.current} onChange={(value) => updatePath("identity.experience.current", value)} buttonWidth="34px" inputClassName="font-ui text-base font-black" />
+            <Field label={t("panel.identity.experienceMax")} type="number" min={0} value={identity.experience?.max} onChange={(value) => updatePath("identity.experience.max", value)} buttonWidth="34px" inputClassName="font-ui text-base font-black" />
+          </div>
+        </div>
         <Field label={t("panel.identity.subclass")} value={identity.subclass} onChange={(value) => updatePath("identity.subclass", value)} />
         <Field label={t("panel.identity.species")} value={identity.species} onChange={(value) => updatePath("identity.species", value)} />
         <Field label={t("panel.identity.background")} value={identity.background} onChange={(value) => updatePath("identity.background", value)} />

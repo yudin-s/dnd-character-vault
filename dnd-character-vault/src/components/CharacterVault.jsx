@@ -48,6 +48,7 @@ export default function CharacterVault() {
   const [mode, setMode] = useState("play");
   const [diceOpen, setDiceOpen] = useState(false);
   const [dicePreset, setDicePreset] = useState(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const visibleSections = mode === "play" ? PLAY_SECTIONS : EDIT_SECTIONS;
   const [activeSection, setActiveSection] = useState(visibleSections[0].id);
   const localizedSections = visibleSections.map((section) => ({
@@ -146,7 +147,7 @@ export default function CharacterVault() {
           }}
         />
 
-        <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="grid min-w-0 gap-4">
           <section className="paper-grain min-w-0 overflow-hidden rounded-md border border-umber/35 p-3 shadow-sheet sm:p-4 lg:p-5">
             {mode === "play" ? (
               <div className="grid min-w-0 gap-4">
@@ -159,7 +160,16 @@ export default function CharacterVault() {
                     adjustResource: vault.changeResource,
                     resetResources: vault.restResources,
                     setDeathSave: vault.changeDeathSave,
-                    toggleCondition: vault.changeCondition
+                    toggleCondition: vault.changeCondition,
+                    addExperience: (amount) => vault.updateCharacter((current) => {
+                      const next = structuredClone(current);
+                      const experience = next.identity.experience || {};
+                      next.identity.experience = {
+                        ...experience,
+                        current: Math.max(0, (Number(experience.current) || 0) + amount)
+                      };
+                      return next;
+                    })
                   }}
                 />
                 <div className="grid min-w-0 gap-4 2xl:grid-cols-2">
@@ -209,15 +219,17 @@ export default function CharacterVault() {
             )}
           </section>
 
-          <HistoryPanel
-            history={vault.history}
-            status={t(`generic.status.${vault.statusKey || "saved"}`)}
-            restoreSnapshot={vault.restoreSnapshot}
-            clearLocal={() => confirm(t("generic.confirm.clearLocal")) && vault.clearLocal()}
-            t={t}
-          />
         </div>
       </div>
+
+      <button
+        type="button"
+        onClick={() => setHistoryOpen(true)}
+        className="fixed bottom-40 right-3 z-50 grid h-14 w-14 place-items-center rounded-full border border-ink bg-parchment text-ink shadow-[0_12px_30px_rgba(37,24,19,0.26)] transition hover:bg-vellum lg:bottom-24 lg:right-6"
+        aria-label={t("history.open")}
+      >
+        <FileClock className="h-6 w-6" aria-hidden="true" />
+      </button>
 
       <button
         type="button"
@@ -242,6 +254,24 @@ export default function CharacterVault() {
         onSectionClick={(id) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" })}
         label={t("header.quickSectionsLabel")}
       />
+      {historyOpen ? (
+        <div className="fixed inset-0 z-[70] bg-ink/50 backdrop-blur-[2px]" role="presentation" onMouseDown={() => setHistoryOpen(false)}>
+          <div className="fixed inset-y-0 right-0 flex w-full max-w-[390px] p-3 sm:p-4" onMouseDown={(event) => event.stopPropagation()}>
+            <HistoryPanel
+              history={vault.history}
+              status={t(`generic.status.${vault.statusKey || "saved"}`)}
+              restoreSnapshot={(id) => {
+                vault.restoreSnapshot(id);
+                setHistoryOpen(false);
+              }}
+              clearLocal={() => confirm(t("generic.confirm.clearLocal")) && vault.clearLocal()}
+              t={t}
+              onClose={() => setHistoryOpen(false)}
+              className="h-full w-full"
+            />
+          </div>
+        </div>
+      ) : null}
       <DiceDrawer t={t} isOpen={diceOpen} onClose={() => setDiceOpen(false)} preset={dicePreset} />
     </main>
   );

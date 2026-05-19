@@ -104,7 +104,7 @@ export function resetResources(character, restType = "long") {
   next.resources = next.resources.map((resource) => {
     const resetText = String(resource.reset || "").toLowerCase();
     const shouldReset = normalizedRest === "long"
-      ? resetText.includes("long") || resetText.includes("дл")
+      ? Boolean(resource.resetOnRest) || resetText.includes("long") || resetText.includes("дл")
       : resetText.includes("short") || resetText.includes("кор");
 
     return shouldReset && resource.max !== ""

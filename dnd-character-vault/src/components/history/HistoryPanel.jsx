@@ -1,18 +1,30 @@
-import { RotateCcw, Trash2 } from "lucide-react";
+import { RotateCcw, Trash2, X } from "lucide-react";
 import { formatTimestamp } from "@/lib/storage";
 
-export default function HistoryPanel({ history, status, restoreSnapshot, clearLocal, t }) {
+export default function HistoryPanel({ history, status, restoreSnapshot, clearLocal, t, onClose, className = "" }) {
   return (
-    <aside className="paper-grain min-w-0 max-w-full overflow-hidden rounded-md border border-umber/35 p-4 shadow-sheet xl:sticky xl:top-4 xl:max-h-[calc(100vh-2rem)]">
+    <aside className={`paper-grain flex min-w-0 max-w-full flex-col overflow-hidden rounded-md border border-umber/35 p-4 shadow-sheet ${className}`.trim()}>
       <div className="flex items-start justify-between gap-3 border-b border-umber/20 pb-3">
         <div className="min-w-0">
           <p className="font-ui text-xs font-black uppercase tracking-[0.12em] text-umber">{t("history.localOnly")}</p>
           <h2 className="font-display text-2xl font-bold leading-none">{t("history.title")}</h2>
         </div>
-        <span className="max-w-28 shrink-0 truncate rounded-full border border-laurel/30 bg-laurel/10 px-3 py-1 font-ui text-xs font-black text-laurel">{status}</span>
+        <div className="flex shrink-0 items-center gap-2">
+          <span className="max-w-28 truncate rounded-full border border-laurel/30 bg-laurel/10 px-3 py-1 font-ui text-xs font-black text-laurel">{status}</span>
+          {onClose ? (
+            <button
+              type="button"
+              onClick={onClose}
+              className="grid h-9 w-9 place-items-center rounded-md border border-umber/35 bg-parchment text-ink transition hover:bg-vellum"
+              aria-label={t("generic.close")}
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+            </button>
+          ) : null}
+        </div>
       </div>
 
-      <div className="scrollbar-thin mt-3 grid gap-2 xl:max-h-[calc(100vh-10rem)] xl:overflow-y-auto xl:pr-1">
+      <div className="scrollbar-thin mt-3 grid flex-1 content-start gap-2 overflow-y-auto pr-1">
         {history.length === 0 ? (
           <p className="rounded-md border border-umber/20 bg-white/20 p-3 text-sm leading-6 text-umber">
             {t("history.empty")}

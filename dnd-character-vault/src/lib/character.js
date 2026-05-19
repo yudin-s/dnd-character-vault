@@ -1,6 +1,6 @@
 import { createEquipmentItem, normalizeEquipmentItem } from "./equipment";
 
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 6;
 
 export const ABILITY_KEYS = [
   "strength",
@@ -33,8 +33,6 @@ export const SKILL_DEFINITIONS = {
 };
 
 const DEFAULT_ABILITY_SCORE = 10;
-const EXPERIENCE_RESOURCE_NAME = "Experience";
-
 function createId(prefix = "char") {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
     return `${prefix}-${crypto.randomUUID()}`;
@@ -78,8 +76,7 @@ function createSpellSlots() {
 
 function createDefaultResources() {
   return [
-    { id: createId("resource"), name: "Hit Dice", current: "", max: "", reset: "Long rest" },
-    { id: createId("resource"), name: EXPERIENCE_RESOURCE_NAME, current: "", max: "", reset: "" }
+    { id: createId("resource"), name: "Hit Dice", current: "", max: "", reset: "Long rest", resetOnRest: true }
   ];
 }
 
@@ -96,7 +93,10 @@ export function createDefaultCharacter() {
       species: "",
       background: "",
       alignment: "",
-      experience: ""
+      experience: {
+        current: "",
+        max: ""
+      }
     },
     inspiration: false,
     abilities: createAbilities(),
@@ -175,7 +175,6 @@ export function proficiencyBonus(level) {
 }
 
 export function normalizeCharacter(input) {
-  const inputSchemaVersion = numberOr(input?.schemaVersion, 0);
   const merged = mergeDeep(createDefaultCharacter(), isObject(input) ? input : {});
 
   merged.schemaVersion = SCHEMA_VERSION;
@@ -218,15 +217,19 @@ export function normalizeCharacter(input) {
 
   merged.deathSaves.successes = normalizeThreeChecks(merged.deathSaves.successes);
   merged.deathSaves.failures = normalizeThreeChecks(merged.deathSaves.failures);
-  merged.resources = normalizeList(merged.resources, "resource", {
+  const normalizedResources = normalizeList(merged.resources, "resource", {
     name: "",
     current: "",
     max: "",
-    reset: ""
-  });
-  if (inputSchemaVersion < 5 && !hasExperienceResource(merged.resources)) {
-    merged.resources.push({ id: createId("resource"), name: EXPERIENCE_RESOURCE_NAME, current: "", max: "", reset: "" });
-  }
+    reset: "",
+    resetOnRest: false
+  }).map((resource) => ({
+    ...resource,
+    resetOnRest: normalizeBoolean(resource.resetOnRest) || hasResetOnRestText(resource.reset)
+  }));
+  const legacyExperienceResource = normalizedResources.find(isExperienceResource);
+  merged.identity.experience = normalizeExperience(merged.identity.experience, legacyExperienceResource);
+  merged.resources = normalizedResources.filter((resource) => !isExperienceResource(resource));
   merged.attacks = normalizeList(merged.attacks, "attack", {
     name: "",
     bonus: "",
@@ -278,11 +281,36 @@ export function normalizeCharacter(input) {
   return merged;
 }
 
-function hasExperienceResource(resources) {
-  return resources.some((resource) => {
-    const name = String(resource?.name || "").trim().toLowerCase();
-    return name === "experience" || name === "xp" || name === "опыт";
-  });
+function isExperienceResource(resource) {
+  const name = String(resource?.name || "").trim().toLowerCase();
+  return name === "experience" || name === "xp" || name === "опыт";
+}
+
+function normalizeExperience(value, legacyResource) {
+  const source = isObject(value) ? value : { current: value, max: "" };
+  return {
+    current: preferText(source.current, legacyResource?.current),
+    max: preferText(source.max, legacyResource?.max)
+  };
+}
+
+function preferText(primary, fallback) {
+  const text = stringOr(primary, "");
+  return text === "" ? stringOr(fallback, "") : text;
+}
+
+function hasResetOnRestText(value) {
+  const text = String(value || "").trim().toLowerCase();
+  return text.includes("long")
+    || text.includes("short")
+    || text.includes("rest")
+    || text.includes("дл")
+    || text.includes("кор")
+    || text.includes("отдых");
+}
+
+function normalizeBoolean(value) {
+  return value === true || String(value).trim().toLowerCase() === "true";
 }
 
 export function summarizeCharacter(character) {
@@ -305,7 +333,7 @@ export function summarizeCharacter(character) {
 export function createListItem(type) {
   const factories = {
     attacks: () => ({ id: createId("attack"), name: "", bonus: "", damage: "", notes: "" }),
-    resources: () => ({ id: createId("resource"), name: "", current: "", max: "", reset: "" }),
+    resources: () => ({ id: createId("resource"), name: "", current: "", max: "", reset: "", resetOnRest: false }),
     spells: () => ({
       id: createId("spell"),
       level: 0,

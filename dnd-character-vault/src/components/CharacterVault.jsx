@@ -112,9 +112,9 @@ export default function CharacterVault() {
           ]}
         />
 
-        <div className="mb-4 grid min-w-0 gap-3 rounded-md border border-umber/25 bg-vellum/55 p-3 shadow-insetLine lg:grid-cols-[260px_minmax(0,1fr)_auto] lg:items-center">
+        <div className="mb-4 grid min-w-0 gap-3 rounded-md border border-umber/25 bg-vellum/55 p-3 shadow-insetLine sm:grid-cols-[minmax(220px,360px)_auto] sm:items-center sm:justify-between">
           <SegmentedToggle
-            label={t("mode.label")}
+            label=""
             value={mode}
             options={[
               { value: "play", label: t("mode.play") },
@@ -122,9 +122,6 @@ export default function CharacterVault() {
             ]}
             onChange={setMode}
           />
-          <p className="text-sm leading-6 text-umber">
-            {mode === "play" ? t("mode.playHint") : t("mode.editHint")}
-          </p>
           <button
             type="button"
             onClick={() => openDice({ label: t("dice.title"), sides: 20, count: 1, autoRoll: false })}

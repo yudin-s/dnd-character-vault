@@ -1,8 +1,8 @@
-# 5e Character Vault
+# Quest Ledger
 
-A browser-only DnD 5e character sheet for live sessions.
+A local-first DnD 5e character sheet for live sessions.
 
-The app is built around practical table use: hit points, resources, inventory, spells, dice rolls, autosaved history, and portable JSON backups. Character data stays in the browser unless you export it.
+The app is built around practical table use: hit points, resources, inventory, spells, dice rolls, autosaved history, and portable JSON backups. Character data stays in the browser unless you export it, and the app can be installed as a PWA on a phone for offline play after the first load.
 
 ## Live App
 
@@ -14,6 +14,7 @@ https://yudin-s.github.io/dnd-character-vault/
 - Edit mode for the full character sheet
 - Built-in 3D dice rolling
 - Spellbook, inventory, coins, attacks, notes, and resources
+- Installable PWA/SPA for phone use and offline sessions
 - Local autosave history with restore points
 - JSON export and import
 - No account or backend required

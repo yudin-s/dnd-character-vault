@@ -1,6 +1,6 @@
-# 5e Character Vault
+# Quest Ledger
 
-Browser-only DnD 5e-compatible character sheet with local autosave, local revision history, backup import/export, dice rolling, and installable PWA support.
+Local-first DnD 5e-compatible character sheet with local autosave, local revision history, backup import/export, dice rolling, and installable PWA support for offline play.
 
 ## Project Layout
 

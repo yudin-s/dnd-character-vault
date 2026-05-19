@@ -12,135 +12,425 @@
         overflow: hidden;
       }
       body {
-        display: grid;
-        grid-template-columns: 470px 1fr;
-        align-items: center;
-        gap: 52px;
-        padding: 64px 76px;
+        padding: 38px 54px;
         background:
-          radial-gradient(circle at 68% 40%, rgba(214,168,50,.28), transparent 30%),
-          linear-gradient(135deg, #f5ebd5, #d9c28c);
+          repeating-linear-gradient(0deg, rgba(255,248,232,.04) 0 1px, transparent 1px 8px),
+          linear-gradient(145deg, #251813, #3e2a20 62%, #251813);
         color: #251813;
-        font-family: Georgia, "Times New Roman", serif;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       }
-      .eyebrow {
-        display: inline-flex;
-        margin-bottom: 22px;
-        border: 2px solid #8c1f24;
-        border-radius: 999px;
-        padding: 10px 16px;
-        color: #8c1f24;
-        font: 900 17px/1 system-ui, sans-serif;
-        letter-spacing: .08em;
-        text-transform: uppercase;
-      }
-      h1 {
-        margin: 0;
-        font-size: 70px;
-        line-height: .94;
-        letter-spacing: 0;
-      }
-      p {
-        margin: 24px 0 0;
-        color: #604636;
-        font: 750 24px/1.36 system-ui, sans-serif;
-      }
-      .stage {
+      .app {
         position: relative;
-        height: 560px;
-        border: 3px solid rgba(37,24,19,.82);
-        border-radius: 18px;
+        height: 684px;
+        border-radius: 7px;
         overflow: hidden;
         background:
-          linear-gradient(transparent 31px, rgba(240,213,140,.12) 32px),
-          linear-gradient(90deg, transparent 31px, rgba(240,213,140,.12) 32px),
-          radial-gradient(circle at 55% 35%, rgba(240,213,140,.34), transparent 28%),
-          linear-gradient(145deg, #183421, #251813 72%);
-        background-size: auto, 32px 32px, auto, auto;
-        box-shadow: 0 28px 80px rgba(37,24,19,.34);
+          repeating-linear-gradient(45deg, rgba(214,168,50,.07) 0 14px, rgba(255,248,232,.2) 14px 28px),
+          #f5ebd5;
+        box-shadow: 0 28px 90px rgba(0,0,0,.42);
       }
-      .result {
-        position: absolute;
-        left: 28px;
-        top: 26px;
-        border-radius: 14px;
-        border: 1px solid rgba(240,213,140,.44);
-        background: rgba(37,24,19,.58);
-        padding: 18px 20px;
-        color: #fff7dc;
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 98px;
+        padding: 22px 32px;
+        border-bottom: 1px solid rgba(95,67,47,.28);
       }
-      .result small {
+      .brand small {
         display: block;
-        color: #f0d58c;
-        font: 900 13px/1 system-ui, sans-serif;
+        color: #604636;
+        font-size: 13px;
+        font-weight: 900;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+      }
+      .brand strong {
+        display: block;
+        margin-top: 2px;
+        color: #251813;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 42px;
+        line-height: 1;
+      }
+      .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .pill, .icon {
+        border: 2px solid rgba(37,24,19,.74);
+        border-radius: 7px;
+        background: #ead6a6;
+        color: #251813;
+        font-weight: 900;
+      }
+      .pill {
+        padding: 13px 18px;
+      }
+      .icon {
+        display: grid;
+        width: 46px;
+        height: 46px;
+        place-items: center;
+      }
+      .mode {
+        height: 118px;
+        border-bottom: 1px solid rgba(95,67,47,.22);
+        background: rgba(37,24,19,.26);
+        padding: 28px 34px;
+      }
+      .toggle {
+        display: grid;
+        width: 320px;
+        grid-template-columns: 1fr 1fr;
+        overflow: hidden;
+        border: 1px solid rgba(95,67,47,.34);
+        border-radius: 8px;
+        background: #fffaf0;
+      }
+      .toggle span {
+        display: grid;
+        min-height: 52px;
+        place-items: center;
+        font-weight: 900;
+      }
+      .toggle span:first-child {
+        background: #251813;
+        color: #fff8e8;
+      }
+      .scrim {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        background: rgba(22,14,10,.62);
+        backdrop-filter: blur(2px);
+      }
+      .modal {
+        width: 1108px;
+        height: 560px;
+        overflow: hidden;
+        border: 2px solid rgba(95,67,47,.42);
+        border-radius: 7px;
+        background: #e9d59f;
+        box-shadow: 0 28px 90px rgba(0,0,0,.38);
+      }
+      .modal-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 66px;
+        padding: 14px 22px;
+        border-bottom: 1px solid rgba(95,67,47,.28);
+      }
+      .modal-title strong {
+        display: block;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 24px;
+        line-height: 1;
+      }
+      .modal-title small {
+        display: block;
+        margin-top: 4px;
+        color: #604636;
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+      }
+      .close {
+        display: grid;
+        width: 44px;
+        height: 44px;
+        place-items: center;
+        border: 2px solid rgba(37,24,19,.62);
+        border-radius: 6px;
+        background: #ead6a6;
+        font-size: 23px;
+      }
+      .modal-body {
+        display: grid;
+        grid-template-columns: 1fr 430px;
+        gap: 18px;
+        padding: 18px;
+      }
+      .controls {
+        display: grid;
+        align-content: start;
+        gap: 16px;
+      }
+      .label {
+        margin-bottom: 8px;
+        color: #604636;
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+      }
+      .dice-types {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 10px;
+      }
+      .dice-types span {
+        display: grid;
+        min-height: 58px;
+        place-items: center;
+        border: 1px solid rgba(95,67,47,.42);
+        border-radius: 6px;
+        background: #fff8e8;
+        font-size: 16px;
+        font-weight: 900;
+      }
+      .dice-types span:last-child {
+        border-color: #9f1f28;
+        background: #9f1f28;
+        color: #fff8e8;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 160px;
+        gap: 14px;
+        align-items: end;
+      }
+      .slider {
+        height: 6px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #9f1f28 0 16%, rgba(37,24,19,.28) 16%);
+      }
+      .stepper {
+        display: grid;
+        grid-template-columns: 44px 1fr 44px;
+        gap: 8px;
+      }
+      .stepper span {
+        display: grid;
+        height: 44px;
+        place-items: center;
+        border: 1px solid rgba(95,67,47,.42);
+        border-radius: 6px;
+        background: #fff8e8;
+        font-size: 20px;
+        font-weight: 900;
+      }
+      .stepper .value {
+        border-color: #251813;
+        background: #ead6a6;
+      }
+      .result-card {
+        border: 1px solid rgba(95,67,47,.28);
+        border-radius: 6px;
+        background: rgba(255,248,232,.7);
+        padding: 14px 16px;
+      }
+      .result-card strong {
+        display: block;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 27px;
+        line-height: 1.1;
+      }
+      .segmented {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        overflow: hidden;
+        border: 1px solid rgba(95,67,47,.34);
+        border-radius: 6px;
+        background: #fff8e8;
+      }
+      .segmented span {
+        display: grid;
+        min-height: 46px;
+        place-items: center;
+        font-weight: 900;
+      }
+      .segmented span:first-child {
+        background: #251813;
+        color: #fff8e8;
+      }
+      .tray {
+        border: 1px solid rgba(95,67,47,.42);
+        border-radius: 6px;
+        padding: 16px;
+        background:
+          radial-gradient(circle at 50% 12%, rgba(214,168,50,.34), transparent 30%),
+          linear-gradient(180deg, rgba(255,248,232,.76), rgba(231,206,159,.9)),
+          repeating-linear-gradient(135deg, rgba(95,67,47,.10) 0 1px, transparent 1px 12px);
+        box-shadow: inset 0 0 0 1px rgba(140,31,36,.12), inset 0 -18px 40px rgba(95,67,47,.16);
+      }
+      .tray-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 12px;
+      }
+      .tray-head strong {
+        display: block;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 32px;
+      }
+      .tray-head small {
+        color: #9f1f28;
+        font-size: 12px;
+        font-weight: 900;
         letter-spacing: .12em;
         text-transform: uppercase;
       }
-      .result strong {
-        display: block;
-        margin-top: 5px;
-        font: 900 50px/1 system-ui, sans-serif;
+      .stage {
+        position: relative;
+        height: 276px;
+        overflow: hidden;
+        border: 1px solid rgba(37,24,19,.42);
+        border-radius: 6px;
+        background:
+          radial-gradient(circle at 50% 18%, rgba(255,248,232,.34), transparent 52%),
+          linear-gradient(175deg, rgba(19,13,10,.9), rgba(37,24,19,1) 58%, rgba(18,14,11,1)),
+          repeating-linear-gradient(90deg, rgba(255,248,232,.08) 0 1px, transparent 1px 14px);
+        box-shadow: inset 0 0 0 1px rgba(255,248,232,.18), inset 0 -36px 58px rgba(0,0,0,.34);
+      }
+      .glow {
+        position: absolute;
+        inset: 16% 18%;
+        border-radius: 999px;
+        background: radial-gradient(circle, rgba(214,168,50,.28), transparent 66%);
+        filter: blur(18px);
       }
       .die {
         position: absolute;
         display: grid;
         place-items: center;
-        color: #fff8e6;
-        font: 900 42px/1 system-ui, sans-serif;
-        text-shadow: 0 3px 10px rgba(37,24,19,.45);
-        box-shadow: 0 24px 70px rgba(0,0,0,.38);
+        color: #fff8e8;
+        font-size: 42px;
+        font-weight: 1000;
+        text-shadow: 0 3px 12px rgba(37,24,19,.55);
+        filter: drop-shadow(0 20px 28px rgba(0,0,0,.42));
       }
       .d20 {
-        left: 252px;
-        top: 142px;
-        width: 190px;
-        height: 190px;
-        transform: rotate(-12deg);
-        clip-path: polygon(50% 0, 95% 28%, 78% 92%, 22% 92%, 5% 28%);
-        border: 4px solid rgba(255,248,230,.56);
-        background: linear-gradient(145deg, #d6a832, #f0d58c 42%, #8c1f24);
-      }
-      .d8 {
-        right: 118px;
-        bottom: 86px;
-        width: 118px;
-        height: 118px;
-        transform: rotate(16deg);
-        clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
-        border: 3px solid rgba(255,248,230,.5);
-        background: linear-gradient(145deg, #8c1f24, #d6a832);
-        font-size: 30px;
-      }
-      .trail {
-        position: absolute;
-        inset: 0;
+        left: 154px;
+        top: 58px;
+        width: 136px;
+        height: 136px;
+        transform: rotate(-13deg);
+        clip-path: polygon(50% 0, 94% 28%, 78% 92%, 22% 92%, 6% 28%);
         background:
-          radial-gradient(circle at 46% 45%, rgba(255,248,230,.20), transparent 8%),
-          radial-gradient(circle at 58% 36%, rgba(255,248,230,.14), transparent 7%),
-          radial-gradient(circle at 67% 57%, rgba(255,248,230,.12), transparent 9%);
+          linear-gradient(135deg, rgba(255,248,232,.34), transparent 38%),
+          linear-gradient(145deg, #d6a832, #f0d58c 46%, #9f1f28);
       }
-      .caption {
+      .d20:before,
+      .d20:after {
+        content: "";
         position: absolute;
-        right: 28px;
-        top: 28px;
-        color: rgba(255,248,230,.74);
-        font: 800 15px/1.4 system-ui, sans-serif;
-        text-align: right;
+        inset: 20px;
+        border: 2px solid rgba(255,248,232,.38);
+        clip-path: polygon(50% 0, 100% 62%, 0 62%);
+      }
+      .d20:after {
+        transform: rotate(180deg);
+      }
+      .d6 {
+        right: 54px;
+        bottom: 38px;
+        width: 84px;
+        height: 84px;
+        border-radius: 12px;
+        transform: rotate(10deg);
+        background:
+          radial-gradient(circle at 24% 25%, #fff8e8 0 5px, transparent 6px),
+          radial-gradient(circle at 72% 25%, #fff8e8 0 5px, transparent 6px),
+          radial-gradient(circle at 24% 72%, #fff8e8 0 5px, transparent 6px),
+          radial-gradient(circle at 72% 72%, #fff8e8 0 5px, transparent 6px),
+          linear-gradient(145deg, #f0d58c, #d6a832 52%, #9f1f28);
+        color: transparent;
+      }
+      .roll-button {
+        display: grid;
+        min-height: 56px;
+        margin-top: 12px;
+        place-items: center;
+        border: 2px solid #251813;
+        border-radius: 7px;
+        background: #9f1f28;
+        color: #fff8e8;
+        font-size: 15px;
+        font-weight: 1000;
+        letter-spacing: .12em;
+        text-transform: uppercase;
       }
     </style>
   </head>
   <body>
-    <main>
-      <div class="eyebrow">Dice roller</div>
-      <h1>Built-in physics dice for live rolls.</h1>
-      <p>Roll d4-d20 from the character sheet and keep the result next to the session controls.</p>
-    </main>
-    <section class="stage">
-      <div class="trail"></div>
-      <div class="caption">d4 · d6 · d8 · d10 · d12 · d20</div>
-      <div class="result"><small>Result</small><strong>17</strong></div>
-      <div class="die d20">17</div>
-      <div class="die d8">6</div>
-    </section>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <small>Offline-ready 5e sheet</small>
+          <strong>Quest Ledger</strong>
+        </div>
+        <div class="toolbar">
+          <div class="pill">Saving</div>
+          <div class="icon">EN</div>
+          <div class="icon">RU</div>
+        </div>
+      </header>
+      <section class="mode">
+        <div class="toggle"><span>Play</span><span>Edit</span></div>
+      </section>
+      <div class="scrim">
+        <section class="modal">
+          <div class="modal-head">
+            <div class="modal-title">
+              <strong>Dice</strong>
+              <small>Roller</small>
+            </div>
+            <div class="close">×</div>
+          </div>
+          <div class="modal-body">
+            <div class="controls">
+              <div>
+                <div class="label">Dice type</div>
+                <div class="dice-types">
+                  <span>d4</span><span>d6</span><span>d8</span><span>d10</span><span>d12</span><span>d20</span>
+                </div>
+              </div>
+              <div class="row">
+                <div>
+                  <div class="label">Quantity</div>
+                  <div class="slider"></div>
+                </div>
+                <div class="stepper"><span>-</span><span class="value">1</span><span>+</span></div>
+              </div>
+              <div class="row">
+                <div class="result-card">
+                  <div class="label">Result</div>
+                  <strong>1d20 = 17</strong>
+                </div>
+                <div>
+                  <div class="label">Modifier</div>
+                  <div class="stepper"><span>-</span><span>0</span><span>+</span></div>
+                </div>
+              </div>
+              <div>
+                <div class="label">Shake roll</div>
+                <div class="segmented"><span>Off</span><span>On</span></div>
+              </div>
+            </div>
+            <aside class="tray">
+              <div class="tray-head">
+                <div>
+                  <small>Result</small>
+                  <strong>1d20 = 17</strong>
+                </div>
+                <div class="icon">⚂</div>
+              </div>
+              <div class="stage">
+                <div class="glow"></div>
+                <div class="die d20">17</div>
+                <div class="die d6">4</div>
+              </div>
+              <div class="roll-button">Roll</div>
+            </aside>
+          </div>
+        </section>
+      </div>
+    </div>
   </body>
 </html>

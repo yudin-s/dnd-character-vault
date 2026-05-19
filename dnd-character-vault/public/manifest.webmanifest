@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "5e Character Vault",
-  "short_name": "5e Vault",
-  "description": "Browser-only DnD 5e character sheet with local autosave, history, and backup files.",
+  "name": "Quest Ledger",
+  "short_name": "Quest Ledger",
+  "description": "Local-first DnD 5e character sheet with offline PWA support, local autosave, history, and backup files.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

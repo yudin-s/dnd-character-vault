@@ -1,10 +1,10 @@
-# Product Hunt Launch Kit: 5e Character Vault
+# Product Hunt Launch Kit: Quest Ledger
 
 Prepared: 2026-05-19
 
 ## Product Basics
 
-- Product name: `5e Character Vault`
+- Product name: `Quest Ledger`
 - Product URL: `https://yudin-s.github.io/dnd-character-vault/`
 - Source code: `https://github.com/yudin-s/dnd-character-vault`
 - Maker: Sergey Yudin, `https://github.com/yudin-s`
@@ -16,36 +16,38 @@ Prepared: 2026-05-19
 
 Tagline options:
 
-1. `A local-first DnD 5e character sheet`
-2. `A browser-only vault for DnD 5e characters`
-3. `Run DnD 5e sessions from one local-first sheet`
-4. `A privacy-friendly character sheet for DnD 5e`
-5. `DnD 5e characters, dice, and backups in your browser`
+1. `An offline-ready DnD 5e character sheet`
+2. `Install your DnD 5e sheet and play offline`
+3. `A local-first ledger for 5e adventurers`
+4. `DnD 5e characters, dice, and backups on your phone`
+5. `A PWA character sheet for offline tabletop sessions`
 
 Recommended tagline:
 
-`A local-first DnD 5e character sheet`
+`An offline-ready DnD 5e character sheet`
 
 Short description:
 
-`5e Character Vault is a browser-only DnD 5e sheet for live sessions: track HP, resources, inventory, spells, dice rolls, autosaved history, and JSON backups without creating an account.`
+`Quest Ledger is a local-first DnD 5e sheet for live sessions: install it as a PWA, save characters locally, and keep HP, spells, resources, dice, history, and backups available offline.`
 
 Product Hunt description under 260 characters:
 
-`A browser-only DnD 5e sheet for live sessions. Track HP, resources, inventory, spells, dice rolls, autosaved history, and portable JSON backups locally, without accounts or a server.`
+`An installable DnD 5e sheet for live sessions. Save characters locally, use it offline as a PWA, and track HP, spells, resources, dice, history, and JSON backups without accounts.`
 
 One-liner for social:
 
-`I built 5e Character Vault: a free, local-first DnD 5e character sheet that runs entirely in the browser.`
+`I built Quest Ledger: a free, local-first DnD 5e character sheet you can install on your phone and use offline at the table.`
 
 Maker first comment:
 
 ```text
 Hi Product Hunt,
 
-I built 5e Character Vault because I wanted a DnD 5e sheet that feels useful at the table, not just complete on paper.
+I built Quest Ledger because I wanted a DnD 5e sheet that feels useful at the table, not just complete on paper.
 
 It runs entirely in the browser: no account, no backend, local autosave, JSON backups, quick dice rolls, session controls, spells, inventory, and history snapshots.
+
+The part I like most: you can install it on your phone as a PWA after the first load, keep your character saved locally, and reopen it offline during a session.
 
 The current focus is practical play: big HP controls, resources, death saves, conditions, dice, and a compact edit mode for the full sheet.
 
@@ -68,12 +70,11 @@ Asset checklist:
 | Product logo / thumbnail | 240x240 PNG or GIF under 3 MB | Ready | `docs/product-hunt/assets/product-hunt-logo-240.png` |
 | Gallery image 1: hero | 1270x760 PNG | Ready | `docs/product-hunt/assets/gallery-01-hero.png` |
 | Gallery image 2: live session controls | 1270x760 PNG | Ready | `docs/product-hunt/assets/gallery-02-session-controls.png` |
-| Gallery image 3: dice hero | 1270x760 PNG | Ready | `docs/product-hunt/assets/gallery-03-dice-hero.png` |
-| Gallery image 4: dice modal | 1270x760 PNG | Ready, optional | `docs/product-hunt/assets/gallery-03-dice.png` |
-| Gallery image 5: spellbook | 1270x760 PNG | Ready | `docs/product-hunt/assets/gallery-04-spellbook.png` |
-| Gallery image 6: inventory + coins | 1270x760 PNG | Ready | `docs/product-hunt/assets/gallery-05-inventory.png` |
-| Gallery image 7: local backups/history | 1270x760 PNG | Ready | `docs/product-hunt/assets/gallery-06-history-backups.png` |
-| Gallery image 8: mobile layout | 1270x760 PNG | Ready | `docs/product-hunt/assets/gallery-07-mobile.png` |
+| Gallery image 3: dice roller | 1270x760 PNG | Ready | `docs/product-hunt/assets/gallery-03-dice.png` |
+| Gallery image 4: spellbook | 1270x760 PNG | Ready | `docs/product-hunt/assets/gallery-04-spellbook.png` |
+| Gallery image 5: inventory + coins | 1270x760 PNG | Ready | `docs/product-hunt/assets/gallery-05-inventory.png` |
+| Gallery image 6: local backups/history | 1270x760 PNG | Ready | `docs/product-hunt/assets/gallery-06-history-backups.png` |
+| Gallery image 7: mobile layout | 1270x760 PNG | Ready | `docs/product-hunt/assets/gallery-07-mobile.png` |
 | Optional gallery video | YouTube full URL, 16:9 | Recommended | 45-60 second walkthrough |
 | Interactive demo | Product Hunt-supported demo link | Optional | Arcade, Supademo, Storylane, etc. |
 | Social OG image | 1200x630 PNG/JPG | Needed | Use hero gallery visual adapted to 1.91:1 |
@@ -84,36 +85,32 @@ Asset checklist:
 Gallery copy:
 
 1. Hero:
-   `A local-first DnD 5e character sheet`
-   `Run your session from the browser, without accounts or a server.`
+   `An offline-ready DnD 5e character sheet`
+   `Install Quest Ledger on your phone and run sessions without accounts or a server.`
 
 2. Session cockpit:
    `Everything needed during play`
    `HP, resources, death saves, conditions, quick rolls, and XP stay close.`
 
-3. Dice hero:
+3. Dice roller:
    `Physics dice, built in`
    `Roll d4-d20 directly from the sheet.`
 
-4. Dice modal:
-   `Roll without leaving the sheet`
-   `Pick a die, add a modifier, and keep roll history nearby.`
-
-5. Spells:
+4. Spells:
    `A spellbook that works at the table`
    `Slots, prepared spells, filters, casting details, and notes.`
 
-6. Inventory:
+5. Inventory:
    `Inventory, coins, and equipped gear`
    `Track items, armor, weapons, and currency without editing long text.`
 
-7. Local-first safety:
+6. Local-first safety:
    `Your character stays with you`
    `Autosave history, restore points, JSON export, and import.`
 
-8. Mobile:
-   `Designed for desktop and mobile sessions`
-   `Use it beside your map, notes, or VTT.`
+7. Mobile:
+   `Install it. Save locally. Play offline.`
+   `Use Quest Ledger from a phone beside your map, notes, or VTT.`
 
 ## Demo Video Script
 
@@ -122,7 +119,7 @@ Length: 45-60 seconds.
 Structure:
 
 1. 0-5s: open with the play dashboard.
-   Voiceover: `This is 5e Character Vault, a local-first character sheet for DnD 5e.`
+   Voiceover: `This is Quest Ledger, a local-first character sheet for DnD 5e.`
 
 2. 5-15s: show HP, damage, healing, XP, resources.
    Voiceover: `The play mode keeps table-critical controls large and close: HP, resources, XP, death saves, and conditions.`
@@ -134,7 +131,7 @@ Structure:
    Voiceover: `The full sheet is still there: identity, combat, inventory, coins, resources, spells, and notes.`
 
 5. 38-50s: open floating history and export.
-   Voiceover: `Everything stays in the browser with autosave history and portable JSON backups.`
+   Voiceover: `Everything stays in the browser with autosave history, portable JSON backups, and offline PWA support after install.`
 
 6. 50-60s: close on URL.
    Voiceover: `It is free, open source, and ready to try.`
@@ -183,7 +180,7 @@ Structure:
 X/Twitter:
 
 ```text
-I launched 5e Character Vault on Product Hunt today.
+I launched Quest Ledger on Product Hunt today.
 
 It is a free, open-source, local-first DnD 5e character sheet:
 - live session controls
@@ -191,6 +188,7 @@ It is a free, open-source, local-first DnD 5e character sheet:
 - built-in dice
 - autosave history
 - JSON backups
+- installable PWA/offline play
 - no account, no backend
 
 Feedback from DnD players and GMs would mean a lot:
@@ -200,11 +198,11 @@ Feedback from DnD players and GMs would mean a lot:
 LinkedIn:
 
 ```text
-Today I am launching 5e Character Vault on Product Hunt.
+Today I am launching Quest Ledger on Product Hunt.
 
-It is a browser-only DnD 5e character sheet designed around live sessions: fast HP controls, resources, spells, inventory, dice rolls, autosaved history, and portable JSON backups.
+It is a local-first DnD 5e character sheet designed around live sessions: fast HP controls, resources, spells, inventory, dice rolls, autosaved history, and portable JSON backups.
 
-The main design constraint was privacy and durability: no account, no server, no lock-in. Your character data stays in your browser unless you export it.
+The main design constraint was privacy and durability: no account, no server, no lock-in. Your character data stays in your browser unless you export it, and the app can be installed on a phone as a PWA for offline play after the first load.
 
 The project is free and open source under MIT.
 
@@ -219,7 +217,7 @@ I built a free local-first DnD 5e character sheet and launched it on Product Hun
 
 It runs fully in the browser and focuses on actual table use: HP, resources, spells, inventory, dice, history snapshots, and JSON backups.
 
-No account or server. Feedback from players/GMs is very welcome:
+No account or server, and it can be installed as a phone PWA for offline play. Feedback from players/GMs is very welcome:
 {PRODUCT_HUNT_URL}
 ```
 
@@ -227,11 +225,13 @@ No account or server. Feedback from players/GMs is very welcome:
 
 Primary angle:
 
-`A practical DnD 5e sheet for live play, not another account-gated character database.`
+`A practical DnD 5e sheet for live play that you can install, save locally, and use offline.`
 
 Differentiators:
 
 - Local-first: character data stays in the browser.
+- Installable PWA/SPA for phone use.
+- Offline play after the first load.
 - No account required.
 - Built-in dice and session controls.
 - Autosave history and manual JSON backups.

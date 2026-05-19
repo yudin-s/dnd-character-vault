@@ -4,38 +4,38 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 const siteUrl = "https://yudin-s.github.io/dnd-character-vault/";
 
 export const metadata = {
-  title: "5e Character Vault",
-  description: "A browser-only DnD 5e character sheet for live sessions, local-first play, dice rolls, autosave history, and portable backups.",
+  title: "Quest Ledger",
+  description: "A local-first DnD 5e character sheet you can install as a PWA, save locally, and use offline at the table.",
   metadataBase: new URL(siteUrl),
   manifest: `${basePath}/manifest.webmanifest`,
-  applicationName: "5e Character Vault",
+  applicationName: "Quest Ledger",
   authors: [{ name: "Sergey Yudin", url: "https://github.com/yudin-s" }],
   creator: "Sergey Yudin",
-  keywords: ["DnD", "Dungeons and Dragons", "5e", "character sheet", "TTRPG", "dice roller", "local-first"],
+  keywords: ["DnD", "Dungeons and Dragons", "5e", "character sheet", "TTRPG", "dice roller", "local-first", "PWA", "offline"],
   openGraph: {
-    title: "5e Character Vault",
-    description: "A browser-only DnD 5e character sheet for live sessions, local-first play, dice rolls, autosave history, and portable backups.",
+    title: "Quest Ledger",
+    description: "A local-first DnD 5e character sheet you can install as a PWA, save locally, and use offline at the table.",
     url: siteUrl,
-    siteName: "5e Character Vault",
+    siteName: "Quest Ledger",
     type: "website",
     images: [
       {
         url: `${basePath}/icons/icon-512x512.png`,
         width: 512,
         height: 512,
-        alt: "5e Character Vault shield icon"
+        alt: "Quest Ledger shield icon"
       }
     ]
   },
   twitter: {
     card: "summary",
-    title: "5e Character Vault",
-    description: "A browser-only DnD 5e character sheet for live sessions, local-first play, dice rolls, autosave history, and portable backups.",
+    title: "Quest Ledger",
+    description: "A local-first DnD 5e character sheet you can install as a PWA, save locally, and use offline at the table.",
     images: [`${basePath}/icons/icon-512x512.png`]
   },
   appleWebApp: {
     capable: true,
-    title: "5e Vault",
+    title: "Quest Ledger",
     statusBarStyle: "default"
   },
   icons: {

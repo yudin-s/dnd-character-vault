@@ -8,7 +8,7 @@ const ARENA_X = 2.28;
 const ARENA_Z = 1.2;
 const ARENA_TOP = 1.68;
 const ORTHO_VIEW_HEIGHT = 2.92;
-const SINGLE_DIE_SCALE = 0.66;
+const SINGLE_DIE_SCALE = 0.82;
 const GRAVITY = 14;
 const FRICTION_AIR = 0.994;
 const FRICTION_FLOOR = 0.82;
@@ -39,8 +39,8 @@ function canvasRgba(hex, alpha) {
 
 function dieScale(total) {
   if (total <= 1) return SINGLE_DIE_SCALE;
-  if (total <= 3) return 0.52;
-  return 0.36;
+  if (total <= 3) return 0.6;
+  return 0.42;
 }
 
 function dieRadius(total) {

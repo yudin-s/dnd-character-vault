@@ -1,3 +1,4 @@
+import { ChevronDown } from "lucide-react";
 import Field from "@/components/form/Field";
 import Panel from "@/components/form/Panel";
 
@@ -22,17 +23,20 @@ export default function IdentityPanel({ character, updatePath, t, panelProps = {
           <span className="mb-1 block font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">
             {t("panel.identity.alignment")}
           </span>
-          <select
-            value={identity.alignment || ""}
-            onChange={(event) => updatePath("identity.alignment", event.target.value)}
-            className="min-h-11 w-full rounded-md border border-umber/35 bg-white/65 px-3 py-2 text-base text-ink outline-none transition focus:border-slate focus:ring-2 focus:ring-slate/20 sm:text-sm"
-          >
-            {alignmentOptions.map((alignment) => (
-              <option key={alignment || "none"} value={alignment}>
-                {alignment ? (ALIGNMENTS.includes(alignment) ? t(`alignment.${alignment}`) : alignment) : t("generic.none")}
-              </option>
-            ))}
-          </select>
+          <span className="relative block">
+            <select
+              value={identity.alignment || ""}
+              onChange={(event) => updatePath("identity.alignment", event.target.value)}
+              className="min-h-11 w-full appearance-none rounded-md border border-umber/35 bg-parchment px-3 py-2 pr-10 text-base font-bold text-ink shadow-insetLine outline-none transition hover:bg-vellum focus:border-slate focus:ring-2 focus:ring-slate/20 sm:text-sm"
+            >
+              {alignmentOptions.map((alignment) => (
+                <option key={alignment || "none"} value={alignment}>
+                  {alignment ? (ALIGNMENTS.includes(alignment) ? t(`alignment.${alignment}`) : alignment) : t("generic.none")}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-umber" aria-hidden="true" />
+          </span>
         </label>
       </div>
     </Panel>

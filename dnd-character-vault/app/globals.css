@@ -134,8 +134,8 @@ button {
 .dice-stage {
   position: relative;
   display: grid;
-  min-height: 238px;
-  height: 238px;
+  min-height: 300px;
+  height: 300px;
   place-items: stretch;
   overflow: hidden;
   border-radius: 0.375rem;
@@ -223,5 +223,12 @@ button {
     position: sticky;
     bottom: 0;
     z-index: 2;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dice-stage {
+    min-height: 340px;
+    height: 340px;
   }
 }

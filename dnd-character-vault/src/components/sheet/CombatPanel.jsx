@@ -15,12 +15,12 @@ export default function CombatPanel({ character, updatePath, t, panelProps = {} 
         <Stat label={t("panel.combat.temp")} value={combat.hitPoints.temporary} />
       </div>
       <div className="mt-3 grid gap-3 sm:grid-cols-3">
-        <Field label={t("panel.combat.currentHp")} type="number" value={combat.hitPoints.current} onChange={(value) => updatePath("combat.hitPoints.current", value)} buttonWidth="34px" inputClassName="font-ui text-base font-black" />
-        <Field label={t("panel.combat.maxHp")} type="number" value={combat.hitPoints.max} onChange={(value) => updatePath("combat.hitPoints.max", value)} buttonWidth="34px" inputClassName="font-ui text-base font-black" />
-        <Field label={t("panel.combat.tempHp")} type="number" value={combat.hitPoints.temporary} onChange={(value) => updatePath("combat.hitPoints.temporary", value)} buttonWidth="34px" inputClassName="font-ui text-base font-black" />
-        <Field label={t("panel.combat.armorClass")} type="number" value={combat.armorClass} onChange={(value) => updatePath("combat.armorClass", value)} buttonWidth="34px" inputClassName="font-ui text-base font-black" />
-        <Field label={t("panel.combat.speed")} type="number" value={combat.speed} onChange={(value) => updatePath("combat.speed", value)} buttonWidth="34px" inputClassName="font-ui text-base font-black" />
-        <Field label={t("panel.combat.exhaustion")} type="number" min={0} max={6} value={combat.exhaustion} onChange={(value) => updatePath("combat.exhaustion", value)} buttonWidth="34px" inputClassName="font-ui text-base font-black" />
+        <Field label={t("panel.combat.currentHp")} type="number" value={combat.hitPoints.current} onChange={(value) => updatePath("combat.hitPoints.current", value)} inputClassName="font-ui text-base font-black" />
+        <Field label={t("panel.combat.maxHp")} type="number" value={combat.hitPoints.max} onChange={(value) => updatePath("combat.hitPoints.max", value)} inputClassName="font-ui text-base font-black" />
+        <Field label={t("panel.combat.tempHp")} type="number" value={combat.hitPoints.temporary} onChange={(value) => updatePath("combat.hitPoints.temporary", value)} inputClassName="font-ui text-base font-black" />
+        <Field label={t("panel.combat.armorClass")} type="number" value={combat.armorClass} onChange={(value) => updatePath("combat.armorClass", value)} inputClassName="font-ui text-base font-black" />
+        <Field label={t("panel.combat.speed")} type="number" value={combat.speed} onChange={(value) => updatePath("combat.speed", value)} inputClassName="font-ui text-base font-black" />
+        <Field label={t("panel.combat.exhaustion")} type="number" min={0} max={6} value={combat.exhaustion} onChange={(value) => updatePath("combat.exhaustion", value)} inputClassName="font-ui text-base font-black" />
       </div>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <Field label={t("panel.combat.hitDice")} value={combat.hitDice} onChange={(value) => updatePath("combat.hitDice", value)} />

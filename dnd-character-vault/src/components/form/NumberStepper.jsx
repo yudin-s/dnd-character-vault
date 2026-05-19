@@ -29,7 +29,7 @@ export default function NumberStepper({
   className = "",
   inputClassName = "",
   buttonClassName = "",
-  buttonWidth = "36px",
+  buttonWidth = "40px",
   disabled = false,
   style,
   ...inputProps
@@ -51,8 +51,8 @@ export default function NumberStepper({
 
   return (
     <div
-      className={`grid min-h-11 grid-cols-[var(--stepper-button-width)_minmax(4.25rem,1fr)_var(--stepper-button-width)] overflow-hidden rounded-md border border-umber/35 bg-white/65 text-ink transition focus-within:border-slate focus-within:ring-2 focus-within:ring-slate/20 ${className}`.trim()}
-      style={{ "--stepper-button-width": buttonWidth, ...style }}
+      className={`grid min-h-11 overflow-hidden rounded-md border border-umber/35 bg-white/65 text-ink transition focus-within:border-slate focus-within:ring-2 focus-within:ring-slate/20 ${className}`.trim()}
+      style={{ gridTemplateColumns: `${buttonWidth} minmax(0, 1fr) ${buttonWidth}`, ...style }}
     >
       <button
         type="button"

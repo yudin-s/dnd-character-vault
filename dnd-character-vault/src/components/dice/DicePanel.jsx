@@ -74,7 +74,7 @@ function DicePanelContent({
         </>
       ) : null}
 
-      <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_260px]">
+      <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_380px] xl:grid-cols-[minmax(0,1fr)_430px]">
         <div className="min-w-0 space-y-4">
           <div>
             <div className="mb-2 font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">{t("dice.typeLabel")}</div>
@@ -306,7 +306,7 @@ export default function DicePanel({ t, isOpen, onClose, preset }) {
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-end p-3 pb-4 sm:items-center sm:p-4 md:p-6"
+      className="fixed inset-0 z-[70] flex items-end justify-center p-3 pb-4 sm:items-center sm:p-4 md:p-6"
       role="dialog"
       aria-modal="true"
       style={{ animation: "dice-drawer-enter 220ms ease-out" }}
@@ -316,7 +316,7 @@ export default function DicePanel({ t, isOpen, onClose, preset }) {
       }}
     >
       <div className="absolute inset-0 bg-ink/85 backdrop-blur-[2px]" aria-hidden="true" />
-      <div className="relative z-10 max-h-[calc(100dvh-2rem)] w-full max-w-5xl overflow-y-auto rounded-md">
+      <div className="relative z-10 max-h-[calc(100dvh-2rem)] w-full max-w-6xl overflow-y-auto rounded-md">
         <DicePanelContent
           t={t}
           dice={dice}

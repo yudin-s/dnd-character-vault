@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Activity, Castle, Dice5, Footprints, HeartPulse, Minus, Plus, RotateCcw, Shield, Skull, Sparkles, Swords } from "lucide-react";
+import { Activity, Castle, Dice5, Footprints, HeartPulse, Minus, Plus, RotateCcw, Shield, Skull, Sparkles, Swords, Trophy } from "lucide-react";
 import { ABILITIES, SKILLS, abilityModifier, passiveScore, savingThrowBonus, signed, skillBonus } from "@/lib/dndRules";
 import { CONDITIONS, parseConditions } from "@/lib/combat";
 import NumberStepper from "@/components/form/NumberStepper";
@@ -10,17 +10,21 @@ const QUICK_SKILLS = ["perception", "stealth", "investigation", "persuasion", "a
 
 export default function PlayDashboard({ character, actions, openDice, t }) {
   const [hpAmount, setHpAmount] = useState(1);
+  const [xpModalOpen, setXpModalOpen] = useState(false);
+  const [xpAmount, setXpAmount] = useState(100);
   const combat = character.combat;
   const hp = combat.hitPoints;
   const hpMax = Math.max(1, Number(hp.max) || 1);
   const hpPercent = Math.max(0, Math.min(100, ((Number(hp.current) || 0) / hpMax) * 100));
   const activeConditions = useMemo(() => parseConditions(combat.conditions), [combat.conditions]);
   const initiative = combat.initiativeOverride === "" ? abilityModifier(character.abilities.dexterity.score) : Number(combat.initiativeOverride);
+  const experienceIndex = character.resources.findIndex(isExperienceResource);
+  const experience = experienceIndex >= 0 ? character.resources[experienceIndex] : null;
 
   return (
     <section id="play" className="grid min-w-0 gap-4">
       <div className="rpg-hero rounded-md p-4 shadow-sheet">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(220px,320px)_auto] lg:items-center">
           <div className="min-w-0">
             <p className="font-ui text-xs font-black uppercase tracking-[0.12em] text-[#d6a832]">{t("play.kicker")}</p>
             <h2 className="truncate font-display text-3xl font-bold leading-none text-vellum sm:text-4xl">
@@ -30,7 +34,12 @@ export default function PlayDashboard({ character, actions, openDice, t }) {
               {[character.identity.species, character.identity.className, character.identity.level ? `${t("play.level")} ${character.identity.level}` : ""].filter(Boolean).join(" / ")}
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <ExperienceProgress
+            experience={experience}
+            t={t}
+            onClick={() => setXpModalOpen(true)}
+          />
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:w-[420px]">
             <HeroStat icon={Shield} label={t("play.ac")} value={combat.armorClass} />
             <HeroStat icon={Sparkles} label={t("play.init")} value={signed(initiative)} />
             <HeroStat icon={Footprints} label={t("play.speed")} value={combat.speed} />
@@ -139,7 +148,94 @@ export default function PlayDashboard({ character, actions, openDice, t }) {
           </section>
         </aside>
       </div>
+      {xpModalOpen ? (
+        <ExperienceModal
+          amount={xpAmount}
+          setAmount={setXpAmount}
+          t={t}
+          onClose={() => setXpModalOpen(false)}
+          onSubmit={() => {
+            if (experienceIndex >= 0) actions.adjustResource(experienceIndex, Math.max(0, Number(xpAmount) || 0));
+            setXpModalOpen(false);
+          }}
+        />
+      ) : null}
     </section>
+  );
+}
+
+function isExperienceResource(resource) {
+  const name = String(resource?.name || "").trim().toLowerCase();
+  return name === "experience" || name === "xp" || name === "опыт";
+}
+
+function ExperienceProgress({ experience, t, onClick }) {
+  const current = Math.max(0, Number(experience?.current) || 0);
+  const max = Math.max(0, Number(experience?.max) || 0);
+  const percent = max > 0 ? Math.max(0, Math.min(100, (current / max) * 100)) : 0;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="rpg-stat-card relative min-h-24 overflow-hidden rounded-md p-3 text-left transition hover:border-[#f0d58c]/70 focus:outline-none focus:ring-2 focus:ring-[#d6a832]/35"
+    >
+      <span
+        className="absolute inset-x-0 top-0 bg-[#8c1f24]/42 transition-[height]"
+        style={{ height: `${percent}%` }}
+        aria-hidden="true"
+      />
+      <span className="relative z-10 flex items-start justify-between gap-3">
+        <span className="min-w-0">
+          <span className="inline-flex items-center gap-1.5 font-ui text-[10px] font-black uppercase tracking-[0.08em] text-vellum/65">
+            <Trophy className="h-4 w-4 text-[#d6a832]" aria-hidden="true" />
+            {t("play.experience")}
+          </span>
+          <span className="mt-2 block font-ui text-2xl font-black leading-none text-vellum">{current}</span>
+          <span className="mt-1 block truncate font-ui text-[11px] font-black uppercase tracking-[0.06em] text-vellum/65">
+            {max > 0 ? `${t("play.xpToNext")}: ${max}` : t("play.setXpTarget")}
+          </span>
+        </span>
+        <span className="shrink-0 rounded-full border border-[#d6a832]/35 bg-black/25 px-2 py-1 font-ui text-[10px] font-black text-[#f0d58c]">
+          {Math.round(percent)}%
+        </span>
+      </span>
+    </button>
+  );
+}
+
+function ExperienceModal({ amount, setAmount, t, onClose, onSubmit }) {
+  return (
+    <div className="fixed inset-0 z-[80] grid place-items-center bg-ink/75 p-4 backdrop-blur-[2px]" role="dialog" aria-modal="true">
+      <div className="w-full max-w-sm rounded-md border border-umber/35 bg-vellum p-4 shadow-sheet">
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <div>
+            <div className="font-ui text-[11px] font-black uppercase tracking-[0.12em] text-umber">{t("play.experience")}</div>
+            <h3 className="font-display text-2xl font-bold leading-none text-ink">{t("play.addExperience")}</h3>
+          </div>
+          <button type="button" onClick={onClose} className="grid h-9 w-9 place-items-center rounded-md border border-umber/35 bg-parchment text-ink hover:bg-white/70" aria-label={t("generic.close")}>
+            ×
+          </button>
+        </div>
+        <NumberStepper
+          label={t("play.addExperience")}
+          min={0}
+          step={50}
+          value={amount}
+          onChange={setAmount}
+          className="bg-white/70"
+          inputClassName="font-ui text-lg font-black"
+        />
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <button type="button" onClick={onClose} className="min-h-11 rounded-md border border-umber/35 bg-parchment px-3 font-ui text-xs font-black uppercase tracking-[0.08em] text-ink hover:bg-white/70">
+            {t("generic.cancel")}
+          </button>
+          <button type="button" onClick={onSubmit} className="min-h-11 rounded-md border border-ink bg-oxblood px-3 font-ui text-xs font-black uppercase tracking-[0.08em] text-vellum hover:bg-oxblood/90">
+            {t("play.addXp")}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -229,6 +325,11 @@ function RollButton({ icon: Icon = Activity, label, title, bonus, openDice, comp
 }
 
 function Resources({ character, actions, t }) {
+  const visibleResources = character.resources
+    .map((resource, index) => ({ resource, index }))
+    .filter(({ resource }) => !isExperienceResource(resource))
+    .slice(0, 5);
+
   return (
     <section className="rpg-panel rounded-md p-4">
       <div className="mb-3 flex items-center justify-between gap-2">
@@ -241,7 +342,7 @@ function Resources({ character, actions, t }) {
         </button>
       </div>
       <div className="grid gap-2">
-        {character.resources.slice(0, 5).map((resource, index) => (
+        {visibleResources.map(({ resource, index }) => (
           <div key={resource.id} className="grid grid-cols-[minmax(0,1fr)_44px_52px_44px] items-center gap-1.5 rounded-md border border-[#d6a832]/20 bg-vellum/90 p-2 sm:grid-cols-[minmax(0,1fr)_44px_58px_44px] sm:gap-2">
             <div className="min-w-0">
               <div className="truncate font-bold text-ink">{resource.name || t("play.resource")}</div>

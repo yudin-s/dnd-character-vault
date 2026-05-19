@@ -468,6 +468,21 @@ async function clickText(cdp, text) {
   await sleep(650);
 }
 
+async function clickDiceCountIncrease(cdp, times = 1) {
+  for (let index = 0; index < times; index += 1) {
+    await evaluate(cdp, `
+      (() => {
+        const dialog = document.querySelector('[role="dialog"]') || document;
+        const buttons = [...dialog.querySelectorAll("button")].filter((button) => button.textContent.trim() === "+");
+        const button = buttons[0];
+        if (!button) throw new Error("No dice count increase button");
+        button.click();
+      })()
+    `);
+    await sleep(160);
+  }
+}
+
 async function openDetails(cdp, title) {
   await evaluate(cdp, `
     (() => {
@@ -624,8 +639,9 @@ async function main() {
 
     await clickText(cdp, "Dice");
     await waitForText(cdp, "Select dice and roll");
+    await clickDiceCountIncrease(cdp, 5);
     await clickText(cdp, "Roll");
-    await sleep(6500);
+    await sleep(8500);
     await screenshot(cdp, "gallery-03-dice.png");
     await evaluate(cdp, "document.querySelector('[aria-label=\"Close\"]')?.click()");
     await sleep(500);

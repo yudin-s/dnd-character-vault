@@ -1,12 +1,38 @@
 import "./globals.css";
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+const siteUrl = "https://yudin-s.github.io/dnd-character-vault/";
 
 export const metadata = {
   title: "5e Character Vault",
-  description: "Browser-only DnD 5e character sheet with local autosave, history, import, and export.",
+  description: "A browser-only DnD 5e character sheet for live sessions, local-first play, dice rolls, autosave history, and portable backups.",
+  metadataBase: new URL(siteUrl),
   manifest: `${basePath}/manifest.webmanifest`,
   applicationName: "5e Character Vault",
+  authors: [{ name: "Sergey Yudin", url: "https://github.com/yudin-s" }],
+  creator: "Sergey Yudin",
+  keywords: ["DnD", "Dungeons and Dragons", "5e", "character sheet", "TTRPG", "dice roller", "local-first"],
+  openGraph: {
+    title: "5e Character Vault",
+    description: "A browser-only DnD 5e character sheet for live sessions, local-first play, dice rolls, autosave history, and portable backups.",
+    url: siteUrl,
+    siteName: "5e Character Vault",
+    type: "website",
+    images: [
+      {
+        url: `${basePath}/icons/icon-512x512.png`,
+        width: 512,
+        height: 512,
+        alt: "5e Character Vault shield icon"
+      }
+    ]
+  },
+  twitter: {
+    card: "summary",
+    title: "5e Character Vault",
+    description: "A browser-only DnD 5e character sheet for live sessions, local-first play, dice rolls, autosave history, and portable backups.",
+    images: [`${basePath}/icons/icon-512x512.png`]
+  },
   appleWebApp: {
     capable: true,
     title: "5e Vault",

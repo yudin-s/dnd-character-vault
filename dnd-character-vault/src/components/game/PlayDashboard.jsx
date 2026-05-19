@@ -63,9 +63,9 @@ export default function PlayDashboard({ character, actions, openDice, t }) {
                 </div>
               </div>
 
-              <div className="grid min-w-0 gap-2 md:grid-cols-[132px_1fr]">
+              <div className="grid min-w-0 gap-2 md:grid-cols-[132px_1fr] md:items-end">
                 <label className="block">
-                  <span className="mb-1 block font-ui text-[11px] font-black uppercase tracking-[0.12em] text-[#d6a832]">{t("play.amount")}</span>
+                  <span className="sr-only">{t("play.amount")}</span>
                   <NumberStepper
                     label={t("play.amount")}
                     min="0"

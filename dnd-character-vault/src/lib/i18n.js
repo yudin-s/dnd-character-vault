@@ -12,6 +12,10 @@ export const dictionaries = {
     "header.actions.import": "Import",
     "header.actions.new": "New",
     "header.quickSectionsLabel": "Quick sections",
+    "footer.product": "5e Character Vault",
+    "footer.license": "MIT License",
+    "footer.source": "Source code",
+    "footer.author": "Sergey Yudin",
 
     "nav.section.play": "Play",
     "nav.section.identity": "Hero",
@@ -406,6 +410,10 @@ export const dictionaries = {
     "header.actions.import": "Импорт",
     "header.actions.new": "Новый",
     "header.quickSectionsLabel": "Быстрые разделы",
+    "footer.product": "5e Character Vault",
+    "footer.license": "Лицензия MIT",
+    "footer.source": "Исходный код",
+    "footer.author": "Сергей Юдин",
 
     "nav.section.play": "Игра",
     "nav.section.identity": "Герой",

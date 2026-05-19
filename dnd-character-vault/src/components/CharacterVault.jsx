@@ -220,6 +220,22 @@ export default function CharacterVault() {
           </section>
 
         </div>
+        <footer className="mt-4 flex flex-col gap-2 rounded-md border border-umber/25 bg-vellum/55 px-4 py-3 text-sm text-umber shadow-insetLine sm:flex-row sm:items-center sm:justify-between">
+          <div className="font-ui text-[11px] font-black uppercase tracking-[0.12em]">
+            {t("footer.product")}
+          </div>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <a className="font-bold underline-offset-4 hover:text-oxblood hover:underline" href="https://github.com/yudin-s/dnd-character-vault/blob/main/LICENSE" target="_blank" rel="noreferrer">
+              {t("footer.license")}
+            </a>
+            <a className="font-bold underline-offset-4 hover:text-oxblood hover:underline" href="https://github.com/yudin-s/dnd-character-vault" target="_blank" rel="noreferrer">
+              {t("footer.source")}
+            </a>
+            <a className="font-bold underline-offset-4 hover:text-oxblood hover:underline" href="https://github.com/yudin-s" target="_blank" rel="noreferrer">
+              {t("footer.author")}
+            </a>
+          </div>
+        </footer>
       </div>
 
       <button

@@ -2,6 +2,8 @@
   "name": "dnd-character-vault",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
+  "author": "Sergey Yudin",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

@@ -501,33 +501,6 @@ async function scrollToY(cdp, y) {
   await sleep(650);
 }
 
-async function polishDiceStage(cdp) {
-  await evaluate(cdp, `
-    (() => {
-      const loading = [...document.querySelectorAll("div")]
-        .filter((node) => /загрузка костей|loading dice/i.test(node.textContent || ""))
-        .sort((a, b) => a.textContent.length - b.textContent.length)[0];
-      if (!loading) return;
-      const stage = loading.parentElement;
-      stage.innerHTML = \`
-        <div style="position:absolute;inset:0;overflow:hidden;background:
-          radial-gradient(circle at 50% 18%, rgba(255,248,232,.34), transparent 52%),
-          linear-gradient(175deg, rgba(19,13,10,.9), rgba(37,24,19,1) 58%, rgba(18,14,11,1)),
-          repeating-linear-gradient(90deg, rgba(255,248,232,.08) 0 1px, transparent 1px 14px);">
-          <div style="position:absolute;inset:16% 18%;border-radius:999px;background:radial-gradient(circle,rgba(214,168,50,.28),transparent 66%);filter:blur(18px);"></div>
-          <div style="position:absolute;left:126px;top:74px;width:132px;height:132px;display:grid;place-items:center;transform:rotate(-13deg);
-            clip-path:polygon(50% 0,94% 28%,78% 92%,22% 92%,6% 28%);
-            background:linear-gradient(135deg,rgba(255,248,232,.34),transparent 38%),linear-gradient(145deg,#d6a832,#f0d58c 46%,#9f1f28);
-            color:#fff8e8;font:1000 42px/1 system-ui,sans-serif;text-shadow:0 3px 12px rgba(37,24,19,.55);filter:drop-shadow(0 20px 28px rgba(0,0,0,.42));">17</div>
-          <div style="position:absolute;right:62px;bottom:42px;width:82px;height:82px;border-radius:12px;transform:rotate(10deg);
-            background:radial-gradient(circle at 24% 25%,#fff8e8 0 5px,transparent 6px),radial-gradient(circle at 72% 25%,#fff8e8 0 5px,transparent 6px),radial-gradient(circle at 24% 72%,#fff8e8 0 5px,transparent 6px),radial-gradient(circle at 72% 72%,#fff8e8 0 5px,transparent 6px),linear-gradient(145deg,#f0d58c,#d6a832 52%,#9f1f28);
-            filter:drop-shadow(0 18px 24px rgba(0,0,0,.4));"></div>
-        </div>
-      \`;
-    })()
-  `);
-}
-
 async function composeMobile(cdp) {
   const mobile = await readFile(resolve(OUT_DIR, "gallery-07-mobile-raw.png"), "base64");
   await setViewport(cdp, 1270, 760, false);
@@ -620,6 +593,10 @@ async function main() {
     "--headless=new",
     `--remote-debugging-port=${PORT}`,
     "--disable-gpu",
+    "--enable-webgl",
+    "--ignore-gpu-blocklist",
+    "--use-gl=angle",
+    "--use-angle=swiftshader",
     "--hide-scrollbars",
     "--no-first-run",
     "--no-default-browser-check",
@@ -646,8 +623,9 @@ async function main() {
     await screenshot(cdp, "gallery-02-session-controls.png");
 
     await clickText(cdp, "Dice");
-    await sleep(2500);
-    await polishDiceStage(cdp);
+    await waitForText(cdp, "Select dice and roll");
+    await clickText(cdp, "Roll");
+    await sleep(6500);
     await screenshot(cdp, "gallery-03-dice.png");
     await evaluate(cdp, "document.querySelector('[aria-label=\"Close\"]')?.click()");
     await sleep(500);

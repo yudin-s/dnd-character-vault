@@ -24,15 +24,7 @@ export default function PlayDashboard({ character, actions, openDice, t }) {
     <section id="play" className="grid min-w-0 gap-4">
       <div className="rpg-hero rounded-md p-4 shadow-sheet">
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(220px,320px)_auto] lg:items-center">
-          <div className="min-w-0">
-            <p className="font-ui text-xs font-black uppercase tracking-[0.12em] text-[#d6a832]">{t("play.kicker")}</p>
-            <h2 className="truncate font-display text-3xl font-bold leading-none text-vellum sm:text-4xl">
-              {character.identity.name || t("play.unnamed")}
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-vellum/75">
-              {[character.identity.species, character.identity.className, character.identity.level ? `${t("play.level")} ${character.identity.level}` : ""].filter(Boolean).join(" / ")}
-            </p>
-          </div>
+          <CharacterProfile identity={character.identity} t={t} />
           <ExperienceProgress
             experience={experience}
             t={t}
@@ -161,6 +153,42 @@ export default function PlayDashboard({ character, actions, openDice, t }) {
       ) : null}
     </section>
   );
+}
+
+function CharacterProfile({ identity, t }) {
+  const alignment = formatAlignment(identity.alignment, t);
+  const details = [
+    { label: t("play.class"), value: identity.className },
+    { label: t("play.subclass"), value: identity.subclass },
+    { label: t("play.race"), value: identity.species },
+    { label: t("play.alignment"), value: alignment }
+  ];
+
+  return (
+    <div className="min-w-0 rounded-md border border-[#d6a832]/25 bg-black/15 p-3">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <p className="font-ui text-xs font-black uppercase tracking-[0.12em] text-[#d6a832]">{t("play.profile")}</p>
+      </div>
+      <div className="grid min-w-0 grid-cols-2 gap-2 xl:grid-cols-4">
+        {details.map((item) => (
+          <div key={item.label} className="min-w-0 rounded-md border border-[#d6a832]/20 bg-vellum/8 px-3 py-2">
+            <div className="truncate font-ui text-[10px] font-black uppercase tracking-[0.09em] text-vellum/55">{item.label}</div>
+            <div className="mt-1 truncate font-ui text-sm font-black leading-tight text-vellum" title={item.value || t("generic.none")}>
+              {item.value || t("generic.none")}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function formatAlignment(value, t) {
+  const alignment = String(value || "").trim();
+  if (!alignment) return "";
+  const key = `alignment.${alignment}`;
+  const translated = t(key);
+  return translated === key ? alignment : translated;
 }
 
 function ExperienceProgress({ experience, t, onClick }) {

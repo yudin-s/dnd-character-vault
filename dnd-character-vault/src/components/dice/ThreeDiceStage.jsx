@@ -4,17 +4,17 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 const DICE_BOX_OPTIONS = {
   assetPath: "./",
-  baseScale: 92,
   framerate: 1 / 60,
-  gravity_multiplier: 420,
-  light_intensity: 0.74,
+  color_spotlight: 0xf0d58c,
+  gravity_multiplier: 440,
+  light_intensity: 0.86,
   shadows: true,
   sounds: false,
-  strength: 1.35,
+  strength: 1.18,
   theme_colorset: "white",
   theme_material: "plastic",
   theme_surface: "green-felt",
-  theme_texture: "none"
+  theme_texture: "marble"
 };
 
 const SUPPORTED_SIDES = new Set([4, 6, 8, 10, 12, 20]);
@@ -42,6 +42,29 @@ function buildNotation(faces, fallbackSides) {
   const normalized = normalizeFaces(faces, fallbackSides);
   if (!normalized.length) return "";
   return normalized.map((face) => `1d${face.sides}`).join("+");
+}
+
+function getBaseScale(diceCount) {
+  if (diceCount <= 1) return 92;
+  if (diceCount === 2) return 80;
+  if (diceCount === 3) return 70;
+  if (diceCount === 4) return 62;
+  if (diceCount === 5) return 54;
+  return 48;
+}
+
+function getTossStrength(diceCount) {
+  if (diceCount <= 2) return 1.18;
+  if (diceCount <= 4) return 1.08;
+  return 0.96;
+}
+
+function getDiceBoxOptions(diceCount) {
+  return {
+    ...DICE_BOX_OPTIONS,
+    baseScale: getBaseScale(diceCount),
+    strength: getTossStrength(diceCount)
+  };
 }
 
 function extractRollValues(result) {
@@ -104,6 +127,8 @@ export default function ThreeDiceStage({
   const [isReady, setIsReady] = useState(false);
   const [hasDice, setHasDice] = useState(false);
   const normalizedFaces = useMemo(() => normalizeFaces(faces, fallbackSides), [faces, fallbackSides]);
+  const diceCount = Math.max(normalizedFaces.length, 1);
+  const diceBoxOptions = useMemo(() => getDiceBoxOptions(diceCount), [diceCount]);
   const notation = useMemo(() => buildNotation(faces, fallbackSides), [faces, fallbackSides]);
 
   useEffect(() => {
@@ -114,12 +139,14 @@ export default function ThreeDiceStage({
     const container = containerRef.current;
     if (!container) return undefined;
     let cancelled = false;
+    initializedRef.current = false;
+    setIsReady(false);
 
     loadDiceBox()
       .then(async (DiceBox) => {
         if (cancelled || !containerRef.current) return;
         const box = new DiceBox(`#${containerId}`, {
-          ...DICE_BOX_OPTIONS,
+          ...diceBoxOptions,
           onRollComplete: (result) => {
             const token = rollTokenRef.current;
             const values = extractRollValues(result);
@@ -150,7 +177,7 @@ export default function ThreeDiceStage({
       disposeDiceBox(boxRef.current, container);
       boxRef.current = null;
     };
-  }, [containerId]);
+  }, [containerId, diceBoxOptions]);
 
   useEffect(() => {
     const box = boxRef.current;
